@@ -1,0 +1,8 @@
+{
+  "name": "planeacion-docente",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Planeación docente para escuela rural multigrado con guías generadas con IA",
+  "engines": { "node": ">=18" }
+}

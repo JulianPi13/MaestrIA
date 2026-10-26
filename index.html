@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Planeación docente para escuela rural multigrado: grados, clases, calendario y guías con IA.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Crect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%2324433A%22/%3E%3Cpath d=%22M6 18l1-3 8-8 2 2-8 8-3 1z%22 fill=%22%23E2A62A%22/%3E%3C/svg%3E">
+<title>Planeación Docente Jerson</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Diseño: barra lateral tipo pizarra + área de trabajo tipo hoja de cuaderno; acento amarillo lápiz */
+:root{
+  --paper:#F4F6F2; --surface:#FFFFFF; --ink:#1D2A25; --muted:#5A6A63; --line:#DBE2DD;
+  --board:#24433A; --board2:#1C362F; --chalk:#E8F0EB; --chalk-dim:#A9C0B5;
+  --pencil:#E2A62A; --pencil-ink:#3A2A05; --rule:#D3E0EC; --margin:#E07A72;
+  --ok:#2D8A57; --warn:#B9800F; --bad:#C2382E; --info:#3672B8;
+  --ok-bg:#E3F3EA; --warn-bg:#FBF0D6; --bad-bg:#FBE4E1; --info-bg:#E2ECF8;
+  --f-display:"Bitter", Georgia, serif; --f-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f1:#2E9E6A;--f2:#3B7DD8;--f3:#D9822B;--f4:#8E4FC2;--f5:#C2384E;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111815; --surface:#18211D; --ink:#E3EBE6; --muted:#9BACA4; --line:#2B3833;
+  --board:#16302A; --board2:#0F241F; --chalk:#E3EDE7; --chalk-dim:#8FAA9D;
+  --pencil:#EDB847; --pencil-ink:#2A1E03; --rule:#24313D; --margin:#9C4C46;
+  --ok:#5CC48A; --warn:#E3B04B; --bad:#EE7468; --info:#78A9E6;
+  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111815; --surface:#18211D; --ink:#E3EBE6; --muted:#9BACA4; --line:#2B3833;
+  --board:#16302A; --board2:#0F241F; --chalk:#E3EDE7; --chalk-dim:#8FAA9D;
+  --pencil:#EDB847; --pencil-ink:#2A1E03; --rule:#24313D; --margin:#9C4C46;
+  --ok:#5CC48A; --warn:#E3B04B; --bad:#EE7468; --info:#78A9E6;
+  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; color-scheme:dark}
+[hidden]{display:none!important}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--f-body)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:1.65rem} h2{font-size:1.2rem} h3{font-size:1.02rem}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--info)}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100%}
+/* Pizarra */
+.side{background:var(--board);color:var(--chalk);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:18px;border-right:6px solid #8B5E34}
+.brand{display:flex;gap:10px;align-items:center;padding:0 6px}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-size:1.1rem;display:block;line-height:1.15}
+.brand small{color:var(--chalk-dim);font-size:.8rem}
+.navg{display:flex;flex-direction:column;gap:2px}
+.navg h4{margin:6px 8px 4px;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--chalk-dim);font-weight:600}
+.nav{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;color:var(--chalk);padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.95rem}
+.nav:hover{background:rgba(255,255,255,.07)}
+.nav.on{background:var(--chalk);color:var(--board)}
+.nav .dot{width:11px;height:11px;border-radius:3px;flex:none}
+.nav .cnt{margin-left:auto;font-size:.75rem;opacity:.75;font-variant-numeric:tabular-nums}
+.main{min-width:0;padding-block:22px 60px;padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+/* Encabezado tipo cuaderno */
+.phead{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px 16px 34px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 27px,var(--rule) 27px 28px);overflow:hidden;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.phead::before{content:"";position:absolute;left:20px;top:0;bottom:0;width:2px;background:var(--margin);opacity:.7}
+.phead p{margin:4px 0 0;color:var(--muted)}
+.phead .k{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);padding:8px 13px;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92rem;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.pri{background:var(--pencil);border-color:var(--pencil);color:var(--pencil-ink)}
+.btn.pri:hover{filter:brightness(1.05)}
+.btn.dark{background:var(--board);border-color:var(--board);color:var(--chalk)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:4px 9px;font-size:.82rem}
+.btn.danger{color:var(--bad)}
+.ib{border:0;background:none;padding:5px;border-radius:6px;cursor:pointer;color:var(--muted);display:inline-flex}
+.ib:hover{background:var(--paper);color:var(--ink)}
+:focus-visible{outline:3px solid var(--pencil);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.card>h2,.card>h3{margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.stat b{font-family:var(--f-display);font-size:1.9rem;display:block;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{color:var(--muted);font-size:.88rem}
+.stat.bad b{color:var(--bad)} .stat.ok b{color:var(--ok)} .stat.warn b{color:var(--warn)}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.list{display:flex;flex-direction:column}
+.row{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);min-width:0}
+.row:first-child{border-top:0}
+.row .grow{flex:1;min-width:0}
+.row .t{font-weight:600;overflow-wrap:anywhere}
+.row .s{color:var(--muted);font-size:.85rem}
+.date{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;color:var(--muted)}
+.chip i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.st{font-size:.74rem;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;letter-spacing:.02em}
+.st.pendiente{background:var(--info-bg);color:var(--info)}
+.st.encurso{background:var(--warn-bg);color:var(--warn)}
+.st.completado{background:var(--ok-bg);color:var(--ok)}
+.st.atrasado{background:var(--bad-bg);color:var(--bad)}
+.bar{height:8px;background:var(--paper);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--ok)}
+.prog{display:grid;grid-template-columns:90px minmax(0,1fr) 46px;gap:10px;align-items:center;padding:7px 0;cursor:pointer;border:0;background:none;width:100%;text-align:left}
+.prog span:last-child{text-align:right;font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--muted)}
+.empty{color:var(--muted);padding:14px 4px;font-size:.92rem}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{border:0;background:none;padding:9px 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.on{color:var(--ink);border-color:var(--pencil)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.filters select,.filters input{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);min-width:0}
+.grp{display:flex;flex-direction:column;gap:10px}
+.grp>header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.grp>header h3{font-size:1.05rem}
+.tema{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.tema.done{opacity:.78}
+.tema .top{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;flex-wrap:wrap}
+.tema .top .grow{flex:1 1 220px;min-width:0}
+.tema .ttl{font-weight:700;font-size:1.02rem;overflow-wrap:anywhere;cursor:pointer;background:none;border:0;padding:0;text-align:left}
+.tema .meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:4px;color:var(--muted);font-size:.85rem}
+.tema .det{border-top:1px dashed var(--line);padding:12px 14px 14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.tema .det h4{margin:0 0 6px;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+.chk input{margin-top:4px;accent-color:var(--ok);width:16px;height:16px}
+.chk.on span{text-decoration:line-through;color:var(--muted)}
+ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
+.note{white-space:pre-wrap;color:var(--ink)}
+/* Calendario */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--line);gap:1px}
+.cal .dh{background:var(--board);color:var(--chalk);text-align:center;font-size:.78rem;font-weight:600;padding:6px 2px;letter-spacing:.05em}
+.cal .d{background:var(--surface);min-height:96px;padding:5px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.cal .d.out{background:var(--paper)}
+.cal .d.today{box-shadow:inset 0 0 0 2px var(--pencil)}
+.cal .n{font-size:.8rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.ev{font-size:.72rem;line-height:1.25;padding:2px 5px;border-radius:4px;border-left:3px solid;background:var(--paper);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;text-align:left;border-top:0;border-right:0;border-bottom:0;width:100%}
+.ev.done{text-decoration:line-through;opacity:.6}
+/* Modal */
+.ov{position:fixed;inset:0;background:rgba(10,20,16,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top,0px)) 12px 20px;z-index:50;overflow:auto}
+.modal{background:var(--surface);border-radius:12px;width:100%;max-width:620px;padding:20px;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal>header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld.wide,.wide{grid-column:1/-1}
+.fld span{font-size:.85rem;font-weight:600}
+.fld small{color:var(--muted);font-size:.78rem}
+.fld input,.fld select,.fld textarea{padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--paper);width:100%}
+.fld textarea{resize:vertical}
+.fld input[type=color]{height:42px;padding:3px}
+.mact{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--board);color:var(--chalk);padding:10px 18px;border-radius:8px;z-index:60;font-weight:600;max-width:90vw}
+.warnbox{background:var(--warn-bg);color:var(--ink);border:1px solid var(--warn);border-radius:var(--r);padding:10px 14px;font-size:.92rem;display:flex;gap:10px;align-items:flex-start}
+/* Generador */
+.gl{display:flex;flex-direction:column;gap:6px}
+.gl .gr{display:flex;gap:6px;align-items:center}
+.gl input,.gl textarea{flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.wk{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.wk b{font-size:.9rem}
+.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--paper);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.scroll{overflow-x:auto}
+.mnav{display:none}
+.det2{border-top:1px dashed var(--line);padding:14px;display:flex;flex-direction:column;gap:12px}
+.cl-res{display:flex;flex-direction:column;gap:6px}
+.cl-res p{margin:0;font-size:.92rem;color:var(--muted)} .cl-res b{color:var(--ink)}
+.tira{display:flex;gap:4px} .tira i{flex:1;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--c)} .tira i.on{background:var(--c)}
+.clases{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.clase{display:grid;grid-template-columns:62px minmax(0,1fr);gap:14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px;padding:12px 14px}
+.clase.hoy{box-shadow:0 0 0 2px var(--pencil)}
+.clase.hecha{background:var(--paper)} .clase.hecha .cl-ver,.clase.hecha .cl-hacer{opacity:.65}
+.hoja{border:1px solid var(--line);border-radius:8px;overflow:hidden;text-align:center;background:var(--surface)}
+.hoja small{display:block;background:var(--c);color:#fff;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 0}
+.hoja b{display:block;font-family:var(--f-display);font-size:1.55rem;line-height:1.25;font-variant-numeric:tabular-nums}
+.hoja span{display:block;font-size:.72rem;color:var(--muted);padding-bottom:4px}
+.cl-cuerpo{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cl-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cl-n{font-family:var(--f-display);font-weight:700;font-size:1.05rem}
+.fase{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.fase svg.i{width:14px;height:14px}
+.cl-acc{margin-left:auto;display:flex;gap:2px;align-items:center}
+.cl-acc input[type=date]{padding:4px 6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:.85rem}
+.cl-ver small,.cl-hacer small{display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2px}
+.cl-ver{font-weight:600;font-size:1.02rem;overflow-wrap:anywhere}
+.pasos{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px;counter-reset:p}
+.pasos li{display:flex;gap:8px;align-items:flex-start;overflow-wrap:anywhere}
+.pasos li::before{counter-increment:p;content:counter(p);width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);font-size:.75rem;font-weight:700;display:grid;place-items:center;flex:none}
+.cl-nota{display:flex;gap:6px;align-items:flex-start;font-size:.88rem;color:var(--muted);background:var(--warn-bg);border-radius:8px;padding:6px 10px}
+.cl-ok{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--line);background:none;border-radius:8px;padding:6px 12px;font-weight:600;font-size:.88rem;color:var(--muted);cursor:pointer}
+.cl-ok:hover{border-color:var(--ok);color:var(--ok)}
+.cl-ok.on{background:var(--ok-bg);border:1.5px solid var(--ok);color:var(--ok)}
+.cl-guia{display:flex;flex-wrap:wrap;gap:6px;padding-top:8px;border-top:1px dashed var(--line)}
+.cl-lista summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:.9rem}
+.gcl .fld textarea,.gcl .fld input{background:var(--paper)}
+@media (max-width:620px){.clase{grid-template-columns:50px minmax(0,1fr);gap:10px;padding:10px}.hoja b{font-size:1.25rem}.det2{padding:12px 10px}}
+.gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.gedit{display:flex;flex-direction:column;gap:8px}
+.gedit textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
+.gsug{display:flex;flex-wrap:wrap;gap:6px}
+.gsug button{cursor:pointer;background:var(--paper)}
+.gsug button:hover{border-color:var(--muted);color:var(--ink)}
+.gerr{background:var(--bad-bg);color:var(--ink);border:1px solid var(--bad);border-radius:var(--r);padding:10px 14px}
+/* Guía impresa: siempre en papel claro */
+:root{--gp-ink:#1F2A30;--gp-mut:#5B6770;--gp-line:#C9D3DA;--gp-a:#2E9E6A;--gp-b:#3B7DD8;--gp-c:#E07B24;--gp-d:#8E4FC2;--gp-e:#C2384E;--gp-note:#FFF4C2;--gp-noteb:#E8C547;--gp-soft:#F3F7FA}
+.guia{background:#fff;color:var(--gp-ink);border-radius:10px;border:1px solid var(--line);max-width:820px;width:100%;margin:0 auto;padding:28px 30px;font:15px/1.55 var(--f-body);display:flex;flex-direction:column;gap:22px}
+.guia h1,.guia h2,.guia h3{font-family:var(--f-display);color:var(--gp-ink)}
+.ghead{border-radius:10px;padding:18px 20px;background:linear-gradient(120deg,#24433A,#2F5C4F);color:#fff;display:flex;gap:16px;align-items:center}
+.ghead h1{color:#fff;font-size:1.55rem}
+.ghead .gk{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#F2D27A;font-weight:700}
+.ghead svg{flex:none}
+.gdatos{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px 16px;font-size:.9rem}
+.gdatos span{border-bottom:1.5px solid var(--gp-line);padding-bottom:2px;color:var(--gp-mut)}
+.gobj{background:var(--gp-soft);border-radius:8px;padding:10px 14px;font-size:.95rem}
+.gsec{display:flex;flex-direction:column;gap:12px;break-inside:auto}
+.gsec-h{display:flex;align-items:center;gap:12px}
+.gsec-h b{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--f-display);font-size:1.25rem;flex:none}
+.gsec-h small{display:block;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.gsec-h h2{font-size:1.2rem}
+.gbody{display:flex;gap:16px;align-items:flex-start}
+.gbody .gtx{flex:1;min-width:0}
+.gtx p{margin:0 0 8px}
+.gimg{flex:none;width:220px;max-width:40%;border-radius:10px;padding:6px;background:var(--gp-soft)}
+.gimg svg{display:block;width:100%;height:auto}
+.gnote{background:var(--gp-note);border:1px dashed var(--gp-noteb);border-radius:8px;padding:10px 14px;font-size:.93rem}
+.gnote b{display:block;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px}
+.gact{border:1.5px solid var(--gp-line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;break-inside:avoid;page-break-inside:avoid}
+.gact .gq{font-weight:600;display:flex;gap:8px}
+.gact .gq i{font-style:normal;color:#fff;border-radius:6px;min-width:24px;height:24px;display:inline-grid;place-items:center;font-size:.8rem;flex:none}
+.gln{height:28px;border-bottom:1.5px solid var(--gp-line)}
+.gop{display:flex;flex-direction:column;gap:6px;padding-left:4px}
+.gop span::before{content:"";display:inline-block;width:14px;height:14px;border:2px solid var(--gp-mut);border-radius:50%;margin-right:8px;vertical-align:-2px}
+.gblank{display:inline-block;min-width:80px;border-bottom:1.5px solid var(--gp-ink);margin:0 3px}
+.gdraw{height:170px;border:2px dashed var(--gp-line);border-radius:10px}
+.guia table{border-collapse:collapse;width:100%;font-size:.9rem}
+.guia th,.guia td{border:1.5px solid var(--gp-line);padding:7px 8px;height:34px;text-align:left}
+.guia th{background:var(--gp-soft)}
+.gunir{display:grid;grid-template-columns:1fr 60px 1fr;gap:8px 0;align-items:center}
+.gunir span{border:1.5px solid var(--gp-line);border-radius:8px;padding:6px 10px}
+.gunir em{justify-self:center;width:10px;height:10px;border-radius:50%;background:var(--gp-mut)}
+.gauto table td:not(:first-child){width:70px;text-align:center}
+.gpie{font-size:.78rem;color:var(--gp-mut);border-top:1px solid var(--gp-line);padding-top:8px}
+@media (max-width:620px){.guia{padding:16px}.gbody{flex-direction:column}.gimg{width:100%;max-width:280px;align-self:center}.gdatos{grid-template-columns:1fr}}
+.loader{display:flex;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;text-align:center}
+.loader span{color:var(--muted);font-size:.9rem}
+.loader .lb{fill:var(--board);stroke:#8B5E34;stroke-width:3}
+.loader .lw{stroke:var(--chalk);stroke-width:3;stroke-linecap:round;fill:none;stroke-dasharray:84;stroke-dashoffset:84;animation:lw 1.4s ease-in-out infinite}
+.loader .lp{fill:var(--pencil);stroke:var(--pencil-ink);stroke-width:.8;animation:lp 1.4s ease-in-out infinite}
+.lbar{width:min(260px,80%);height:6px;border-radius:99px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.lbar i{display:block;height:100%;width:40%;background:var(--pencil);border-radius:99px;animation:lbar 1.1s ease-in-out infinite}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+.btn:disabled{opacity:.75;cursor:wait}
+@keyframes lw{0%{stroke-dashoffset:84}70%,100%{stroke-dashoffset:0}}
+@keyframes lp{0%{transform:translate(20px,30px)}35%{transform:translate(90px,26px)}55%{transform:translate(100px,38px)}80%,100%{transform:translate(76px,50px)}}
+@keyframes lbar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+#printArea{display:none}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;top:0;height:auto;flex-direction:row;align-items:center;padding:8px max(12px,env(safe-area-inset-left,0px));gap:10px;border-right:0;border-bottom:4px solid #8B5E34;z-index:20;overflow-x:auto;padding-top:calc(8px + env(safe-area-inset-top,0px))}
+  .brand small,.navg h4{display:none}
+  .brand b{font-size:.95rem;white-space:nowrap}
+  .navg{flex-direction:row}
+  .nav{white-space:nowrap;padding:7px 10px}
+  .nav .cnt{display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols,.tema .det{grid-template-columns:minmax(0,1fr)}
+  .cal .d{min-height:58px;padding:3px}
+  .ev{font-size:0;height:6px;padding:0;border-left-width:0}
+  h1{font-size:1.35rem}
+}
+@media (max-width:520px){.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  :root{--paper:#fff;--surface:#fff;--ink:#000;--muted:#333;--line:#999}
+  body{background:#fff;color:#000;font-size:11pt}
+  .app{display:none!important}
+  #printArea{display:block!important;padding:0}
+  .tbl th{background:#eee}
+  .pbreak{page-break-before:always}
+}
+#printArea h1{font-size:1.4rem} #printArea h2{margin:16px 0 6px;font-size:1.1rem}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main class="main"><div class="wrap" id="main"></div></main>
+</div>
+<div id="printArea"></div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+
+<script>
+/* ---------- Iconos ---------- */
+const IC={
+ board:'<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20l2-4M16 20l-2-4M7 8h6M7 11h9"/>',
+ book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
+ print:'<path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/><rect x="6" y="14" width="12" height="7"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/>',
+ trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+ check:'<path d="M5 12l5 5L20 7"/>',
+ undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ left:'<path d="M15 6l-6 6 6 6"/>', right:'<path d="M9 6l6 6-6 6"/>',
+ pencil:'<path d="M3 21l3-1 12-12-2-2L4 18l-1 3z"/><path d="M14 6l2-2 4 4-2 2"/>',
+ ruler:'<rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/>',
+ down:'<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', up:'<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
+};
+const ic=(n)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ---------- Utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MESL=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const pd=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+const fmt=s=>{if(!s)return '—';const d=pd(s);return `${d.getDate()} ${MES[d.getMonth()]}`};
+const fmtL=s=>s?pd(s).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
+const HOY=iso(new Date());
+const COLORES=['#3B7DD8','#2E9E6A','#D9822B','#9B59B6','#C0392B','#16A0A0','#7A8B2E','#B5487E'];
+
+/* ---------- Datos ---------- */
+const KEY='planeacion_docente_v1';
+let storageOK=true;
+function seed(){
+  const g=[],m=[],mats=['Matemáticas','Lenguaje','Ciencias Naturales','Ciencias Sociales','Inglés','Educación Artística','Educación Física','Ética y Valores'];
+  ['1.º','2.º','3.º','4.º','5.º'].forEach((n,i)=>{const id='g'+(i+1);g.push({id,nombre:'Grado '+n,color:COLORES[i]});mats.forEach(x=>m.push({id:uid(),gradoId:id,nombre:x}))});
+  const y=new Date().getFullYear();
+  const per=[['Periodo 1',`${y}-02-02`,`${y}-04-10`],['Periodo 2',`${y}-04-13`,`${y}-06-19`],['Periodo 3',`${y}-07-06`,`${y}-09-11`],['Periodo 4',`${y}-09-14`,`${y}-11-27`]].map(p=>({id:uid(),nombre:p[0],inicio:p[1],fin:p[2]}));
+  const S0={v:1,config:{docente:'Jerson',institucion:'Sede rural',},grados:g,materias:m,periodos:per,temas:[],eventos:[],recursos:[],observaciones:[]};
+  // Ejemplos editables/eliminables
+  const pa=per.find(p=>p.inicio<=HOY&&p.fin>=HOY)||per[3];
+  const mid=(gid,n)=>m.find(x=>x.gradoId===gid&&x.nombre===n).id;
+  S0.temas.push(
+   {id:uid(),gradoId:'g3',materiaId:mid('g3','Matemáticas'),periodoId:pa.id,titulo:'Fracciones homogéneas (ejemplo)',inicio:addD(HOY,-7),limite:addD(HOY,9),estado:'en curso',
+    subtemas:[{texto:'La fracción como parte de un todo',hecho:true},{texto:'Lectura y escritura de fracciones',hecho:true},{texto:'Suma y resta de fracciones homogéneas',hecho:false},{texto:'Problemas con fracciones en la huerta',hecho:false}],
+    actividades:['Repartir frutas o panes en partes iguales','Guía de trabajo autónomo en parejas'],plan:[],notas:''},
+   {id:uid(),gradoId:'g1',materiaId:mid('g1','Lenguaje'),periodoId:pa.id,titulo:'Sílabas con m, p y s (ejemplo)',inicio:addD(HOY,-14),limite:addD(HOY,-3),estado:'en curso',
+    subtemas:[{texto:'Sonido de cada consonante',hecho:true},{texto:'Formación de sílabas',hecho:false},{texto:'Lectura de palabras sencillas',hecho:false}],actividades:['Lotería de sílabas'],plan:[],notas:''},
+   {id:uid(),gradoId:'g5',materiaId:mid('g5','Ciencias Naturales'),periodoId:pa.id,titulo:'El sistema solar (ejemplo)',inicio:addD(HOY,12),limite:addD(HOY,30),estado:'pendiente',subtemas:[],actividades:[],plan:[],notas:''}
+  );
+  S0.eventos.push({id:uid(),gradoId:'g3',materiaId:mid('g3','Matemáticas'),tipo:'Evaluación',titulo:'Evaluación de fracciones (ejemplo)',fecha:addD(HOY,9),hecho:false,notas:''});
+  return S0;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){storageOK=false}return seed()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOK=false}}
+let S=load(); save();
+
+const G=id=>S.grados.find(x=>x.id===id);
+const M=id=>S.materias.find(x=>x.id===id);
+const P=id=>S.periodos.find(x=>x.id===id);
+const matsDe=gid=>S.materias.filter(m=>m.gradoId===gid);
+const perActual=()=>S.periodos.find(p=>p.inicio<=HOY&&p.fin>=HOY);
+function estado(t){if(t.estado==='completado')return 'completado';if(t.limite&&t.limite<HOY)return 'atrasado';return t.estado}
+const ESTXT={pendiente:'Pendiente','en curso':'En curso',completado:'Completado',atrasado:'Atrasado'};
+const stBadge=t=>{const e=estado(t);return `<span class="st ${e.replace(' ','')}">${ESTXT[e]}</span>`};
+const avance=list=>list.length?Math.round(list.filter(t=>t.estado==='completado').length*100/list.length):0;
+
+/* ---------- Estado de interfaz ---------- */
+let V={name:'panel',grado:null,tab:'temas',f:{materia:'',periodo:'',estado:'',q:''},open:new Set(),cal:{y:new Date().getFullYear(),m:new Date().getMonth(),g:''},pr:{g:'',p:''},gen:null};
+function go(name,extra={}){Object.assign(V,{name},extra);render();window.scrollTo(0,0)}
+
+/* ---------- Modal y avisos ---------- */
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2200)}
+function openModal(title,html,mount){closeModal();const o=document.createElement('div');o.className='ov';o.id='ov';
+  o.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><h2>${esc(title)}</h2><button class="ib" data-close aria-label="Cerrar">${ic('x')}</button></header><div id="mbody">${html}</div></div>`;
+  o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-close]'))closeModal()});document.body.append(o);mount&&mount();const f=o.querySelector('input,select,textarea');f&&f.focus()}
+function closeModal(){const o=$('#ov');o&&o.remove()}
+function confirmar(msg,fn){openModal('Confirmar',`<p>${esc(msg)}</p><div class="mact"><button class="btn ghost" data-close>Cancelar</button><button class="btn pri" id="okc">Sí, continuar</button></div>`,()=>{$('#okc').onclick=()=>{closeModal();fn()}})}
+function fieldHtml(f,v){const id='f_'+f.k;v=v??f.def??'';let inp;
+  if(f.type==='select')inp=`<select id="${id}">${f.options.map(o=>`<option value="${esc(o.v)}"${String(o.v)===String(v)?' selected':''}>${esc(o.t)}</option>`).join('')}</select>`;
+  else if(f.type==='textarea')inp=`<textarea id="${id}" rows="${f.rows||3}" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
+  else inp=`<input id="${id}" type="${f.type||'text'}" value="${esc(v)}" placeholder="${esc(f.ph||'')}"${f.min!=null?` min="${f.min}"`:''}${f.max!=null?` max="${f.max}"`:''}>`;
+  return `<label class="fld${f.wide?' wide':''}" for="${id}"><span>${esc(f.label)}${f.req?' *':''}</span>${inp}${f.help?`<small>${esc(f.help)}</small>`:''}</label>`}
+function openForm(title,fields,vals,onSave,mount){
+  openModal(title,`<form id="mform" class="grid2" novalidate>${fields.map(f=>fieldHtml(f,vals[f.k])).join('')}<div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Guardar</button></div></form>`,()=>{
+    $('#mform')._go=()=>{const o={};for(const f of fields)o[f.k]=$('#f_'+f.k).value.trim();
+      const falta=fields.find(f=>f.req&&!o[f.k]);if(falta){toast('Falta completar: '+falta.label);$('#f_'+falta.k).focus();return}
+      if(o.inicio&&o.limite&&o.limite<o.inicio){toast('La fecha límite no puede ser anterior al inicio');return}
+      if(onSave(o)!==false){save();closeModal();render()}};mount&&mount()})}
+const optG=(todos)=>[...(todos?[{v:'',t:todos}]:[]),...S.grados.map(g=>({v:g.id,t:g.nombre}))];
+const optM=(gid,vacio)=>[...(vacio?[{v:'',t:vacio}]:[]),...matsDe(gid).map(m=>({v:m.id,t:m.nombre}))];
+const optP=(vacio)=>[...(vacio?[{v:'',t:vacio}]:[]),...S.periodos.map(p=>({v:p.id,t:p.nombre}))];
+const linkGM=()=>{const g=$('#f_gradoId'),m=$('#f_materiaId');if(!g||!m)return;g.onchange=()=>{const vac=m.querySelector('option[value=""]');m.innerHTML=(vac?'<option value="">— Sin materia —</option>':'')+matsDe(g.value).map(x=>`<option value="${x.id}">${esc(x.nombre)}</option>`).join('')}};
+
+/* ---------- Formularios de entidades ---------- */
+function formTema(t,gid){
+  const nuevo=!t;t=t||{gradoId:gid,materiaId:matsDe(gid)[0]?.id||'',periodoId:perActual()?.id||S.periodos[0]?.id||'',inicio:HOY,limite:'',estado:'pendiente',subtemas:[],actividades:[],plan:[],notas:''};
+  if(!matsDe(t.gradoId).length){toast('Primero agregue una materia a este grado');return}
+  openForm(nuevo?'Nuevo tema':'Editar tema',[
+   {k:'titulo',label:'Tema',req:1,wide:1,ph:'Ej.: La multiplicación'},
+   {k:'materiaId',label:'Materia',type:'select',options:optM(t.gradoId)},
+   {k:'periodoId',label:'Periodo',type:'select',options:optP('— Sin periodo —')},
+   {k:'inicio',label:'Fecha de inicio',type:'date'},{k:'limite',label:'Fecha límite',type:'date'},
+   {k:'estado',label:'Estado',type:'select',options:[{v:'pendiente',t:'Pendiente'},{v:'en curso',t:'En curso'},{v:'completado',t:'Completado'}]},
+   {k:'subtemas',label:'Subtemas (uno por línea)',type:'textarea',rows:4,wide:1},
+   {k:'actividades',label:'Actividades y ejercicios (uno por línea)',type:'textarea',rows:3,wide:1},
+   {k:'notas',label:'Observaciones',type:'textarea',rows:2,wide:1}
+  ],{...t,subtemas:t.subtemas.map(s=>s.texto).join('\n'),actividades:t.actividades.join('\n'),plan:(t.plan||[]).join('\n')},o=>{
+    const lines=s=>s.split('\n').map(x=>x.trim()).filter(Boolean);
+    const prev=new Map(t.subtemas.map(s=>[s.texto,s.hecho]));
+    const d={...t,...o,subtemas:lines(o.subtemas).map(x=>({texto:x,hecho:!!prev.get(x)})),actividades:lines(o.actividades)};
+    if(nuevo){d.id=uid();S.temas.push(d)}else Object.assign(S.temas.find(x=>x.id===t.id),d);toast(nuevo?'Tema agregado':'Tema actualizado')})}
+function formEvento(e,gid,fecha){
+  const nuevo=!e;e=e||{gradoId:gid||S.grados[0]?.id||'',materiaId:'',tipo:'Tarea',titulo:'',fecha:fecha||HOY,hecho:false,notas:''};
+  openForm(nuevo?'Nueva tarea o evaluación':'Editar',[
+   {k:'tipo',label:'Tipo',type:'select',options:['Tarea','Evaluación','Actividad','Entrega de notas','Reunión','Izada de bandera','Otro'].map(x=>({v:x,t:x}))},
+   {k:'fecha',label:'Fecha',type:'date',req:1},
+   {k:'titulo',label:'Descripción',req:1,wide:1,ph:'Ej.: Taller de comprensión lectora'},
+   {k:'gradoId',label:'Grado',type:'select',options:optG('Todos los grados')},
+   {k:'materiaId',label:'Materia',type:'select',options:optM(e.gradoId,'— Sin materia —')},
+   {k:'hecho',label:'Estado',type:'select',options:[{v:'',t:'Pendiente'},{v:'1',t:'Realizada'}]},
+   {k:'notas',label:'Notas',type:'textarea',rows:2,wide:1}
+  ],{...e,hecho:e.hecho?'1':''},o=>{const d={...e,...o,hecho:o.hecho==='1'};if(nuevo){d.id=uid();S.eventos.push(d)}else Object.assign(S.eventos.find(x=>x.id===e.id),d);toast('Guardado')},linkGM)}
+function formRecurso(r,gid){const nuevo=!r;r=r||{gradoId:gid,materiaId:'',titulo:'',enlace:'',notas:''};
+  openForm(nuevo?'Nuevo recurso':'Editar recurso',[
+   {k:'titulo',label:'Nombre del recurso',req:1,wide:1,ph:'Ej.: Guía Escuela Nueva Matemáticas 3, unidad 2'},
+   {k:'materiaId',label:'Materia',type:'select',options:optM(r.gradoId,'— General —')},
+   {k:'enlace',label:'Enlace o ubicación',ph:'https://… o "Biblioteca, estante 2"'},
+   {k:'notas',label:'Cómo usarlo',type:'textarea',rows:2,wide:1}
+  ],r,o=>{if(nuevo)S.recursos.push({...r,...o,id:uid()});else Object.assign(S.recursos.find(x=>x.id===r.id),o);toast('Recurso guardado')})}
+function formObs(ob,gid){const nuevo=!ob;ob=ob||{gradoId:gid,fecha:HOY,estudiante:'',texto:''};
+  openForm(nuevo?'Nueva observación':'Editar observación',[
+   {k:'fecha',label:'Fecha',type:'date',req:1},{k:'estudiante',label:'Estudiante (opcional)'},
+   {k:'texto',label:'Observación',type:'textarea',rows:4,req:1,wide:1}
+  ],ob,o=>{if(nuevo)S.observaciones.push({...ob,...o,id:uid()});else Object.assign(S.observaciones.find(x=>x.id===ob.id),o);toast('Observación guardada')})}
+function formGrado(g){const nuevo=!g;g=g||{nombre:'',color:COLORES[S.grados.length%COLORES.length]};
+  openForm(nuevo?'Nuevo grado':'Editar grado',[{k:'nombre',label:'Nombre',req:1,ph:'Ej.: Transición, Grado 6.º'},{k:'color',label:'Color',type:'color'}],g,o=>{
+    if(nuevo){const id=uid();S.grados.push({id,...o});if(confirmCopy)['Matemáticas','Lenguaje','Ciencias Naturales','Ciencias Sociales'].forEach(n=>S.materias.push({id:uid(),gradoId:id,nombre:n}))}else Object.assign(S.grados.find(x=>x.id===g.id),o)})}
+let confirmCopy=true;
+function formPeriodo(p){const nuevo=!p;p=p||{nombre:`Periodo ${S.periodos.length+1}`,inicio:HOY,fin:addD(HOY,60)};
+  openForm(nuevo?'Nuevo periodo':'Editar periodo',[{k:'nombre',label:'Nombre',req:1,wide:1},{k:'inicio',label:'Inicio',type:'date',req:1},{k:'limite',label:'Fin',type:'date',req:1}],{...p,limite:p.fin},o=>{
+    const d={nombre:o.nombre,inicio:o.inicio,fin:o.limite};if(nuevo)S.periodos.push({id:uid(),...d});else Object.assign(S.periodos.find(x=>x.id===p.id),d);S.periodos.sort((a,b)=>a.inicio.localeCompare(b.inicio))})}
+function modalMaterias(gid){
+  const body=()=>`<div class="list">${matsDe(gid).map(m=>`<div class="row"><div class="grow t">${esc(m.nombre)}</div><span class="s">${S.temas.filter(t=>t.materiaId===m.id).length} temas</span>
+   <button class="ib" data-act="mRen" data-id="${m.id}" aria-label="Renombrar">${ic('edit')}</button><button class="ib" data-act="mDel" data-id="${m.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Este grado aún no tiene materias.</p>'}</div>
+   <form id="mAdd" class="filters" style="margin-top:12px"><input id="mNew" placeholder="Nueva materia, ej.: Tecnología" style="flex:1"><button type="button" data-submit class="btn pri">${ic('plus')} Agregar</button></form>`;
+  const mount=()=>{$('#mAdd')._go=()=>{const n=$('#mNew').value.trim();if(!n)return;S.materias.push({id:uid(),gradoId:gid,nombre:n});save();openModal('Materias de '+G(gid).nombre,body(),mount);render()};
+    $('#mbody').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const m=M(b.dataset.id);
+      if(b.dataset.act==='mRen'){const row=b.closest('.row');row.innerHTML=`<input id="mRenI" value="${esc(m.nombre)}" style="flex:1;padding:7px;border:1px solid var(--line);border-radius:8px;background:var(--paper)"><button class="btn sm pri" id="mRenOk">Guardar</button>`;$('#mRenI').focus();$('#mRenOk').onclick=()=>{const v=$('#mRenI').value.trim();if(v){m.nombre=v;save();render()}openModal('Materias de '+G(gid).nombre,body(),mount)}}
+      if(b.dataset.act==='mDel'){const n=S.temas.filter(t=>t.materiaId===m.id).length;confirmar(`¿Eliminar la materia "${m.nombre}"${n?` y sus ${n} temas`:''}?`,()=>{S.materias=S.materias.filter(x=>x.id!==m.id);S.temas=S.temas.filter(t=>t.materiaId!==m.id);save();render();modalMaterias(gid)})}}};
+  openModal('Materias de '+G(gid).nombre,body(),mount)}
+
+/* ---------- Barra lateral ---------- */
+function renderSide(){
+  const n=gid=>S.temas.filter(t=>t.gradoId===gid&&estado(t)!=='completado').length;
+  const b=(name,label,icon,extra='',on)=>`<button class="nav${on?' on':''}" data-act="go" data-v="${name}" ${extra}>${icon}${label}</button>`;
+  $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>Planeación Docente</b><small>${esc(S.config.docente)} · ${esc(S.config.institucion)}</small></div></div>
+  <nav class="navg" aria-label="General">${b('panel','Panel',ic('board'),'',V.name==='panel')}${b('calendario','Calendario',ic('cal'),'',V.name==='calendario')}${b('generador','Generador de temarios',ic('bulb'),'',V.name==='generador')}${b('imprimir','Imprimir y exportar',ic('print'),'',V.name==='imprimir')}${b('config','Configuración',ic('gear'),'',V.name==='config')}</nav>
+  <nav class="navg" aria-label="Grados"><h4>Grados</h4>${S.grados.map(g=>`<button class="nav${V.name==='grado'&&V.grado===g.id?' on':''}" data-act="grado" data-id="${g.id}"><span class="dot" style="background:${g.color}"></span>${esc(g.nombre)}<span class="cnt">${n(g.id)}</span></button>`).join('')}
+  <button class="nav" data-act="addGrado" style="opacity:.8">${ic('plus')}Agregar grado</button></nav>`}
+
+/* ---------- Vistas ---------- */
+function head(k,title,sub,tools=''){return `<div class="phead"><div><div class="k">${k}</div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="tools">${tools}</div></div>`}
+function temaRow(t){const g=G(t.gradoId),m=M(t.materiaId);return `<div class="row"><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${g?.color};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer" data-act="openTema" data-id="${t.id}">${esc(t.titulo)}</button><div class="s">${esc(g?.nombre)} · ${esc(m?.nombre||'')}</div></div><span class="date">${fmt(t.limite)}</span>${stBadge(t)}</div>`}
+const VIEWS={};
+VIEWS.panel=()=>{
+  const T=S.temas,at=T.filter(t=>estado(t)==='atrasado'),ec=T.filter(t=>estado(t)==='en curso'),pe=T.filter(t=>estado(t)==='pendiente'),co=T.filter(t=>t.estado==='completado');
+  const lim=addD(HOY,14);const prox=[...T.filter(t=>t.estado!=='completado').flatMap(t=>[t.inicio>=HOY&&t.inicio<=lim?{f:t.inicio,txt:'Inicia: '+t.titulo,g:t.gradoId,a:`data-act="openTema" data-id="${t.id}"`}:null,t.limite>=HOY&&t.limite<=lim?{f:t.limite,txt:'Fecha límite: '+t.titulo,g:t.gradoId,a:`data-act="openTema" data-id="${t.id}"`}:null]).filter(Boolean),
+    ...S.eventos.filter(e=>!e.hecho&&e.fecha>=HOY&&e.fecha<=lim).map(e=>({f:e.fecha,txt:e.tipo+': '+e.titulo,g:e.gradoId,a:`data-act="editEv" data-id="${e.id}"`}))].sort((a,b)=>a.f.localeCompare(b.f));
+  const pa=perActual();
+  return head(fmtL(HOY),`Panel de ${esc(S.config.docente)}`,pa?`${esc(pa.nombre)} · del ${fmt(pa.inicio)} al ${fmt(pa.fin)}`:'Fuera de los periodos académicos registrados',
+    `<button class="btn pri" data-act="go" data-v="generador">${ic('bulb')} Generar temario</button><button class="btn" data-act="newEv">${ic('plus')} Tarea o evaluación</button>`)+
+  (storageOK?'':`<div class="warnbox">${ic('x')} Este navegador no permite guardar datos. Use “Configuración → Descargar respaldo” antes de cerrar.</div>`)+
+  `<div class="stats"><div class="stat warn"><b>${ec.length}</b><span>Temas en curso</span></div><div class="stat"><b>${pe.length}</b><span>Temas pendientes</span></div><div class="stat bad"><b>${at.length}</b><span>Temas atrasados</span></div><div class="stat ok"><b>${avance(T)}%</b><span>Avance general (${co.length} de ${T.length})</span></div></div>
+  <div class="cols"><section class="card"><h2>${ic('cal')} Próximos 14 días</h2><div class="list">${prox.map(p=>`<div class="row"><span class="date" style="width:52px">${fmt(p.f)}</span><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${G(p.g)?.color||'var(--muted)'};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600" ${p.a}>${esc(p.txt)}</button><div class="s">${esc(G(p.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||'<p class="empty">Nada programado en las próximas dos semanas.</p>'}</div></section>
+  <section class="card"><h2>${ic('ruler')} Avance por grado</h2>${S.grados.map(g=>{const l=T.filter(t=>t.gradoId===g.id),p=avance(l);return `<button class="prog" data-act="grado" data-id="${g.id}"><span style="font-weight:600">${esc(g.nombre)}</span><span class="bar"><i style="width:${p}%;background:${g.color}"></i></span><span>${p}%</span></button>`}).join('')||'<p class="empty">Agregue un grado para empezar.</p>'}<p class="s" style="color:var(--muted);font-size:.82rem;margin:8px 0 0">Porcentaje de temas completados sobre los planeados.</p></section></div>
+  <div class="cols"><section class="card"><h2 style="color:var(--bad)">Contenidos atrasados</h2><div class="list">${at.sort((a,b)=>a.limite.localeCompare(b.limite)).map(temaRow).join('')||'<p class="empty">No hay temas atrasados.</p>'}</div></section>
+  <section class="card"><h2>Temas en curso</h2><div class="list">${ec.map(temaRow).join('')||'<p class="empty">No hay temas en curso.</p>'}</div></section></div>`};
+
+function temaCard(t){
+  const e=estado(t),open=V.open.has(t.id),hs=t.subtemas.filter(s=>s.hecho).length,p=P(t.periodoId);
+  return `<article class="tema${e==='completado'?' done':''}" id="t_${t.id}"><div class="top"><div class="grow"><button class="ttl" data-act="toggle" data-id="${t.id}" aria-expanded="${open}">${esc(t.titulo)}</button>
+   <div class="meta"><span>${ic('cal')} ${fmt(t.inicio)} → ${fmt(t.limite)}</span>${p?`<span>${esc(p.nombre)}</span>`:''}${(()=>{const C=clasesDe(t);return `<span>${C.filter(c=>c.hecho).length}/${C.length} clases dictadas</span>`})()}</div></div>
+   ${stBadge(t)}<div style="display:flex">${e==='completado'?`<button class="ib" data-act="estado" data-id="${t.id}" data-e="en curso" title="Reabrir" aria-label="Reabrir">${ic('undo')}</button>`:`<button class="ib" data-act="estado" data-id="${t.id}" data-e="completado" title="Marcar completado" aria-label="Marcar completado" style="color:var(--ok)">${ic('check')}</button>`}
+   <button class="ib" data-act="editTema" data-id="${t.id}" title="Editar" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delTema" data-id="${t.id}" title="Eliminar" aria-label="Eliminar">${ic('trash')}</button></div></div>
+   ${open?detalleTema(t):''}</article>`}
+VIEWS.grado=()=>{
+  const g=G(V.grado);if(!g){V.name='panel';return VIEWS.panel()}
+  const T=S.temas.filter(t=>t.gradoId===g.id),f=V.f;
+  const tabs=[['temas','Temas'],['eventos','Tareas y evaluaciones'],['recursos','Recursos'],['obs','Observaciones']];
+  let body='';
+  if(V.tab==='temas'){
+    const L=T.filter(t=>(!f.materia||t.materiaId===f.materia)&&(!f.periodo||t.periodoId===f.periodo)&&(!f.estado||estado(t)===f.estado)&&(!f.q||t.titulo.toLowerCase().includes(f.q.toLowerCase()))).sort((a,b)=>(a.inicio||'').localeCompare(b.inicio||''));
+    body=`<div class="filters"><select id="fMat" aria-label="Materia">${optM(g.id,'Todas las materias').map(o=>`<option value="${o.v}"${o.v===f.materia?' selected':''}>${esc(o.t)}</option>`).join('')}</select>
+      <select id="fPer" aria-label="Periodo">${optP('Todos los periodos').map(o=>`<option value="${o.v}"${o.v===f.periodo?' selected':''}>${esc(o.t)}</option>`).join('')}</select>
+      <select id="fEst" aria-label="Estado">${[['','Todos los estados'],['pendiente','Pendientes'],['en curso','En curso'],['atrasado','Atrasados'],['completado','Completados']].map(o=>`<option value="${o[0]}"${o[0]===f.estado?' selected':''}>${o[1]}</option>`).join('')}</select>
+      <input id="fQ" type="search" placeholder="Buscar tema…" value="${esc(f.q)}" style="flex:1;min-width:140px"></div>`+
+     (matsDe(g.id).filter(m=>!f.materia||m.id===f.materia).map(m=>{const l=L.filter(t=>t.materiaId===m.id),all=T.filter(t=>t.materiaId===m.id);if(!l.length)return '';
+       return `<section class="grp"><header><h3>${esc(m.nombre)}</h3><span class="chip">${avance(all)}% completado · ${all.length} temas</span><button class="btn sm ghost" data-act="newTemaM" data-m="${m.id}">${ic('plus')} Tema</button></header>${l.map(temaCard).join('')||'<p class="empty">Sin temas con este filtro.</p>'}</section>`}).join('')||'')+
+     (L.length?'':`<div class="card empty">No hay temas ${T.length?'que coincidan con el filtro':'todavía'}. Use “Nuevo tema” o el generador de temarios para planear el primero.</div>`);
+  }
+  if(V.tab==='eventos'){const E=S.eventos.filter(e=>e.gradoId===g.id||!e.gradoId).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    body=`<div class="card"><div class="list">${E.map(e=>`<div class="row"><input type="checkbox" data-act="evDone" data-id="${e.id}"${e.hecho?' checked':''} aria-label="Marcar realizada" style="width:18px;height:18px;accent-color:var(--ok)"><span class="date" style="width:52px">${fmt(e.fecha)}</span><div class="grow"><div class="t" style="${e.hecho?'text-decoration:line-through;color:var(--muted)':''}">${esc(e.titulo)}</div><div class="s">${esc(e.tipo)}${e.materiaId?' · '+esc(M(e.materiaId)?.nombre):''}${!e.gradoId?' · Todos los grados':''}${e.notas?' · '+esc(e.notas):''}</div></div>${!e.hecho&&e.fecha<HOY?'<span class="st atrasado">Vencida</span>':''}<button class="ib" data-act="editEv" data-id="${e.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delEv" data-id="${e.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Sin tareas ni evaluaciones registradas.</p>'}</div></div>`}
+  if(V.tab==='recursos'){const R=S.recursos.filter(r=>r.gradoId===g.id);
+    body=`<div class="card"><div class="list">${R.map(r=>`<div class="row">${ic('book')}<div class="grow"><div class="t">${esc(r.titulo)}</div><div class="s">${esc(M(r.materiaId)?.nombre||'General')}${r.notas?' · '+esc(r.notas):''}</div>${r.enlace?(/^https?:\/\//.test(r.enlace)?`<a href="${esc(r.enlace)}" target="_blank" rel="noopener" style="font-size:.85rem;overflow-wrap:anywhere">${esc(r.enlace)}</a>`:`<div class="s">${esc(r.enlace)}</div>`):''}</div><button class="ib" data-act="editRec" data-id="${r.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delRec" data-id="${r.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Guarde aquí guías, libros, videos y material del aula.</p>'}</div></div>`}
+  if(V.tab==='obs'){const O=S.observaciones.filter(o=>o.gradoId===g.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+    body=`<div class="card"><div class="list">${O.map(o=>`<div class="row" style="align-items:flex-start"><span class="date" style="width:52px">${fmt(o.fecha)}</span><div class="grow">${o.estudiante?`<div class="t">${esc(o.estudiante)}</div>`:''}<div class="note">${esc(o.texto)}</div></div><button class="ib" data-act="editObs" data-id="${o.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delObs" data-id="${o.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Registre aquí observaciones del grupo o de cada estudiante.</p>'}</div></div>`}
+  const addBtn={temas:`<button class="btn pri" data-act="newTema">${ic('plus')} Nuevo tema</button>`,eventos:`<button class="btn pri" data-act="newEv">${ic('plus')} Nueva tarea o evaluación</button>`,recursos:`<button class="btn pri" data-act="newRec">${ic('plus')} Nuevo recurso</button>`,obs:`<button class="btn pri" data-act="newObs">${ic('plus')} Nueva observación</button>`}[V.tab];
+  const at=T.filter(t=>estado(t)==='atrasado').length;
+  return head(`<span style="color:${g.color}">■</span> Grado`,esc(g.nombre),`${T.length} temas · ${avance(T)}% completado${at?` · <b style="color:var(--bad)">${at} atrasados</b>`:''}`,
+   `${addBtn}<button class="btn" data-act="genG">${ic('bulb')} Generar temario</button><button class="btn" data-act="materias">${ic('book')} Materias</button>`)+
+   `<nav class="tabs">${tabs.map(([k,l])=>`<button class="tab${V.tab===k?' on':''}" data-act="tab" data-v="${k}">${l}</button>`).join('')}</nav>${body}`};
+
+VIEWS.calendario=()=>{
+  const {y,m,g}=V.cal,first=new Date(y,m,1),start=new Date(y,m,1-((first.getDay()+6)%7));
+  const items=[];const fg=x=>!g||x===g||!x;
+  S.temas.filter(t=>fg(t.gradoId)).forEach(t=>{if(t.inicio)items.push({f:t.inicio,txt:'Inicia: '+t.titulo,c:G(t.gradoId)?.color,a:`data-act="openTema" data-id="${t.id}"`,done:t.estado==='completado',g:t.gradoId});if(t.limite)items.push({f:t.limite,txt:'Límite: '+t.titulo,c:G(t.gradoId)?.color,a:`data-act="openTema" data-id="${t.id}"`,done:t.estado==='completado',g:t.gradoId})});
+  S.eventos.filter(e=>fg(e.gradoId)).forEach(e=>items.push({f:e.fecha,txt:e.tipo+': '+e.titulo,c:G(e.gradoId)?.color||'#777',a:`data-act="editEv" data-id="${e.id}"`,done:e.hecho,g:e.gradoId}));
+  let cells='';for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const s=iso(d),its=items.filter(x=>x.f===s);
+    cells+=`<div class="d${d.getMonth()!==m?' out':''}${s===HOY?' today':''}"><span class="n">${d.getDate()}</span>${its.slice(0,4).map(x=>`<button class="ev${x.done?' done':''}" style="border-color:${x.c}" title="${esc(x.txt)}" ${x.a}>${esc(x.txt)}</button>`).join('')}${its.length>4?`<span class="s" style="font-size:.7rem;color:var(--muted)">+${its.length-4} más</span>`:''}</div>`}
+  const mes=items.filter(x=>pd(x.f).getMonth()===m&&pd(x.f).getFullYear()===y).sort((a,b)=>a.f.localeCompare(b.f));
+  const pers=S.periodos.filter(p=>p.inicio<=iso(new Date(y,m+1,0))&&p.fin>=iso(first));
+  return head('Calendario académico',`${MESL[m]} ${y}`,pers.map(p=>`${esc(p.nombre)}: ${fmt(p.inicio)} – ${fmt(p.fin)}`).join(' · '),
+   `<button class="btn" data-act="calMv" data-v="-1" aria-label="Mes anterior">${ic('left')}</button><button class="btn" data-act="calHoy">Hoy</button><button class="btn" data-act="calMv" data-v="1" aria-label="Mes siguiente">${ic('right')}</button><button class="btn pri" data-act="newEv">${ic('plus')} Evento</button>`)+
+  `<div class="filters"><select id="calG" aria-label="Grado">${optG('Todos los grados').map(o=>`<option value="${o.v}"${o.v===g?' selected':''}>${esc(o.t)}</option>`).join('')}</select><span class="filters">${S.grados.map(x=>`<span class="chip"><i style="background:${x.color}"></i>${esc(x.nombre)}</span>`).join('')}</span></div>
+  <div class="cal">${['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'].map(d=>`<div class="dh">${d}</div>`).join('')}${cells}</div>
+  <section class="card"><h2>Agenda del mes</h2><div class="list">${mes.map(x=>`<div class="row"><span class="date" style="width:52px">${fmt(x.f)}</span><span style="width:10px;height:10px;border-radius:3px;background:${x.c};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;${x.done?'text-decoration:line-through;color:var(--muted)':''}" ${x.a}>${esc(x.txt)}</button><div class="s">${esc(G(x.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||'<p class="empty">No hay actividades en este mes.</p>'}</div></section>`};
+
+/* ---------- Generador de temarios ---------- */
+const AREAS=[
+ {re:/mate|aritm|geom|estad/i,sub:t=>[`Saberes previos: ¿dónde encontramos ${t}?`,`Concepto y representación de ${t}`,`Procedimientos con ${t} paso a paso`,`Resolución de problemas con ${t}`,`${t} en la vida diaria: la finca, el mercado y la tienda`],
+  act:['Conversación inicial y conteo con material del entorno (semillas, piedras, tapas)','Explicación en el tablero con dibujos y material concreto','Práctica guiada en parejas con ejercicios de menor a mayor dificultad','Problemas con situaciones reales: cosechas, ventas, medidas de la huerta','Prueba corta y corrección colectiva en el tablero'],
+  ej:t=>[`Representar ${t} con dibujos o material concreto`,`Resolver una serie de 5 ejercicios graduados sobre ${t}`,`Inventar y resolver un problema propio relacionado con ${t}`]},
+ {re:/leng|espa|castell|lectu|escrit/i,sub:t=>[`Exploración oral: ¿qué sabemos de ${t}?`,`Lectura de textos relacionados con ${t}`,`Elementos y características de ${t}`,`Producción escrita sobre ${t}`,`Socialización, revisión y corrección`],
+  act:['Conversatorio o lectura en voz alta para activar saberes previos','Lectura guiada con preguntas antes, durante y después','Identificación de elementos en textos cortos (subrayar, clasificar)','Escritura de un texto propio con apoyo de un modelo','Lectura de los trabajos al grupo y revisión entre compañeros'],
+  ej:t=>[`Responder preguntas de comprensión sobre un texto de ${t}`,`Completar un organizador gráfico con las características de ${t}`,`Escribir un texto breve aplicando ${t}`]},
+ {re:/natur|biol|cienc.*nat|ambient/i,sub:t=>[`Observación del entorno: ${t}`,`Conceptos clave de ${t}`,`Clasificación y comparación`,`Experimento o práctica sencilla sobre ${t}`,`Cuidado del ambiente y relación con la comunidad`],
+  act:['Salida de observación a la huerta, el patio o la quebrada con registro en el cuaderno','Explicación con láminas, esquemas o modelos hechos en clase','Clasificación de ejemplos reales en cuadros o tablas','Experimento sencillo con materiales de la casa y registro de resultados','Exposición corta o cartelera con conclusiones'],
+  ej:t=>[`Dibujar y rotular lo observado sobre ${t}`,`Completar un cuadro comparativo sobre ${t}`,`Escribir hipótesis y conclusiones del experimento`]},
+ {re:/soci|hist|geog|ciudad|constit/i,sub:t=>[`¿Qué sabemos de ${t}?`,`Conceptos y ubicación (mapas o línea del tiempo)`,`${t} en nuestra vereda y municipio`,`Análisis de relatos, imágenes y testimonios`,`Conclusiones y compromiso ciudadano`],
+  act:['Lluvia de ideas y preguntas de los estudiantes','Trabajo con mapas, croquis o líneas del tiempo','Entrevista a un familiar o vecino sobre el tema','Lectura de imágenes y relatos en grupos pequeños','Mesa redonda y elaboración de compromisos'],
+  ej:t=>[`Ubicar en un mapa o croquis los lugares relacionados con ${t}`,`Elaborar una línea del tiempo o esquema sobre ${t}`,`Escribir un párrafo con lo aprendido en la entrevista`]},
+ {re:/ingl|english|idioma/i,sub:t=>[`Vocabulario de ${t}`,`Escucha y pronunciación`,`Diálogos cortos sobre ${t}`,`Lectura y escritura de frases sencillas`,`Repaso con juego y evaluación`],
+  act:['Presentación de vocabulario con imágenes y objetos reales','Canción o audio corto y repetición coral','Diálogos en parejas con frases modelo','Completar frases y etiquetar dibujos','Juego de repaso (lotería, memoria) y evaluación oral'],
+  ej:t=>[`Unir palabras de ${t} con su imagen`,`Completar frases con el vocabulario de ${t}`,`Presentar un diálogo corto en parejas`]},
+ {re:/art|músic|dibuj/i,sub:t=>[`Exploración y apreciación: ${t}`,`Técnicas y materiales`,`Práctica guiada`,`Creación libre sobre ${t}`,`Exposición y valoración de trabajos`],
+  act:['Observación de ejemplos y conversación sobre lo que transmiten','Demostración de la técnica con materiales disponibles (incluidos reciclables)','Ejercicios de práctica en el cuaderno o en hojas','Creación individual o en grupo','Muestra de trabajos y comentarios respetuosos'],
+  ej:t=>[`Boceto previo sobre ${t}`,`Ejercicio de técnica aplicada`,`Obra final con explicación corta`]},
+ {re:/f[ií]sica|deport|recrea/i,sub:t=>[`Calentamiento y exploración del movimiento: ${t}`,`Fundamentos técnicos`,`Ejercicios por estaciones`,`Juego aplicado a ${t}`,`Evaluación práctica y vuelta a la calma`],
+  act:['Calentamiento con juegos tradicionales','Demostración y práctica de fundamentos','Circuito por estaciones en la cancha o el patio','Juego reglado o predeportivo','Observación con lista de chequeo y estiramiento final'],
+  ej:t=>[`Circuito de habilidades de ${t}`,`Juego en equipos aplicando lo aprendido`,`Autoevaluación de desempeño`]},
+ {re:/.*/,sub:t=>[`Introducción y saberes previos sobre ${t}`,`Conceptos principales de ${t}`,`Desarrollo y práctica`,`Aplicación en el contexto de la comunidad`,`Repaso y evaluación`],
+  act:['Pregunta problematizadora y conversación inicial','Explicación con apoyos visuales en el tablero','Trabajo en parejas o pequeños grupos','Actividad aplicada a situaciones del entorno','Evaluación corta y retroalimentación'],
+  ej:t=>[`Cuestionario breve sobre ${t}`,`Mapa conceptual de ${t}`,`Tarea de aplicación en casa`]}
+];
+const FASES=['Exploración','Conceptualización','Práctica','Aplicación','Evaluación'];
+function generar(o){
+  const g=G(o.gradoId),m=M(o.materiaId),A=AREAS.find(a=>a.re.test(m.nombre)),t=o.tema;
+  const num=parseInt((g.nombre.match(/\d+/)||[0])[0]),nivel=num&&num<=2?'inicial':num>=4?'superior':'medio';
+  const ajuste={inicial:' (con apoyo oral, dibujo y material concreto)',medio:'',superior:' (con registro escrito y explicación del procedimiento)'}[nivel];
+  const act=A.act.map((a,i)=>a+(i===1||i===2?ajuste:''));act.splice(3,0,'Guía de trabajo autónomo mientras se acompaña a otro grado (aula multigrado)');
+  const N=Math.max(1,o.semanas*o.clases),clases=[],OFF={1:[0],2:[0,2],3:[0,2,4],4:[0,1,3,4]}[o.clases]||[0,1,2,3,4],SUB=A.sub(t),EJ=A.ej(t);
+  for(let i=0;i<N;i++){const w=Math.floor(i/o.clases),k=i%o.clases,s=Math.min(4,Math.floor(i*5/N)),rep=i>0&&Math.min(4,Math.floor((i-1)*5/N))===s;
+    const hacer=[A.act[s]];if(s===2)hacer.push('Ejercicio: '+EJ[i%EJ.length]);if(s===2&&i%2)hacer.push('Guía de trabajo autónomo mientras se acompaña a otro grado');
+    let fecha=habil(addD(habil(o.inicio),w*7+OFF[k%OFF.length]));const prev=clases[clases.length-1]?.fecha;if(prev&&fecha<=prev)fecha=habil(addD(prev,1));clases.push({fecha,fase:s,tema:SUB[s]+(rep?' (continuación)':''),hacer,hecho:false})}
+  return {o,sub:SUB,act,ej:EJ,clases,limite:clases[clases.length-1].fecha}}
+VIEWS.generador=()=>{
+  const gid=V.genG||S.grados[0]?.id;const gen=V.gen;
+  if(!S.grados.length)return head('Herramienta','Generador de temarios','')+'<div class="card empty">Primero agregue un grado en Configuración.</div>';
+  const form=`<form id="genF" class="card grid2"><h2 class="wide">${ic('bulb')} Datos del tema</h2>
+   ${fieldHtml({k:'gradoId',label:'Grado',type:'select',options:optG()},gid)}${fieldHtml({k:'materiaId',label:'Materia',type:'select',options:optM(gid)},gen?.o.materiaId)}
+   ${fieldHtml({k:'tema',label:'Tema principal',req:1,wide:1,ph:'Ej.: Los seres vivos y su clasificación'},gen?.o.tema)}
+   ${fieldHtml({k:'inicio',label:'Fecha de inicio',type:'date'},gen?.o.inicio||HOY)}${fieldHtml({k:'periodoId',label:'Periodo',type:'select',options:optP('— Sin periodo —')},gen?.o.periodoId??perActual()?.id)}
+   ${fieldHtml({k:'semanas',label:'Semanas disponibles',type:'number',min:1,max:16},gen?.o.semanas||3)}${fieldHtml({k:'clases',label:'Clases por semana',type:'number',min:1,max:10},gen?.o.clases||2)}
+   <div class="mact wide"><button type="button" data-submit id="genBtn" class="btn pri">${ic('bulb')} Generar propuesta</button></div></form>`;
+  const lst=(k,title)=>`<div class="card"><h3>${title}</h3><div class="gl">${gen[k].map((v,i)=>`<div class="gr"><input class="gi" data-k="${k}" data-i="${i}" value="${esc(v)}" aria-label="${title} ${i+1}"><button type="button" class="ib" data-act="gDel" data-k="${k}" data-i="${i}" aria-label="Quitar">${ic('x')}</button></div>`).join('')}<button type="button" class="btn sm ghost" data-act="gAdd" data-k="${k}" style="align-self:flex-start">${ic('plus')} Agregar</button></div></div>`;
+  return head('Herramienta','Generador de temarios','Escriba el tema y el tiempo disponible. Recibirá una propuesta que puede corregir antes de guardarla.')+form+`<div id="genOut"></div>`+
+  (gen?`<div class="warnbox">${ic('pencil')} <span><b>Propuesta editable.</b> Es una sugerencia de organización, no un contenido oficial. Revísela y ajústela con los Estándares Básicos de Competencias y los DBA del MEN, y con el contexto de sus estudiantes.</span></div>
+   <div class="cols">${lst('sub','Subtemas sugeridos')}${lst('act','Actividades sugeridas')}</div>
+   <div class="cols">${lst('ej','Ejercicios sugeridos')}<div class="card"><h3>Resumen</h3><p style="margin:0">${esc(G(gen.o.gradoId).nombre)} · ${esc(M(gen.o.materiaId).nombre)}<br>${gen.o.semanas} semanas × ${gen.o.clases} clases = <b>${gen.clases.length} clases</b><br>Del ${fmt(gen.o.inicio)} al ${fmt(gen.limite)}</p></div></div>
+   <div class="card"><h3>${ic('cal')} Clase por clase</h3><ol class="clases gcl">${gen.clases.map((c,i)=>`<li class="clase" style="--c:var(${FASEC[c.fase][2]})">${hojaFecha(c.fecha)}<div class="cl-cuerpo"><div class="cl-h"><span class="cl-n">Clase ${i+1}</span><span class="fase">${ic(FASEC[c.fase][1])}${FASEC[c.fase][0]}</span><span class="cl-acc"><input type="date" class="gc" data-i="${i}" data-f="fecha" value="${c.fecha}" aria-label="Fecha clase ${i+1}"><button type="button" class="ib" data-act="gcDel" data-i="${i}" aria-label="Quitar clase">${ic('x')}</button></span></div>
+     <label class="fld"><span>Qué vemos</span><input class="gc" data-i="${i}" data-f="tema" value="${esc(c.tema)}"></label><label class="fld"><span>Qué hacemos (un paso por línea)</span><textarea class="gc" data-i="${i}" data-f="hacer" rows="${Math.max(2,c.hacer.length)}">${esc(c.hacer.join('\n'))}</textarea></label></div></li>`).join('')}</ol>
+     <button type="button" class="btn sm ghost" data-act="gcAdd" style="margin-top:8px">${ic('plus')} Agregar clase</button></div>
+   <div class="mact"><button class="btn ghost" data-act="gReset">Descartar</button><button class="btn pri" data-act="gSave">${ic('check')} Guardar en la planeación</button></div>`:'')};
+
+/* ---------- Imprimir / exportar ---------- */
+function filtrados(){const {g,p}=V.pr;return S.temas.filter(t=>(!g||t.gradoId===g)&&(!p||t.periodoId===p))}
+function planHTML(){const {g,p}=V.pr,T=filtrados(),grados=S.grados.filter(x=>!g||x.id===g);
+  return `<h1>Planeación académica — ${esc(S.config.institucion)}</h1><p>Docente: ${esc(S.config.docente)} · ${p?esc(P(p).nombre):'Todos los periodos'} · Generado el ${fmtL(HOY)}</p>`+
+  grados.map((gr,ix)=>{const l=T.filter(t=>t.gradoId===gr.id).sort((a,b)=>(a.materiaId+a.inicio).localeCompare(b.materiaId+b.inicio));const ev=S.eventos.filter(e=>e.gradoId===gr.id&&(!p||(e.fecha>=P(p).inicio&&e.fecha<=P(p).fin)));
+   return `<section class="${ix?'pbreak':''}"><h2>${esc(gr.nombre)} — avance ${avance(l)}%</h2><div class="scroll"><table class="tbl"><thead><tr><th>Materia</th><th>Tema</th><th>Subtemas y actividades</th><th>Inicio</th><th>Límite</th><th>Estado</th></tr></thead><tbody>${l.map(t=>`<tr><td>${esc(M(t.materiaId)?.nombre)}</td><td><b>${esc(t.titulo)}</b></td><td>${t.subtemas.map(s=>(s.hecho?'✔ ':'• ')+esc(s.texto)).join('<br>')}${t.actividades.length?'<br><i>'+t.actividades.map(esc).join('; ')+'</i>':''}</td><td>${fmt(t.inicio)}</td><td>${fmt(t.limite)}</td><td>${ESTXT[estado(t)]}</td></tr>`).join('')||'<tr><td colspan="6">Sin temas registrados.</td></tr>'}</tbody></table></div>
+   ${ev.length?`<h3 style="margin:12px 0 6px">Tareas y evaluaciones</h3><table class="tbl"><tbody>${ev.sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(e=>`<tr><td>${fmt(e.fecha)}</td><td>${esc(e.tipo)}</td><td>${esc(e.titulo)}</td><td>${e.hecho?'Realizada':'Pendiente'}</td></tr>`).join('')}</tbody></table>`:''}</section>`}).join('')}
+VIEWS.imprimir=()=>head('Planeación','Imprimir y exportar','Elija qué incluir y descargue la planeación en PDF o en Excel.',
+  `<button class="btn pri" data-act="print">${ic('down')} Descargar PDF</button><button class="btn" data-act="csv">${ic('down')} Exportar a Excel (CSV)</button>`)+
+ `<div class="filters"><select id="prG" aria-label="Grado">${optG('Todos los grados').map(o=>`<option value="${o.v}"${o.v===V.pr.g?' selected':''}>${esc(o.t)}</option>`).join('')}</select><select id="prP" aria-label="Periodo">${optP('Todos los periodos').map(o=>`<option value="${o.v}"${o.v===V.pr.p?' selected':''}>${esc(o.t)}</option>`).join('')}</select></div>
+ <div class="card">${planHTML()}</div>`;
+
+VIEWS.config=()=>head('Ajustes','Configuración','Grados, periodos y respaldo de la información.')+
+ `<div class="cols"><section class="card grid2"><h2 class="wide">Datos del docente</h2>${fieldHtml({k:'docente',label:'Nombre del docente'},S.config.docente)}${fieldHtml({k:'institucion',label:'Institución o sede'},S.config.institucion)}<div class="mact wide"><button class="btn pri" data-act="saveCfg">Guardar datos</button></div></section>
+ <section class="card"><h2>Respaldo</h2><p style="margin:0 0 12px;color:var(--muted)">La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
+ <div class="cols"><section class="card"><h2>Grados</h2><div class="list">${S.grados.map(g=>`<div class="row"><span style="width:14px;height:14px;border-radius:3px;background:${g.color};flex:none"></span><div class="grow t">${esc(g.nombre)}</div><span class="s">${matsDe(g.id).length} materias</span><button class="ib" data-act="materiasG" data-id="${g.id}" title="Materias" aria-label="Materias">${ic('book')}</button><button class="ib" data-act="editGrado" data-id="${g.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delGrado" data-id="${g.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')}</div><button class="btn sm" data-act="addGrado" style="margin-top:10px">${ic('plus')} Agregar grado</button></section>
+ <section class="card"><h2>Periodos académicos</h2><div class="list">${S.periodos.map(p=>`<div class="row"><div class="grow"><div class="t">${esc(p.nombre)}</div><div class="s">${fmt(p.inicio)} – ${fmt(p.fin)}${p===perActual()?' · actual':''}</div></div><button class="ib" data-act="editPer" data-id="${p.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delPer" data-id="${p.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Sin periodos.</p>'}</div><button class="btn sm" data-act="addPer" style="margin-top:10px">${ic('plus')} Agregar periodo</button></section></div>`;
+
+/* ---------- Render ---------- */
+function render(){renderSide();$('#main').innerHTML=VIEWS[V.name]();bindInputs()}
+function bindInputs(){
+  const on=(id,fn)=>{const e=$(id);if(e)e.onchange=fn};
+  on('#fMat',e=>{V.f.materia=e.target.value;render()});on('#fPer',e=>{V.f.periodo=e.target.value;render()});on('#fEst',e=>{V.f.estado=e.target.value;render()});
+  const q=$('#fQ');if(q)q.oninput=e=>{V.f.q=e.target.value;const p=q.selectionStart;render();const n=$('#fQ');n.focus();n.setSelectionRange(p,p)};
+  on('#calG',e=>{V.cal.g=e.target.value;render()});on('#prG',e=>{V.pr.g=e.target.value;render()});on('#prP',e=>{V.pr.p=e.target.value;render()});
+  const gf=$('#genF');if(gf){$('#f_gradoId').onchange=e=>{V.genG=e.target.value;$('#f_materiaId').innerHTML=optM(e.target.value).map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join('')};
+    gf._go=()=>{if(V.loading)return;const o={gradoId:$('#f_gradoId').value,materiaId:$('#f_materiaId').value,tema:$('#f_tema').value.trim(),inicio:$('#f_inicio').value||HOY,periodoId:$('#f_periodoId').value,semanas:Math.min(16,Math.max(1,+$('#f_semanas').value||1)),clases:Math.min(10,Math.max(1,+$('#f_clases').value||1))};
+      if(!o.materiaId){toast('Este grado no tiene materias');return}if(!o.tema){toast('Escriba el tema principal');$('#f_tema').focus();return}V.genG=o.gradoId;V.loading=true;const b=$('#genBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> Generando…';$('#genOut').innerHTML=LOADER;$('#genOut').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>{try{V.gen=generar(o)}catch(x){toast('No se pudo generar la propuesta. Revise los datos.')}V.loading=false;render();$('.warnbox')?.scrollIntoView({behavior:'smooth'})},1400)}}
+  document.querySelectorAll('.gc').forEach(i=>i.oninput=e=>{const c=V.gen.clases[+e.target.dataset.i],f=e.target.dataset.f;c[f]=f==='hacer'?e.target.value.split('\n').map(x=>x.trim()).filter(Boolean):e.target.value});
+  document.querySelectorAll('.gi').forEach(i=>i.oninput=e=>{V.gen[e.target.dataset.k][+e.target.dataset.i]=e.target.value})}
+async function download(name,content,type){const b0=content instanceof Blob?content:new Blob([content],{type});const dl=await capa('downloads');if(dl){try{await dl.save({filename:name,data:b0});toast('Archivo guardado')}catch(e){toast(e?.code==='declined'?'Descarga cancelada':'No se pudo descargar el archivo')}return}
+  if(window.claude){toast('La descarga no está disponible en esta vista');return}return dlA(name,b0)}
+function dlA(name,b){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+
+/* ---------- Acciones ---------- */
+const delBy=(arr,id)=>S[arr]=S[arr].filter(x=>x.id!==id);
+const A={
+ go:d=>go(d.v), grado:d=>go('grado',{grado:d.id,tab:'temas',f:{materia:'',periodo:'',estado:'',q:''}}), tab:d=>{V.tab=d.v;render()},
+ toggle:d=>{V.open.has(d.id)?V.open.delete(d.id):V.open.add(d.id);render()},
+ openTema:d=>{const t=S.temas.find(x=>x.id===d.id);V.open.add(t.id);go('grado',{grado:t.gradoId,tab:'temas',f:{materia:'',periodo:'',estado:'',q:''}});document.getElementById('t_'+t.id)?.scrollIntoView({block:'center'})},
+ newTema:()=>formTema(null,V.grado), newTemaM:d=>{formTema(null,V.grado);$('#f_materiaId').value=d.m},
+ editTema:d=>formTema(S.temas.find(x=>x.id===d.id)),
+ delTema:d=>{const t=S.temas.find(x=>x.id===d.id);confirmar(`¿Eliminar el tema "${t.titulo}"?`,()=>{delBy('temas',d.id);save();render();toast('Tema eliminado')})},
+ estado:d=>{const t=S.temas.find(x=>x.id===d.id);t.estado=d.e;if(d.e==='completado'&&t.subtemas.length&&t.subtemas.every(s=>!s.hecho))t.subtemas.forEach(s=>s.hecho=true);save();render();toast(d.e==='completado'?'Tema completado':'Tema en curso')},
+ sub:d=>{const t=S.temas.find(x=>x.id===d.id),s=t.subtemas[+d.i];s.hecho=!s.hecho;if(s.hecho&&t.estado==='pendiente')t.estado='en curso';save();render()},
+ newEv:()=>formEvento(null,V.name==='grado'?V.grado:(V.cal.g||'')), editEv:d=>formEvento(S.eventos.find(x=>x.id===d.id)),
+ delEv:d=>confirmar('¿Eliminar esta tarea o evaluación?',()=>{delBy('eventos',d.id);save();render()}),
+ evDone:d=>{const e=S.eventos.find(x=>x.id===d.id);e.hecho=!e.hecho;save();render()},
+ newRec:()=>formRecurso(null,V.grado), editRec:d=>formRecurso(S.recursos.find(x=>x.id===d.id)), delRec:d=>confirmar('¿Eliminar este recurso?',()=>{delBy('recursos',d.id);save();render()}),
+ newObs:()=>formObs(null,V.grado), editObs:d=>formObs(S.observaciones.find(x=>x.id===d.id)), delObs:d=>confirmar('¿Eliminar esta observación?',()=>{delBy('observaciones',d.id);save();render()}),
+ materias:()=>modalMaterias(V.grado), materiasG:d=>modalMaterias(d.id),
+ addGrado:()=>formGrado(), editGrado:d=>formGrado(G(d.id)),
+ delGrado:d=>{const g=G(d.id);confirmar(`¿Eliminar "${g.nombre}" con todas sus materias, temas, tareas, recursos y observaciones?`,()=>{delBy('grados',g.id);['materias','temas','eventos','recursos','observaciones'].forEach(k=>S[k]=S[k].filter(x=>x.gradoId!==g.id));save();if(V.grado===g.id)V.name='config';render()})},
+ addPer:()=>formPeriodo(), editPer:d=>formPeriodo(P(d.id)), delPer:d=>confirmar('¿Eliminar este periodo? Los temas quedarán sin periodo.',()=>{delBy('periodos',d.id);S.temas.forEach(t=>{if(t.periodoId===d.id)t.periodoId=''});save();render()}),
+ calMv:d=>{let {y,m}=V.cal;m+=+d.v;if(m<0){m=11;y--}if(m>11){m=0;y++}Object.assign(V.cal,{y,m});render()},
+ calHoy:()=>{const n=new Date();Object.assign(V.cal,{y:n.getFullYear(),m:n.getMonth()});render()},
+ genG:()=>{V.genG=V.grado;V.gen=null;go('generador')},
+ gAdd:d=>{V.gen[d.k].push('');render();const l=document.querySelectorAll(`.gi[data-k="${d.k}"]`);l[l.length-1].focus()},
+ gcDel:d=>{V.gen.clases.splice(+d.i,1);render()}, gcAdd:()=>{const c=V.gen.clases,u=c[c.length-1];c.push({fecha:habil(addD(u?.fecha||HOY,1)),fase:4,tema:'Repaso y evaluación',hacer:[FASEC[4][3]],hecho:false});render()},
+ gDel:d=>{V.gen[d.k].splice(+d.i,1);render()}, gReset:()=>{V.gen=null;render()},
+ gSave:()=>{const g=V.gen,cl=a=>a.map(x=>x.trim()).filter(Boolean);
+   const t={id:uid(),gradoId:g.o.gradoId,materiaId:g.o.materiaId,periodoId:g.o.periodoId,titulo:g.o.tema,inicio:g.o.inicio,limite:g.limite,estado:'pendiente',subtemas:cl(g.sub).map(x=>({texto:x,hecho:false})),actividades:[...cl(g.act),...cl(g.ej).map(x=>'Ejercicio: '+x)],clases:g.clases.filter(c=>c.tema.trim()).map(c=>({...c,id:uid()})),notas:''};t.limite=t.clases.reduce((m,c)=>c.fecha>m?c.fecha:m,t.inicio);
+   S.temas.push(t);save();V.gen=null;toast('Tema guardado en la planeación');A.openTema({id:t.id})},
+ print:()=>{const d=document.createElement('div');d.className='guia';d.innerHTML=planHTML();pdfDe(d,`planeacion_${HOY}.pdf`)},
+ csv:()=>{const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;const rows=[['Grado','Materia','Periodo','Tema','Subtemas','Actividades','Inicio','Límite','Estado']].concat(filtrados().map(t=>[G(t.gradoId)?.nombre,M(t.materiaId)?.nombre,P(t.periodoId)?.nombre,t.titulo,t.subtemas.map(s=>s.texto).join(' | '),t.actividades.join(' | '),t.inicio,t.limite,ESTXT[estado(t)]]));
+   download(`planeacion_${HOY}.csv`,'﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n'),'text/csv;charset=utf-8');},
+ saveCfg:()=>{S.config.docente=$('#f_docente').value.trim()||'Docente';S.config.institucion=$('#f_institucion').value.trim();save();render();toast('Datos guardados')},
+ backup:()=>{download(`respaldo_planeacion_${HOY}.json`,JSON.stringify(S,null,1),'application/json');},
+ restore:()=>$('#fileIn').click(),
+ reset:()=>confirmar('¿Borrar toda la información y volver a la configuración inicial? Descargue un respaldo antes si lo necesita.',()=>{S=seed();S.temas=[];S.eventos=[];save();V.name='panel';render();toast('Información reiniciada')})
+};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.closest('#mbody'))return;const f=A[b.dataset.act];if(f){if(b.tagName!=='INPUT')e.preventDefault();f(b.dataset,b)}});
+$('#fileIn').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.grados||!d.temas)throw 0;S=d;save();render();toast('Respaldo cargado')}catch(x){toast('El archivo no es un respaldo válido de esta aplicación')}e.target.value=''};r.readAsText(f)};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.key==='Enter'&&e.target.tagName==='INPUT'){const f=e.target.closest('form');if(f&&f._go){e.preventDefault();f._go()}}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-submit]');if(!b)return;e.preventDefault();const f=b.closest('form');f&&f._go&&f._go()},true);
+document.addEventListener('submit',e=>e.preventDefault(),true);
+const LOADER=`<div class="loader card" role="status" aria-live="polite"><svg viewBox="0 0 120 70" width="150" aria-hidden="true"><rect x="6" y="8" width="108" height="56" rx="4" class="lb"/><path class="lw" d="M18 26h70M18 38h84M18 50h56"/><g class="lp"><path d="M0 0l14-14 4 4L4 4z"/><path d="M0 0l-2 6 6-2"/></g></svg><b>Preparando la propuesta…</b><span>Organizando subtemas, actividades y clases por semana</span><div class="lbar"><i></i></div></div>`;
+
+/* ---------- Clases de un tema ---------- */
+const FASEC=[['Exploro','bulb','--f1','Conversamos y descubrimos lo que ya saben'],['Aprendo','book','--f2','Explicación en el tablero con ejemplos'],['Practico','pencil','--f3','Ejercicios en parejas o con la guía'],['Aplico','ruler','--f4','Usamos lo aprendido en la vida diaria'],['Evalúo','check','--f5','Repaso y prueba corta']];
+const DIAS=['dom','lun','mar','mié','jue','vie','sáb'];
+const habil=s=>{const d=pd(s).getDay();return d===6?addD(s,2):d===0?addD(s,1):s};
+const faseIdx=(i,N)=>N===1?2:Math.round(i*4/(N-1));
+function derivarClases(t){
+  const N=Math.max(1,t.plan?.length||t.subtemas.length||3),ini=habil(t.inicio||HOY),S=t.subtemas.map(s=>s.texto),Ac=t.actividades;
+  const hab=[];if(t.limite&&t.limite>=ini)for(let d=ini;d<=t.limite;d=addD(d,1))if(pd(d).getDay()%6)hab.push(d);
+  const fechas=hab.length>=N?Array.from({length:N},(_,i)=>hab[Math.round(i*(hab.length-1)/Math.max(1,N-1))]):Array.from({length:N},(_,i)=>{let d=ini;for(let k=0;k<i;k++)d=habil(addD(d,1));return d});
+  return fechas.map((f,i)=>{const fi=faseIdx(i,N);const ver=S.length?(S.length>=N?S.slice(Math.floor(i*S.length/N),Math.floor((i+1)*S.length/N)).join(' y '):S[Math.floor(i*S.length/N)]):t.titulo;
+    return {fecha:f,fase:fi,tema:ver,hacer:[Ac.length?Ac[i%Ac.length]:FASEC[fi][3]],hecho:t.estado==='completado'}})}
+const clasesDe=t=>t.clases?.length?t.clases:derivarClases(t);
+const fijarClases=t=>{if(!t.clases?.length)t.clases=derivarClases(t);return t.clases};
+function hojaFecha(f){if(!f)return '<div class="hoja"><small>—</small><b>?</b><span>sin fecha</span></div>';const d=pd(f);return `<div class="hoja"><small>${MES[d.getMonth()]}</small><b>${d.getDate()}</b><span>${DIAS[d.getDay()]}</span></div>`}
+function detalleTema(t){
+  const C=clasesDe(t),n=C.filter(c=>c.hecho).length,sig=C.findIndex(c=>!c.hecho);
+  const tira=`<div class="tira" aria-hidden="true">${C.map(c=>`<i class="${c.hecho?'on':''}" style="--c:var(${FASEC[c.fase]?.[2]||'--f2'})"></i>`).join('')}</div>`;
+  const resumen=`<div class="cl-res">${tira}<p><b>${n} de ${C.length}</b> clases dictadas${sig>=0?` · Próxima: <b>Clase ${sig+1}</b>, ${C[sig].fecha?fmtL(C[sig].fecha).replace(/ de \d{4}$/,''):'sin fecha'}`:' · ¡Todas listas!'}</p></div>`;
+  const cards=C.map((c,i)=>{const F=FASEC[c.fase]||FASEC[1],hoy=c.fecha===HOY,venc=!c.hecho&&c.fecha&&c.fecha<HOY;
+    return `<li class="clase${c.hecho?' hecha':''}${hoy?' hoy':''}" style="--c:var(${F[2]})">${hojaFecha(c.fecha)}<div class="cl-cuerpo">
+      <div class="cl-h"><span class="cl-n">Clase ${i+1}</span><span class="fase">${ic(F[1])}${F[0]}</span>${hoy?'<span class="st encurso">Hoy</span>':venc?'<span class="st atrasado">Pendiente</span>':''}
+        <span class="cl-acc"><button class="ib" data-act="clEdit" data-id="${t.id}" data-i="${i}" aria-label="Editar clase ${i+1}">${ic('edit')}</button><button class="ib" data-act="clDel" data-id="${t.id}" data-i="${i}" aria-label="Quitar clase ${i+1}">${ic('trash')}</button></span></div>
+      <div class="cl-ver"><small>Qué vemos</small>${esc(c.tema)}</div>
+      ${c.hacer?.length?`<div class="cl-hacer"><small>Qué hacemos</small><ol class="pasos">${c.hacer.map(h=>`<li>${esc(h)}</li>`).join('')}</ol></div>`:''}
+      ${c.nota?`<div class="cl-nota">${ic('pencil')} ${esc(c.nota)}</div>`:''}
+      <button class="cl-ok${c.hecho?' on':''}" data-act="clDone" data-id="${t.id}" data-i="${i}" aria-pressed="${!!c.hecho}">${ic('check')} ${c.hecho?'Clase dictada':'Marcar como dictada'}</button><div class="cl-guia">${c.guia?`<button class="btn sm" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('book')} Ver guía</button><button class="btn sm" data-act="guiaPdf" data-id="${t.id}" data-i="${i}">${ic('down')} Descargar guía en PDF</button>`:`<button class="btn sm pri" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('bulb')} Generar guía</button>`}</div></div></li>`}).join('');
+  const todo=n===C.length&&t.estado!=='completado'?`<div class="warnbox" style="background:var(--ok-bg);border-color:var(--ok)">${ic('check')} <span>Ya dictó todas las clases de este tema. <button class="btn sm" data-act="estado" data-id="${t.id}" data-e="completado">Marcar tema como completado</button></span></div>`:'';
+  return `<div class="det2">${resumen}${todo}<ol class="clases">${cards}</ol>
+   <div class="tools"><button class="btn sm" data-act="clAdd" data-id="${t.id}">${ic('plus')} Agregar clase</button></div>
+   ${t.notas?`<div class="cl-nota" style="font-size:.92rem">${ic('pencil')} <b>Observaciones:</b> ${esc(t.notas)}</div>`:''}
+   ${t.subtemas.length||t.actividades.length?`<details class="cl-lista"><summary>Ver lista completa de subtemas y actividades</summary><div class="det" style="border:0;padding:10px 0 0"><div><h4>Subtemas</h4>${t.subtemas.map((s,i)=>`<label class="chk${s.hecho?' on':''}"><input type="checkbox" data-act="sub" data-id="${t.id}" data-i="${i}"${s.hecho?' checked':''}><span>${esc(s.texto)}</span></label>`).join('')||'<p class="empty" style="padding:0">Sin subtemas.</p>'}</div><div><h4>Actividades</h4>${t.actividades.length?`<ul class="pl">${t.actividades.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>`:'<p class="empty" style="padding:0">Sin actividades.</p>'}</div></div></details>`:''}</div>`}
+function formClase(t,i){const C=fijarClases(t),nuevo=i==null,c=nuevo?{fecha:habil(addD(C[C.length-1]?.fecha||HOY,1)),fase:2,tema:'',hacer:[],hecho:false}:C[i];
+  openForm(nuevo?'Nueva clase':`Editar clase ${i+1}`,[
+   {k:'fecha',label:'Fecha',type:'date'},{k:'fase',label:'Momento de la clase',type:'select',options:FASEC.map((f,k)=>({v:k,t:f[0]+' · '+f[3]}))},
+   {k:'tema',label:'Qué vemos',req:1,wide:1,ph:'Ej.: Suma de fracciones con igual denominador'},
+   {k:'hacer',label:'Qué hacemos (un paso por línea)',type:'textarea',rows:4,wide:1,ph:'Ej.: Repartir una arepa en partes iguales'},
+   {k:'nota',label:'Nota o material (opcional)',wide:1,ph:'Ej.: Llevar tapas de gaseosa'}
+  ],{...c,hacer:(c.hacer||[]).join('\n')},o=>{const d={...c,fecha:o.fecha,fase:+o.fase,tema:o.tema,hacer:o.hacer.split('\n').map(x=>x.trim()).filter(Boolean),nota:o.nota};
+    if(nuevo)C.push(d);else C[i]=d;C.sort((a,b)=>(a.fecha||'9').localeCompare(b.fecha||'9'));toast('Clase guardada')})}
+Object.assign(A,{
+  clDone:d=>{const t=S.temas.find(x=>x.id===d.id),c=fijarClases(t)[+d.i];c.hecho=!c.hecho;if(c.hecho&&t.estado==='pendiente')t.estado='en curso';if(!c.hecho&&t.estado==='completado')t.estado='en curso';save();render();toast(c.hecho?`Clase ${+d.i+1} dictada`:'Clase pendiente')},
+  clEdit:d=>formClase(S.temas.find(x=>x.id===d.id),+d.i), clAdd:d=>formClase(S.temas.find(x=>x.id===d.id)),
+  clDel:d=>{const t=S.temas.find(x=>x.id===d.id);confirmar(`¿Quitar la clase ${+d.i+1}?`,()=>{fijarClases(t).splice(+d.i,1);save();render()})}
+});
+
+/* ---------- Capacidades de la página (IA y descargas) ---------- */
+const _capas={};
+function capa(n){if(window.claude?.use)return _capas[n]??=window.claude.use(n).catch(()=>null);return Promise.resolve(n==='sample'&&/^https?:/.test(location.protocol)?httpSample:null)}
+/* Fuera de Claude (por ejemplo en Vercel) la IA se pide al servicio /api/guia */
+const codigoIA=()=>{try{return localStorage.getItem('planeacion_codigo_ia')||''}catch(e){return ''}};
+function leerJson(t){const s=String(t||'').replace(/```(?:json)?/g,'');const i=s.indexOf('{'),j=s.lastIndexOf('}');try{return JSON.parse(s.slice(i,j+1))}catch(e){throw {code:'invalid_json'}}}
+const httpSample={json:async input=>{let r;try{r=await fetch('/api/guia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:input,codigo:codigoIA()})})}catch(e){throw {code:'red'}}
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error'};return leerJson(d.text)}};
+let _pdfLib;
+function cargarPdf(){return _pdfLib??=new Promise((ok,no)=>{if(window.html2pdf)return ok();const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=()=>ok();s.onerror=()=>{_pdfLib=null;no()};document.head.append(s)})}
+async function pdfDe(el,nombre){
+  toast('Preparando el PDF…');
+  try{await cargarPdf()}catch(e){toast('No se pudo cargar el generador de PDF. Revise la conexión.');return}
+  const box=document.createElement('div');box.style.cssText='position:absolute;left:-10000px;top:0;width:800px;background:#fff';
+  const c=el.cloneNode(true);c.style.maxWidth='800px';c.style.border='0';c.style.borderRadius='0';box.append(c);document.body.append(box);
+  try{const blob=await html2pdf().set({margin:[8,8,10,8],image:{type:'jpeg',quality:.95},html2canvas:{scale:2,backgroundColor:'#ffffff',windowWidth:800},jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.gact','.gsec-h','.gimg','.gnote','tr','.ghead']}}).from(c).outputPdf('blob');
+    await download(nombre,blob,'application/pdf')}
+  catch(e){toast('No se pudo crear el PDF')}finally{box.remove()}}
+
+/* ---------- Guías con IA ---------- */
+const MOM={A:['Vivencia','Exploro lo que sé','--gp-a'],B:['Fundamentación','Aprendo','--gp-b'],C:['Ejercitación','Practico','--gp-c'],D:['Aplicación','Aplico en mi comunidad','--gp-d']};
+function limpiarSvg(src){
+  if(typeof src!=='string'||!src.includes('<svg'))return '';
+  try{const doc=new DOMParser().parseFromString(src.slice(src.indexOf('<svg')),'image/svg+xml');const svg=doc.documentElement;if(svg.nodeName!=='svg'||doc.querySelector('parsererror'))return '';
+    svg.querySelectorAll('script,foreignObject,image,style,a,iframe,use').forEach(n=>n.remove());
+    [svg,...svg.querySelectorAll('*')].forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name)||/href$/i.test(a.name)||/javascript:|url\(\s*['"]?(?!#)/i.test(a.value))n.removeAttribute(a.name)}));
+    svg.removeAttribute('width');svg.removeAttribute('height');if(!svg.getAttribute('viewBox'))svg.setAttribute('viewBox','0 0 240 160');
+    return new XMLSerializer().serializeToString(svg)}catch(e){return ''}}
+const txt=s=>esc(s).replace(/_{3,}/g,'<span class="gblank">&nbsp;</span>').split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+function actHtml(a,n,color){
+  const q=`<div class="gq"><i style="background:var(${color})">${n}</i><span>${esc(a.enunciado).replace(/_{3,}/g,'<span class="gblank">&nbsp;</span>')}</span></div>`;let r='';
+  const L=k=>'<div class="gln"></div>'.repeat(Math.min(10,Math.max(1,k||3)));
+  switch(a.tipo){
+    case 'opciones':r=`<div class="gop">${(a.opciones||[]).map(o=>`<span>${esc(o)}</span>`).join('')}</div>`;break;
+    case 'tabla':{const cols=a.columnas||[],filas=a.filas?.length?a.filas:[[],[],[]];r=`<table>${cols.length?`<tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>`:''}${filas.map(f=>`<tr>${Array.from({length:Math.max(cols.length,f.length,1)},(_,i)=>`<td>${esc(f[i]||'')}</td>`).join('')}</tr>`).join('')}</table>`;break}
+    case 'dibujo':r='<div class="gdraw"></div>';break;
+    case 'unir':{const P=a.pares||[],der=P.map(p=>p[1]).sort(()=>.5-Math.random());r=`<div class="gunir">${P.map((p,i)=>`<span>${esc(p[0])}</span><em></em><span>${esc(der[i])}</span>`).join('')}</div>`;break}
+    case 'completar':r=a.lineas?L(a.lineas):'';break;
+    default:r=L(a.lineas)}
+  return `<div class="gact">${q}${r}</div>`}
+function guiaHtml(t,c,i,N){
+  const g=c.guia,gr=G(t.gradoId),m=M(t.materiaId);let n=0;
+  return `<article class="guia" id="guiaDoc"><header class="ghead"><svg width="54" height="54" viewBox="0 0 24 24" aria-hidden="true" style="stroke:#F2D27A;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round">${IC.book}</svg><div><div class="gk">Guía de aprendizaje · ${esc(m?.nombre)} · ${esc(gr?.nombre)}</div><h1>${esc(g.titulo||c.tema)}</h1><div style="font-size:.85rem;opacity:.85;margin-top:2px">Clase ${i+1} de ${N}${c.fecha?' · '+fmtL(c.fecha):''} · Tema: ${esc(t.titulo)}</div></div></header>
+  <div class="gdatos"><span>Nombre:</span><span>Fecha:</span><span>Grado: ${esc((gr?.nombre||'').replace('Grado ',''))}</span></div>
+  ${g.objetivo?`<div class="gobj"><b>Lo que voy a aprender:</b> ${esc(g.objetivo)}</div>`:''}
+  ${(g.secciones||[]).map(s=>{const k=MOM[s.momento]||MOM.B,img=limpiarSvg(s.ilustracion);return `<section class="gsec"><div class="gsec-h"><b style="background:var(${k[2]})">${esc(s.momento||'')}</b><div><small style="color:var(${k[2]})">${k[0]} · ${k[1]}</small><h2>${esc(s.titulo)}</h2></div></div>
+    ${s.texto||img?`<div class="gbody"><div class="gtx">${txt(s.texto)}</div>${img?`<div class="gimg">${img}</div>`:''}</div>`:''}
+    ${s.recuadro?`<div class="gnote"><b>¿Sabías que…?</b>${esc(s.recuadro)}</div>`:''}
+    ${(s.actividades||[]).map(a=>actHtml(a,++n,k[2])).join('')}</section>`}).join('')}
+  ${g.autoevaluacion?.length?`<section class="gsec gauto"><div class="gsec-h"><b style="background:var(--gp-e)">E</b><div><small style="color:var(--gp-e)">Evaluación</small><h2>Me evalúo</h2></div></div><table><tr><th>Puedo…</th><th>Sí</th><th>A veces</th><th>Aún no</th></tr>${g.autoevaluacion.map(x=>`<tr><td>${esc(x)}</td><td></td><td></td><td></td></tr>`).join('')}</table></section>`:''}
+  ${g.para_casa?`<div class="gnote" style="background:var(--gp-soft);border-color:var(--gp-line)"><b>Para hacer en casa</b>${esc(g.para_casa)}</div>`:''}
+  <footer class="gpie">Guía sugerida y editable · Revisar con los DBA y Estándares Básicos de Competencias del MEN · ${esc(S.config.institucion)} · Docente ${esc(S.config.docente)}</footer></article>`}
+const FORMATO=`Responde SOLO con un objeto JSON válido, sin texto antes ni después, con esta forma:
+{"titulo":"…","objetivo":"una frase","secciones":[{"momento":"A|B|C|D","titulo":"…","texto":"párrafos cortos separados por \\n","recuadro":"dato curioso corto (opcional)","ilustracion":"<svg …>…</svg> (opcional)","actividades":[{"enunciado":"…","tipo":"lineas|opciones|completar|tabla|dibujo|unir","lineas":3,"opciones":["…"],"columnas":["…"],"filas":[["…",""]],"pares":[["…","…"]]}]}],"autoevaluacion":["frase en primera persona"],"para_casa":"…"}
+Reglas: usa exactamente cuatro secciones con momento A (Vivencia: exploro lo que sé), B (Fundamentación: explicación clara con ejemplos), C (Ejercitación: varios ejercicios para resolver) y D (Aplicación: actividad con la familia o la vereda). Las actividades deben poder resolverse en la misma hoja: "lineas" deja renglones, "completar" usa ____ dentro del enunciado, "tabla" deja celdas vacías con "", "unir" da pares concepto-respuesta, "dibujo" deja un recuadro, "opciones" es selección múltiple. Incluye entre 2 y 4 actividades en C y al menos una en A, B y D.
+Ilustraciones: en las secciones A, B y C incluye "ilustracion" con un SVG propio, sencillo y colorido (xmlns="http://www.w3.org/2000/svg", viewBox="0 0 240 160", figuras planas de colores vivos, fondo claro, sin textos largos, sin imágenes externas, sin scripts, máximo 2500 caracteres) que represente el contenido.
+Escribe en español de Colombia, con lenguaje adecuado a la edad. No inventes datos oficiales ni cites documentos que no existan.`;
+function promptGuia(t,c,i,N){const gr=G(t.gradoId),m=M(t.materiaId),C=clasesDe(t),F=FASEC[c.fase]||FASEC[1];
+  return `Eres un docente colombiano experto en el modelo Escuela Nueva para escuelas rurales multigrado. Crea una guía de aprendizaje colorida para UNA sola clase (de 45 a 60 minutos), para que los estudiantes la resuelvan de forma autónoma.
+Grado: ${gr?.nombre}
+Área: ${m?.nombre}
+Tema general: ${t.titulo}
+Esta es la clase ${i+1} de ${N}. Momento principal de esta clase: ${F[0]} (${F[3]}).
+Lo que se ve en esta clase: ${c.tema}
+${c.hacer?.length?'Lo que el docente planeó hacer: '+c.hacer.join('; '):''}
+${i>0?'Clases anteriores (no repitas su contenido, puedes repasarlo brevemente): '+C.slice(0,i).map(x=>x.tema).join('; '):'Es la primera clase del tema.'}
+Contexto: estudiantes de zona rural en Colombia; usa ejemplos del campo, la finca, la huerta, los animales y la vereda.
+Como es para una sola clase, mantén cada sección breve y enfocada solo en lo de esta clase.
+${FORMATO}`}
+function promptEditar(t,c,pedido){return `Esta es una guía de aprendizaje en formato JSON para ${G(t.gradoId)?.nombre}, área ${M(t.materiaId)?.nombre}, para una clase sobre "${c.tema}" (tema general "${t.titulo}"):
+${JSON.stringify(c.guia)}
+
+El docente pide este cambio: "${pedido}"
+Aplica el cambio y conserva todo lo demás que no se pidió cambiar (incluidas las ilustraciones). Devuelve la guía completa.
+${FORMATO}`}
+function claseDe(t,id){const C=fijarClases(t);C.forEach(x=>x.id??=uid());const i=Math.max(0,C.findIndex(x=>x.id===id));return {C,c:C[i],i}}
+let GU={busy:false,err:''};
+async function pedirGuia(t,c,input,msg){
+  const sample=await capa('sample');
+  if(!sample){GU.err='La guía con IA solo se genera en la versión en línea de la aplicación (abierta desde Claude).';render();return}
+  GU={busy:msg,err:''};render();$('#guiaOut')?.scrollIntoView({behavior:'smooth',block:'center'});
+  try{const r=await sample.json(input,{modelTier:'default',cache:false});
+    if(!r||!Array.isArray(r.secciones)||!r.secciones.length)throw {code:'invalid_json'};
+    if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast('Guía lista')}
+  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se hicieron muchas solicitudes seguidas. Espere un momento e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA (ANTHROPIC_API_KEY) en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
+  if(V.name==='guia')render()}
+VIEWS.guia=()=>{
+  const t=S.temas.find(x=>x.id===V.tema);if(!t){V.name='panel';return VIEWS.panel()}
+  const {C,c,i}=claseDe(t,V.clase),N=C.length,gr=G(t.gradoId),dis=GU.busy?' disabled':'',D=`data-id="${t.id}" data-c="${c.id}"`;
+  const tools=`<button class="btn" data-act="guiaVolver" data-id="${t.id}">${ic('left')} Volver</button>`+(c.guia?`<button class="btn pri" data-act="guiaPdf" ${D}${dis}>${ic('down')} Descargar guía en PDF</button><button class="btn" data-act="guiaNueva" ${D}${dis}>${ic('bulb')} Generar otra</button>`:'');
+  const nav=`<div class="filters" style="justify-content:space-between">${i>0?`<button class="btn sm" data-act="guiaIr" data-id="${t.id}" data-c="${C[i-1].id}"${dis}>${ic('left')} Clase ${i}</button>`:'<span></span>'}<span class="chip" style="--c:var(${(FASEC[c.fase]||FASEC[1])[2]})">${C.map((x,k)=>`<i style="background:${x.guia?'var(--ok)':'var(--line)'};${k===i?'outline:2px solid var(--ink)':''}"></i>`).join('')} ${C.filter(x=>x.guia).length} de ${N} clases con guía</span>${i<N-1?`<button class="btn sm" data-act="guiaIr" data-id="${t.id}" data-c="${C[i+1].id}"${dis}>Clase ${i+2} ${ic('right')}</button>`:'<span></span>'}</div>`;
+  let body='';
+  if(GU.busy)body=LOADER.replace('Preparando la propuesta…',esc(GU.busy)).replace('Organizando subtemas, actividades y clases por semana','Escribiendo explicaciones, ejercicios e ilustraciones. Puede tardar hasta un minuto.');
+  else if(!c.guia)body=`<div class="card" style="text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding:28px 16px"><h2>Esta clase aún no tiene guía</h2><p style="margin:0;color:var(--muted);max-width:52ch">La IA preparará una guía para resolver en esta clase, con ejercicios con espacio para responder e ilustraciones.</p><button class="btn pri" data-act="guiaNueva" ${D}>${ic('bulb')} Generar guía</button></div>`;
+  return head(`<span style="color:${gr?.color}">■</span> ${esc(gr?.nombre)} · ${esc(M(t.materiaId)?.nombre)} · ${esc(t.titulo)}`,`Guía de la clase ${i+1}`,`${esc(c.tema)}${c.fecha?' · '+fmtL(c.fecha):''}`,tools)+nav+
+   (GU.err?`<div class="gerr">${esc(GU.err)}</div>`:'')+(GU.pedirCod?`<div class="card filters"><input id="codIA" type="password" placeholder="Código de acceso" aria-label="Código de acceso" style="flex:1;min-width:0"><button class="btn pri" data-act="guardarCod">Guardar código</button></div>`:'')+
+   (c.guia?`<section class="card gedit"><h2>${ic('pencil')} Editar esta guía</h2><label for="gPedido" class="s" style="color:var(--muted)">Escriba qué quiere cambiar y la IA ajustará la misma guía.</label>
+     <textarea id="gPedido" rows="3" placeholder="Ej.: Agregue dos problemas más con precios de la tienda y use un lenguaje más sencillo"${dis}></textarea>
+     <div class="gsug">${['Use un lenguaje más sencillo','Agregue más ejercicios para practicar','Incluya una sopa de letras o un crucigrama','Hágala más corta','Agregue una actividad en grupo'].map(x=>`<button type="button" class="chip" data-act="gSug" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+     <div class="mact">${c.guiaPrev?`<button class="btn ghost" data-act="guiaUndo" ${D}${dis}>${ic('undo')} Deshacer último cambio</button>`:''}<button class="btn pri" data-act="guiaEdit" ${D}${dis}>${ic('check')} Aplicar cambios</button></div></section>`:'')+
+   `<div id="guiaOut">${body}</div>`+(c.guia&&!GU.busy?guiaHtml(t,c,i,N):'')};
+const TC=d=>{const t=S.temas.find(x=>x.id===d.id);return {t,...claseDe(t,d.c)}};
+Object.assign(A,{
+  guia:d=>{const t=S.temas.find(x=>x.id===d.id),{C}=claseDe(t),c=C[+d.i];save();GU={busy:false,err:''};V.open.add(t.id);go('guia',{tema:t.id,clase:c.id});if(!c.guia)A.guiaNueva({id:t.id,c:c.id})},
+  guiaIr:d=>{GU={busy:false,err:''};go('guia',{tema:d.id,clase:d.c})},
+  guiaVolver:d=>{const t=S.temas.find(x=>x.id===d.id);V.open.add(t.id);go('grado',{grado:t.gradoId,tab:'temas',f:{materia:'',periodo:'',estado:'',q:''}})},
+  guiaNueva:d=>{const {t,c,i,C}=TC(d);pedirGuia(t,c,promptGuia(t,c,i,C.length),`Generando la guía de la clase ${i+1}…`)},
+  guiaEdit:d=>{const {t,c}=TC(d),p=$('#gPedido').value.trim();if(!p){toast('Escriba qué quiere cambiar');$('#gPedido').focus();return}pedirGuia(t,c,promptEditar(t,c,p),'Aplicando los cambios a la guía…')},
+  guiaUndo:d=>{const {c}=TC(d);[c.guia,c.guiaPrev]=[c.guiaPrev,null];save();render();toast('Cambio deshecho')},
+  guardarCod:()=>{try{localStorage.setItem('planeacion_codigo_ia',$('#codIA').value.trim())}catch(e){}GU={busy:false,err:''};render();toast('Código guardado. Toque de nuevo Generar guía')},
+  gSug:d=>{const a=$('#gPedido');a.value=(a.value.trim()?a.value.trim()+'. ':'')+d.v;a.focus()},
+  guiaPdf:async d=>{const t=S.temas.find(x=>x.id===d.id);const {C,c,i}=d.c?claseDe(t,d.c):(()=>{const C=clasesDe(t);return {C,c:C[+d.i],i:+d.i}})();if(!c?.guia)return;
+    let el=$('#guiaDoc');if(!el){const w=document.createElement('div');w.innerHTML=guiaHtml(t,c,i,C.length);el=w.firstElementChild}
+    const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.pdf';await pdfDe(el,nom)}
+});
+render();
+</script>
+
+
+</body>
+</html>
