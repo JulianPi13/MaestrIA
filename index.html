@@ -191,6 +191,9 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .cl-lista summary{cursor:pointer;color:var(--muted);font-weight:600;font-size:.9rem}
 .gcl .fld textarea,.gcl .fld input{background:var(--paper)}
 @media (max-width:620px){.clase{grid-template-columns:50px minmax(0,1fr);gap:10px;padding:10px}.hoja b{font-size:1.25rem}.det2{padding:12px 10px}}
+.pdfw,.pdfw *{font-family:Arial, Helvetica, sans-serif!important}
+.pdfw h1,.pdfw h2,.pdfw h3,.pdfw .gsec-h b{font-family:Georgia, 'Times New Roman', serif!important}
+.guia.pdfw{padding:0;gap:20px}.guia.pdfw .gbody{flex-direction:row}.guia.pdfw .gimg{width:220px;max-width:40%;align-self:flex-start}.guia.pdfw .gdatos{grid-template-columns:2fr 1fr 1fr}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
 .gedit textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
@@ -321,7 +324,7 @@ const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${Str
 const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
 const fmt=s=>{if(!s)return '—';const d=pd(s);return `${d.getDate()} ${MES[d.getMonth()]}`};
 const fmtL=s=>s?pd(s).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'';
-const HOY=iso(new Date());
+let HOY=iso(new Date());
 const COLORES=['#3B7DD8','#2E9E6A','#D9822B','#9B59B6','#C0392B','#16A0A0','#7A8B2E','#B5487E'];
 
 /* ---------- Datos ---------- */
@@ -356,7 +359,7 @@ const M=id=>S.materias.find(x=>x.id===id);
 const P=id=>S.periodos.find(x=>x.id===id);
 const matsDe=gid=>S.materias.filter(m=>m.gradoId===gid);
 const perActual=()=>S.periodos.find(p=>p.inicio<=HOY&&p.fin>=HOY);
-function estado(t){if(t.estado==='completado')return 'completado';if(t.limite&&t.limite<HOY)return 'atrasado';return t.estado}
+function estado(t){if(t.estado==='completado')return 'completado';if(t.limite&&t.limite<HOY)return 'atrasado';if(t.estado==='pendiente'&&t.inicio&&t.inicio<=HOY)return 'en curso';return t.estado}
 const ESTXT={pendiente:'Pendiente','en curso':'En curso',completado:'Completado',atrasado:'Atrasado'};
 const stBadge=t=>{const e=estado(t);return `<span class="st ${e.replace(' ','')}">${ESTXT[e]}</span>`};
 const avance=list=>list.length?Math.round(list.filter(t=>t.estado==='completado').length*100/list.length):0;
@@ -682,7 +685,7 @@ function detalleTema(t){
       <div class="cl-ver"><small>Qué vemos</small>${esc(c.tema)}</div>
       ${c.hacer?.length?`<div class="cl-hacer"><small>Qué hacemos</small><ol class="pasos">${c.hacer.map(h=>`<li>${esc(h)}</li>`).join('')}</ol></div>`:''}
       ${c.nota?`<div class="cl-nota">${ic('pencil')} ${esc(c.nota)}</div>`:''}
-      <button class="cl-ok${c.hecho?' on':''}" data-act="clDone" data-id="${t.id}" data-i="${i}" aria-pressed="${!!c.hecho}">${ic('check')} ${c.hecho?'Clase dictada':'Marcar como dictada'}</button><div class="cl-guia">${c.guia?`<button class="btn sm" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('book')} Ver guía</button><button class="btn sm" data-act="guiaPdf" data-id="${t.id}" data-i="${i}">${ic('down')} Descargar guía en PDF</button>`:`<button class="btn sm pri" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('bulb')} Generar guía</button>`}</div></div></li>`}).join('');
+      <button class="cl-ok${c.hecho?' on':''}" data-act="clDone" data-id="${t.id}" data-i="${i}" aria-pressed="${!!c.hecho}">${ic('check')} ${c.hecho?'Clase dictada':'Marcar como dictada'}</button><div class="cl-guia">${c.guia?`<button class="btn sm" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('book')} Ver guía</button><button class="btn sm" data-act="guiaPdf" data-id="${t.id}" data-i="${i}">${ic('down')} PDF</button><button class="btn sm" data-act="guiaWord" data-id="${t.id}" data-i="${i}">${ic('down')} Word</button>`:`<button class="btn sm pri" data-act="guia" data-id="${t.id}" data-i="${i}">${ic('bulb')} Generar guía</button>`}</div></div></li>`}).join('');
   const todo=n===C.length&&t.estado!=='completado'?`<div class="warnbox" style="background:var(--ok-bg);border-color:var(--ok)">${ic('check')} <span>Ya dictó todas las clases de este tema. <button class="btn sm" data-act="estado" data-id="${t.id}" data-e="completado">Marcar tema como completado</button></span></div>`:'';
   return `<div class="det2">${resumen}${todo}<ol class="clases">${cards}</ol>
    <div class="tools"><button class="btn sm" data-act="clAdd" data-id="${t.id}">${ic('plus')} Agregar clase</button></div>
@@ -710,16 +713,125 @@ const codigoIA=()=>{try{return localStorage.getItem('planeacion_codigo_ia')||''}
 function leerJson(t){const s=String(t||'').replace(/```(?:json)?/g,'');const i=s.indexOf('{'),j=s.lastIndexOf('}');try{return JSON.parse(s.slice(i,j+1))}catch(e){throw {code:'invalid_json'}}}
 const httpSample={json:async input=>{let r;try{r=await fetch('/api/guia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:input,codigo:codigoIA()})})}catch(e){throw {code:'red'}}
   const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error'};return leerJson(d.text)}};
-let _pdfLib;
-function cargarPdf(){return _pdfLib??=new Promise((ok,no)=>{if(window.html2pdf)return ok();const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';s.onload=()=>ok();s.onerror=()=>{_pdfLib=null;no()};document.head.append(s)})}
+/* ---------- PDF propio: tamaño carta, márgenes iguales y cortes de página sin partir ejercicios ---------- */
+const enc=new TextEncoder();
+const CARTA={w:612,h:792,m:36}; // puntos (1/72 pulgada): carta 8,5×11 in, márgenes de 0,5 in
+function cssParaImagen(){let out='';for(const sh of document.styleSheets){let rules;try{rules=sh.cssRules}catch(e){continue}
+  for(const r of rules){const t=r.cssText||'';if(r.media&&/prefers-color-scheme:\s*dark|print/.test(r.media.mediaText))continue;if(r.selectorText&&/data-theme="dark"/.test(r.selectorText))continue;if(/^@font-face|^@import/.test(t))continue;out+=t+'\n'}}return out}
+function cargarImg(src){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=()=>no(new Error('img'));im.src=src})}
+function cortesDePagina(clone,altoPag){
+  const base=clone.getBoundingClientRect().top,H=clone.scrollHeight,bloques=[];
+  clone.querySelectorAll('.gact,.gsec-h,.gnote,.ghead,.gimg,.gobj,.gdatos,.gtx p,li,h1,h2,h3,p,tr,.gunir span,.gdraw,.gln,.gop span,.gpie,.wk').forEach(e=>{const r=e.getBoundingClientRect();const a=r.top-base,b=r.bottom-base;if(b-a>2&&b-a<altoPag*.9)bloques.push([a,b])});
+  const partido=y=>bloques.some(([a,b])=>a<y-1&&b>y+1);
+  const cortes=[0];let y0=0;
+  while(H-y0>altoPag){let y=y0+altoPag,ok=false;for(let k=y;k>y0+altoPag*.4;k-=2)if(!partido(k)){y=k;ok=true;break}cortes.push(Math.floor(y));y0=Math.floor(y)}
+  cortes.push(H);return cortes}
+function armarPdf(paginas){ // paginas: [{jpg:Uint8Array, pw, ph, x, y, w, h}] en puntos
+  const partes=[],off=[];let n=0,len=0;const push=x=>{const b=typeof x==='string'?enc.encode(x):x;partes.push(b);len+=b.length};
+  const obj=(id,cuerpo)=>{off[id]=len;push(`${id} 0 obj\n`);cuerpo();push('\nendobj\n')};
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const N=paginas.length,kids=paginas.map((_,i)=>`${3+i*3} 0 R`).join(' ');
+  obj(1,()=>push('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2,()=>push(`<< /Type /Pages /Kids [${kids}] /Count ${N} >>`));
+  paginas.forEach((p,i)=>{const pg=3+i*3,ct=pg+1,im=pg+2;
+    obj(pg,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${CARTA.w} ${CARTA.h}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${ct} 0 R >>`));
+    const s=`q ${p.w.toFixed(2)} 0 0 ${p.h.toFixed(2)} ${p.x.toFixed(2)} ${(CARTA.h-p.y-p.h).toFixed(2)} cm /Im${i} Do Q`;
+    obj(ct,()=>{push(`<< /Length ${s.length} >>\nstream\n${s}\nendstream`)});
+    obj(im,()=>{push(`<< /Type /XObject /Subtype /Image /Width ${p.pw} /Height ${p.ph} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${p.jpg.length} >>\nstream\n`);push(p.jpg);push('\nendstream')})});
+  n=3+N*3;const xref=len;let x=`xref\n0 ${n}\n0000000000 65535 f \n`;for(let i=1;i<n;i++)x+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+  push(x+`trailer\n<< /Size ${n} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(partes,{type:'application/pdf'})}
 async function pdfDe(el,nombre){
   toast('Preparando el PDF…');
-  try{await cargarPdf()}catch(e){toast('No se pudo cargar el generador de PDF. Revise la conexión.');return}
-  const box=document.createElement('div');box.style.cssText='position:absolute;left:-10000px;top:0;width:800px;background:#fff';
-  const c=el.cloneNode(true);c.style.maxWidth='800px';c.style.border='0';c.style.borderRadius='0';box.append(c);document.body.append(box);
-  try{const blob=await html2pdf().set({margin:[8,8,10,8],image:{type:'jpeg',quality:.95},html2canvas:{scale:2,backgroundColor:'#ffffff',windowWidth:800},jsPDF:{unit:'mm',format:'letter',orientation:'portrait'},pagebreak:{mode:['css','legacy'],avoid:['.gact','.gsec-h','.gimg','.gnote','tr','.ghead']}}).from(c).outputPdf('blob');
-    await download(nombre,blob,'application/pdf')}
-  catch(e){toast('No se pudo crear el PDF')}finally{box.remove()}}
+  const W=720,ESC=2,ptPx=(CARTA.w-2*CARTA.m)/W,altoPag=Math.floor((CARTA.h-2*CARTA.m)/ptPx); // 720 px = ancho útil de la hoja
+  const host=document.createElement('div');host.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;background:#fff`;
+  const c=el.cloneNode(true);c.removeAttribute('id');c.classList.add('pdfw');Object.assign(c.style,{width:W+'px',maxWidth:'none',margin:'0',border:'0',borderRadius:'0',padding:'0',boxShadow:'none',background:'#fff'});
+  host.append(c);document.body.append(host);
+  try{
+    try{await document.fonts?.ready}catch(e){}
+    const H=Math.ceil(c.scrollHeight),cortes=cortesDePagina(c,altoPag);
+    const xml=new XMLSerializer().serializeToString(c);
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W*ESC}" height="${H*ESC}" viewBox="0 0 ${W} ${H}"><foreignObject x="0" y="0" width="${W}" height="${H}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;background:#fff;color:#1F2A30;font-family:Arial, sans-serif"><style>${cssParaImagen().replace(/<\/style/gi,'')}</style>${xml}</div></foreignObject></svg>`;
+    const img=await cargarImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg));
+    const paginas=[];
+    for(let i=0;i<cortes.length-1;i++){const a=cortes[i],h=cortes[i+1]-a;if(h<2)continue;
+      const cv=document.createElement('canvas');cv.width=W*ESC;cv.height=Math.ceil(h*ESC);const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.drawImage(img,0,a*ESC,W*ESC,h*ESC,0,0,W*ESC,h*ESC);
+      const bin=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),jpg=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)jpg[k]=bin.charCodeAt(k);
+      paginas.push({jpg,pw:cv.width,ph:cv.height,x:CARTA.m,y:CARTA.m,w:W*ptPx,h:h*ptPx})}
+    await download(nombre,armarPdf(paginas),'application/pdf')
+  }catch(e){console.error(e);toast('No se pudo crear el PDF')}finally{host.remove()}}
+
+/* ---------- Word (.docx) propio, sin librerías ---------- */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+function zip(archivos){ // [{nombre, datos:Uint8Array|string}] sin compresión
+  const partes=[],central=[];let off=0;const u16=v=>[v&255,(v>>8)&255],u32=v=>[v&255,(v>>>8)&255,(v>>>16)&255,(v>>>24)&255];
+  for(const f of archivos){const d=typeof f.datos==='string'?enc.encode(f.datos):f.datos,nm=enc.encode(f.nombre),cr=crc32(d);
+    const loc=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(cr),...u32(d.length),...u32(d.length),...u16(nm.length),...u16(0)]);
+    partes.push(loc,nm,d);central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0x21),...u32(cr),...u32(d.length),...u32(d.length),...u16(nm.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nm);
+    off+=loc.length+nm.length+d.length}
+  const tamC=central.reduce((s,b)=>s+b.length,0);
+  return new Blob([...partes,...central,new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(archivos.length),...u16(archivos.length),...u32(tamC),...u32(off),...u16(0)])],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'})}
+async function svgPng(svg,anchoPx=480){try{const vb=(svg.match(/viewBox="([^"]+)"/)||[])[1]?.split(/[\s,]+/).map(Number)||[0,0,240,160];const r=vb[3]/vb[2]||2/3;
+  const im=await cargarImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg));const cv=document.createElement('canvas');cv.width=anchoPx;cv.height=Math.round(anchoPx*r);
+  const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(im,0,0,cv.width,cv.height);
+  const bin=atob(cv.toDataURL('image/png').split(',')[1]),u=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)u[k]=bin.charCodeAt(k);return {png:u,r}}catch(e){return null}}
+const xe=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'');
+const COLW={A:'2E9E6A',B:'3B7DD8',C:'E07B24',D:'8E4FC2',E:'C2384E'};
+async function guiaDocx(t,c,i,N){
+  const g=c.guia,gr=G(t.gradoId),m=M(t.materiaId),medios=[];let nAct=0,body='';
+  const run=(tx,o={})=>`<w:r><w:rPr>${o.b?'<w:b/>':''}${o.i?'<w:i/>':''}${o.color?`<w:color w:val="${o.color}"/>`:''}${o.sz?`<w:sz w:val="${o.sz}"/><w:szCs w:val="${o.sz}"/>`:''}${o.font?`<w:rFonts w:ascii="${o.font}" w:hAnsi="${o.font}"/>`:''}</w:rPr><w:t xml:space="preserve">${xe(tx)}</w:t></w:r>`;
+  const par=(runs,o={})=>`<w:p><w:pPr>${o.style?`<w:pStyle w:val="${o.style}"/>`:''}${o.keep?'<w:keepNext/>':''}${o.shd?`<w:shd w:val="clear" w:color="auto" w:fill="${o.shd}"/>`:''}${o.bb?'<w:pBdr><w:bottom w:val="single" w:sz="8" w:space="1" w:color="B7C2CA"/></w:pBdr>':''}${o.jc?`<w:jc w:val="${o.jc}"/>`:''}<w:spacing w:before="${o.antes??0}" w:after="${o.despues??120}"/>${o.ind?`<w:ind w:left="${o.ind}"/>`:''}</w:pPr>${runs}</w:p>`;
+  const blanco=txt=>xe(txt).replace(/_{3,}/g,'__________');
+  const borde=(c2='B7C2CA')=>`<w:tblBorders>${['top','left','bottom','right','insideH','insideV'].map(s=>`<w:${s} w:val="single" w:sz="6" w:space="0" w:color="${c2}"/>`).join('')}</w:tblBorders>`;
+  const tabla=(filas,o={})=>{const nc=Math.max(1,...filas.map(f=>f.length)),ancho=9360,cws=o.anchos?o.anchos.map(x=>Math.floor(ancho*x)):Array(nc).fill(Math.floor(ancho/nc)),cw=cws[0];
+    return `<w:tbl><w:tblPr><w:tblW w:w="${ancho}" w:type="dxa"/><w:jc w:val="center"/>${o.sinBorde?'':borde()}<w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>${cws.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${filas.map((f,ri)=>`<w:tr>${o.alto?`<w:trPr><w:cantSplit/><w:trHeight w:val="${o.alto}" w:hRule="atLeast"/></w:trPr>`:'<w:trPr><w:cantSplit/></w:trPr>'}${Array.from({length:nc},(_,k)=>`<w:tc><w:tcPr><w:tcW w:w="${cws[k]}" w:type="dxa"/>${ri===0&&o.cab?'<w:shd w:val="clear" w:color="auto" w:fill="EEF3F6"/>':''}</w:tcPr>${par(run(f[k]??'',{b:ri===0&&o.cab}),{despues:40,jc:o.centro?'center':undefined})}</w:tc>`).join('')}</w:tr>`).join('')}</w:tbl>${par('',{despues:80})}`};
+  const imagen=async svg=>{const r=await svgPng(svg);if(!r)return '';const id='rImg'+(medios.length+1),n=medios.length+1;medios.push({nombre:`word/media/img${n}.png`,datos:r.png,id});
+    const cx=Math.round(3.2*914400),cy=Math.round(cx*r.r);
+    return par(`<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${n}" name="Ilustración ${n}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${n}" name="img${n}.png"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${id}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`,{jc:'center'})};
+  // Encabezado
+  body+=`<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:jc w:val="center"/><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="200" w:type="dxa"/><w:left w:w="280" w:type="dxa"/><w:bottom w:w="160" w:type="dxa"/><w:right w:w="280" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid><w:gridCol w:w="9360"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="24433A"/></w:tcPr>${par(run(`Guía de aprendizaje · ${m?.nombre||''} · ${gr?.nombre||''}`.toUpperCase(),{b:true,color:'F2D27A',sz:18}),{despues:40})}${par(run(g.titulo||c.tema,{b:true,color:'FFFFFF',sz:36,font:'Georgia'}),{despues:40})}${par(run(`Clase ${i+1} de ${N}${c.fecha?' · '+fmtL(c.fecha):''} · Tema: ${t.titulo}`,{color:'E8F0EB',sz:18}),{despues:0})}</w:tc></w:tr></w:tbl>${par('',{despues:120})}`;
+  body+=tabla([[`Nombre: `,`Fecha: `,`Grado: ${(gr?.nombre||'').replace('Grado ','')}`]],{sinBorde:false});
+  if(g.objetivo)body+=par(run('Lo que voy a aprender: ',{b:true})+run(g.objetivo),{shd:'F3F7FA',despues:200});
+  for(const s of g.secciones||[]){const k=MOM[s.momento]||MOM.B,col=COLW[s.momento]||COLW.B;
+    body+=par(run(`${s.momento||''}  `,{b:true,color:col,sz:36,font:'Georgia'})+run(`${k[0]} · ${k[1]}`.toUpperCase(),{b:true,color:col,sz:18}),{keep:true,antes:240,despues:0});
+    body+=par(run(s.titulo,{b:true,sz:30,font:'Georgia'}),{keep:true,despues:120});
+    for(const p of String(s.texto||'').split(/\n+/).filter(Boolean))body+=par(`<w:r><w:t xml:space="preserve">${blanco(p)}</w:t></w:r>`);
+    const im=limpiarSvg(s.ilustracion);if(im)body+=await imagen(im);
+    if(s.recuadro)body+=par(run('¿Sabías que…? ',{b:true})+run(s.recuadro),{shd:'FFF4C2',despues:160});
+    for(const a of s.actividades||[]){nAct++;
+      body+=par(run(`${nAct}. `,{b:true,color:col})+`<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">${blanco(a.enunciado)}</w:t></w:r>`,{keep:true,antes:120});
+      const L=k=>`<w:tbl><w:tblPr><w:tblW w:w="9360" w:type="dxa"/><w:jc w:val="center"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:right w:val="nil"/><w:insideV w:val="nil"/><w:bottom w:val="single" w:sz="6" w:space="0" w:color="B7C2CA"/><w:insideH w:val="single" w:sz="6" w:space="0" w:color="B7C2CA"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="9360"/></w:tblGrid>${Array.from({length:Math.min(10,Math.max(1,k||3))},()=>`<w:tr><w:trPr><w:cantSplit/><w:trHeight w:val="460" w:hRule="exact"/></w:trPr><w:tc><w:tcPr><w:tcW w:w="9360" w:type="dxa"/></w:tcPr><w:p/></w:tc></w:tr>`).join('')}</w:tbl>${par('',{despues:60})}`;
+      if(a.tipo==='opciones')body+=(a.opciones||[]).map(o=>par(run('○  '+o),{ind:360,despues:60})).join('');
+      else if(a.tipo==='tabla'){const cols=a.columnas||[],filas=a.filas?.length?a.filas:[[],[],[]];body+=tabla([...(cols.length?[cols]:[]),...filas],{cab:!!cols.length,alto:420})}
+      else if(a.tipo==='dibujo')body+=tabla([['']],{alto:2600});
+      else if(a.tipo==='unir'){const P=a.pares||[],der=P.map(p=>p[1]).sort(()=>.5-Math.random());body+=tabla(P.map((p,k)=>[p[0],'•                •',der[k]]),{sinBorde:true,centro:true})}
+      else if(a.tipo==='completar'){if(a.lineas)body+=L(a.lineas)}
+      else body+=L(a.lineas)}}
+  if(g.autoevaluacion?.length){body+=par(run('E  ',{b:true,color:COLW.E,sz:36,font:'Georgia'})+run('EVALUACIÓN',{b:true,color:COLW.E,sz:18}),{keep:true,antes:240,despues:0})+par(run('Me evalúo',{b:true,sz:30,font:'Georgia'}),{keep:true});
+    body+=tabla([['Puedo…','Sí','A veces','Aún no'],...g.autoevaluacion.map(x=>[x,'','',''])],{cab:true,anchos:[.58,.14,.14,.14]})}
+  if(g.para_casa)body+=par(run('Para hacer en casa: ',{b:true})+run(g.para_casa),{shd:'F3F7FA',antes:120});
+  body+=par(run(`Guía sugerida y editable · Revisar con los DBA y Estándares Básicos de Competencias del MEN · ${S.config.institucion} · Docente ${S.config.docente}`,{i:true,color:'5B6770',sz:16}),{antes:240});
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body}<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1080" w:right="1440" w:bottom="1080" w:left="1440" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+  const estilos=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial" w:cs="Arial"/><w:sz w:val="23"/><w:szCs w:val="23"/><w:color w:val="1F2A30"/><w:lang w:val="es-CO"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="276" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>`;
+  return zip([
+    {nombre:'[Content_Types].xml',datos:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`},
+    {nombre:'_rels/.rels',datos:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`},
+    {nombre:'word/_rels/document.xml.rels',datos:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>${medios.map((m2,k)=>`<Relationship Id="${m2.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/img${k+1}.png"/>`).join('')}</Relationships>`},
+    {nombre:'word/document.xml',datos:doc},{nombre:'word/styles.xml',datos:estilos},...medios.map(m2=>({nombre:m2.nombre,datos:m2.datos}))])}
+
+/* ---------- La fecha de hoy se mantiene al día ---------- */
+function revisarFecha(){const h=iso(new Date());if(h===HOY)return;const ant=pd(HOY);HOY=h;
+  if(V.cal.y===ant.getFullYear()&&V.cal.m===ant.getMonth()){const d=new Date();V.cal.y=d.getFullYear();V.cal.m=d.getMonth()}
+  const ocupado=$('#ov')||(typeof GU!=='undefined'&&GU.busy)||/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'');
+  if(ocupado)_fechaPendiente=true;else render()}
+let _fechaPendiente=false;
+setInterval(revisarFecha,60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)revisarFecha()});
+window.addEventListener('focus',revisarFecha);
+document.addEventListener('focusout',()=>setTimeout(()=>{if(_fechaPendiente&&!$('#ov')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')){_fechaPendiente=false;render()}},300));
+
 
 /* ---------- Guías con IA ---------- */
 const MOM={A:['Vivencia','Exploro lo que sé','--gp-a'],B:['Fundamentación','Aprendo','--gp-b'],C:['Ejercitación','Practico','--gp-c'],D:['Aplicación','Aplico en mi comunidad','--gp-d']};
@@ -786,12 +898,12 @@ async function pedirGuia(t,c,input,msg){
   try{const r=await sample.json(input,{modelTier:'default',cache:false});
     if(!r||!Array.isArray(r.secciones)||!r.secciones.length)throw {code:'invalid_json'};
     if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast('Guía lista')}
-  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se hicieron muchas solicitudes seguidas. Espere un momento e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA (ANTHROPIC_API_KEY) en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
+  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se alcanzó el límite de uso de la IA. Espere un rato (en el plan gratuito, hasta el día siguiente) e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA en Vercel (por ejemplo GEMINI_API_KEY).',clave_invalida:'La clave de la IA no es válida. Revísela en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
   if(V.name==='guia')render()}
 VIEWS.guia=()=>{
   const t=S.temas.find(x=>x.id===V.tema);if(!t){V.name='panel';return VIEWS.panel()}
   const {C,c,i}=claseDe(t,V.clase),N=C.length,gr=G(t.gradoId),dis=GU.busy?' disabled':'',D=`data-id="${t.id}" data-c="${c.id}"`;
-  const tools=`<button class="btn" data-act="guiaVolver" data-id="${t.id}">${ic('left')} Volver</button>`+(c.guia?`<button class="btn pri" data-act="guiaPdf" ${D}${dis}>${ic('down')} Descargar guía en PDF</button><button class="btn" data-act="guiaNueva" ${D}${dis}>${ic('bulb')} Generar otra</button>`:'');
+  const tools=`<button class="btn" data-act="guiaVolver" data-id="${t.id}">${ic('left')} Volver</button>`+(c.guia?`<button class="btn pri" data-act="guiaPdf" ${D}${dis}>${ic('down')} Descargar en PDF</button><button class="btn" data-act="guiaWord" ${D}${dis}>${ic('down')} Descargar en Word</button><button class="btn" data-act="guiaNueva" ${D}${dis}>${ic('bulb')} Generar otra</button>`:'');
   const nav=`<div class="filters" style="justify-content:space-between">${i>0?`<button class="btn sm" data-act="guiaIr" data-id="${t.id}" data-c="${C[i-1].id}"${dis}>${ic('left')} Clase ${i}</button>`:'<span></span>'}<span class="chip" style="--c:var(${(FASEC[c.fase]||FASEC[1])[2]})">${C.map((x,k)=>`<i style="background:${x.guia?'var(--ok)':'var(--line)'};${k===i?'outline:2px solid var(--ink)':''}"></i>`).join('')} ${C.filter(x=>x.guia).length} de ${N} clases con guía</span>${i<N-1?`<button class="btn sm" data-act="guiaIr" data-id="${t.id}" data-c="${C[i+1].id}"${dis}>Clase ${i+2} ${ic('right')}</button>`:'<span></span>'}</div>`;
   let body='';
   if(GU.busy)body=LOADER.replace('Preparando la propuesta…',esc(GU.busy)).replace('Organizando subtemas, actividades y clases por semana','Escribiendo explicaciones, ejercicios e ilustraciones. Puede tardar hasta un minuto.');
@@ -812,6 +924,8 @@ Object.assign(A,{
   guiaEdit:d=>{const {t,c}=TC(d),p=$('#gPedido').value.trim();if(!p){toast('Escriba qué quiere cambiar');$('#gPedido').focus();return}pedirGuia(t,c,promptEditar(t,c,p),'Aplicando los cambios a la guía…')},
   guiaUndo:d=>{const {c}=TC(d);[c.guia,c.guiaPrev]=[c.guiaPrev,null];save();render();toast('Cambio deshecho')},
   guardarCod:()=>{try{localStorage.setItem('planeacion_codigo_ia',$('#codIA').value.trim())}catch(e){}GU={busy:false,err:''};render();toast('Código guardado. Toque de nuevo Generar guía')},
+  guiaWord:async d=>{const t=S.temas.find(x=>x.id===d.id);const {C,c,i}=d.c?claseDe(t,d.c):(()=>{const C=clasesDe(t);return {C,c:C[+d.i],i:+d.i}})();if(!c?.guia)return;
+    toast('Preparando el documento de Word…');try{const blob=await guiaDocx(t,c,i,C.length);const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.docx';await download(nom,blob,blob.type)}catch(e){console.error(e);toast('No se pudo crear el documento de Word')}},
   gSug:d=>{const a=$('#gPedido');a.value=(a.value.trim()?a.value.trim()+'. ':'')+d.v;a.focus()},
   guiaPdf:async d=>{const t=S.temas.find(x=>x.id===d.id);const {C,c,i}=d.c?claseDe(t,d.c):(()=>{const C=clasesDe(t);return {C,c:C[+d.i],i:+d.i}})();if(!c?.guia)return;
     let el=$('#guiaDoc');if(!el){const w=document.createElement('div');w.innerHTML=guiaHtml(t,c,i,C.length);el=w.firstElementChild}
