@@ -60,6 +60,9 @@ create table if not exists public.perfiles (
 
 alter table public.perfiles enable row level security;
 
+-- El usuario tal como el docente lo escribió (con mayúsculas, espacios y tildes); "usuario" guarda la forma para comparar
+alter table public.perfiles add column if not exists usuario_visible text;
+
 drop policy if exists "ver su perfil" on public.perfiles;
 create policy "ver su perfil" on public.perfiles
   for select using (auth.uid() = id);
@@ -72,10 +75,11 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.perfiles (id, usuario, correo, rol)
+  insert into public.perfiles (id, usuario, usuario_visible, correo, rol)
   values (
     new.id,
-    lower(coalesce(nullif(new.raw_user_meta_data ->> 'usuario', ''), split_part(new.email, '@', 1))),
+    lower(trim(coalesce(nullif(new.raw_user_meta_data ->> 'usuario_clave', ''), nullif(new.raw_user_meta_data ->> 'usuario', ''), split_part(new.email, '@', 1)))),
+    coalesce(nullif(new.raw_user_meta_data ->> 'usuario', ''), split_part(new.email, '@', 1)),
     new.email,
     'profesor'
   );

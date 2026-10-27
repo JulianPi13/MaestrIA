@@ -1005,18 +1005,17 @@ function revisarCorreo(v){v=String(v||'').trim();
   if(!/\.[A-Za-z]{2,}$/.test(dom))return {err:'Al final del correo falta algo como .com o .co',sug:/^(gmail|hotmail|outlook|yahoo|icloud)$/i.test(dom)?`${loc}@${dom.toLowerCase()}.com`:undefined};
   const d=dom.toLowerCase();if(DOM_TYPO[d])return {warn:`¿Quiso decir ${loc}@${DOM_TYPO[d]}?`,sug:`${loc}@${DOM_TYPO[d]}`,val:v.toLowerCase()};
   return {ok:true,val:v.toLowerCase()}}
-const limpiarUsuario=v=>sinTildes(String(v)).replace(/ñ/gi,'n').trim().replace(/[\s,;]+/g,'.').replace(/[^A-Za-z0-9._-]/g,'').replace(/\.{2,}/g,'.').toLowerCase();
-function revisarUsuario(v){v=String(v||'').trim();
-  if(!v)return {err:'Escriba un nombre de usuario.'};
-  if(/\s/.test(v))return {err:'El usuario no puede tener espacios.',sug:limpiarUsuario(v)};
-  if(/[,;]/.test(v))return {err:'El usuario no puede tener comas ni punto y coma.',sug:limpiarUsuario(v)};
+// Clave para comparar usuarios: sin mayúsculas, tildes ni espacios repetidos ("JULIÁN  Pinto" = "julian pinto")
+const claveUsuario=v=>sinTildes(String(v||'')).toLowerCase().trim().replace(/\s+/g,' ');
+function revisarUsuario(v){v=String(v||'').trim().replace(/\s{2,}/g,' ');
+  if(!v)return {err:'Escriba un nombre de usuario, por ejemplo «Julian Pinto».'};
+  if(/[,;]/.test(v))return {err:'El usuario no puede tener comas ni punto y coma. Puede separar con espacios, por ejemplo «Julian Pinto».',sug:v.replace(/\s*[,;]+\s*/g,' ').trim()};
   if(v.includes('@'))return {err:'El usuario no puede tener @. El correo va en su propia casilla.'};
-  if(/[À-ÿ]/.test(v))return {err:'El usuario no puede tener tildes ni ñ.',sug:limpiarUsuario(v)};
-  const raro=v.match(/[^A-Za-z0-9._-]/);if(raro)return {err:`El usuario tiene un carácter que no se permite: «${raro[0]}». Use letras, números, punto, guion o guion bajo.`};
-  if(!/^[A-Za-z]/.test(v))return {err:'El usuario debe empezar con una letra.'};
+  const raro=v.match(/[^\p{L}0-9 ._-]/u);if(raro)return {err:`El usuario tiene un carácter que no se permite: «${raro[0]}». Use letras (mayúsculas, minúsculas o con tilde), números, espacios, punto, guion o guion bajo.`,sug:v.replace(/[^\p{L}0-9 ._-]/gu,'').replace(/\s{2,}/g,' ').trim()||undefined};
+  if(!/^\p{L}/u.test(v))return {err:'El usuario debe empezar con una letra.'};
   if(v.length<3)return {err:'El usuario debe tener al menos 3 caracteres.'};
-  if(v.length>20)return {err:'El usuario puede tener máximo 20 caracteres.'};
-  return {ok:true,val:v.toLowerCase()}}
+  if(v.length>30)return {err:'El usuario puede tener máximo 30 caracteres.'};
+  return {ok:true,val:v,key:claveUsuario(v)}}
 // En el inicio de sesión se acepta usuario o correo
 function revisarId(v){const t=String(v||'').trim();if(!t)return {err:'Escriba su usuario o su correo.'};return t.includes('@')||/[,;]\s*(com|co|net|org|es)\b/i.test(t)?revisarCorreo(t):revisarUsuario(t)}
 const COMUNES=/^(1234|12345|123456|1234567|12345678|123456789|1234567890|password|contraseña|contrasena|clave|qwerty|abc123|abcd1234|111111|000000|maestria|profesor|profesora|docente|colombia)\d*$/i;
@@ -1040,11 +1039,11 @@ async function hashClave(clave,sal){const txt=sal+':'+clave;
   let h=2166136261;for(let i=0;i<txt.length;i++){h^=txt.charCodeAt(i);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}
 const cuentasLocales=()=>lsJ('md_cuentas',{}),guardarCuentas=c=>lsSet('md_cuentas',JSON.stringify(c));
 const LOCAL={
-  async registrar({correo,usuario,clave}){const c=cuentasLocales();
-    if(Object.values(c).some(x=>x.usuario===usuario))throw {code:'usuario_existe'};
+  async registrar({correo,usuario,llave,clave}){const c=cuentasLocales();
+    if(Object.values(c).some(x=>(x.llave||claveUsuario(x.usuario))===llave))throw {code:'usuario_existe'};
     if(Object.values(c).some(x=>x.correo===correo))throw {code:'user_already_exists'};
-    const id=uid()+uid(),sal=uid()+uid();c[id]={id,usuario,correo,rol:'profesor',sal,hash:await hashClave(clave,sal),creado:new Date().toISOString()};guardarCuentas(c);return id},
-  async entrar(idTxt,clave){const t=idTxt.toLowerCase(),c=Object.values(cuentasLocales()).find(x=>x.usuario===t||x.correo===t);
+    const id=uid()+uid(),sal=uid()+uid();c[id]={id,usuario,llave,correo,rol:'profesor',sal,hash:await hashClave(clave,sal),creado:new Date().toISOString()};guardarCuentas(c);return id},
+  async entrar(idTxt,clave){const t=idTxt.includes('@')?idTxt.toLowerCase():claveUsuario(idTxt),c=Object.values(cuentasLocales()).find(x=>(x.llave||claveUsuario(x.usuario))===t||x.correo===t);
     if(!c||await hashClave(clave,c.sal)!==c.hash)throw {code:'invalid_credentials'};return c.id},
   async cambiar(id,actual,nueva){const c=cuentasLocales(),x=c[id];if(!x||await hashClave(actual,x.sal)!==x.hash)throw {code:'clave_actual'};
     x.sal=uid()+uid();x.hash=await hashClave(nueva,x.sal);guardarCuentas(c)}};
@@ -1108,18 +1107,18 @@ async function cerrarSesion(){
     [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null}
   else{lsDel('md_sesion_local');LOC.uid=null}
   S=seed();pantallaAuth('entrar','Cerró sesión.')}
-async function correoParaEntrar(idTxt){if(idTxt.includes('@'))return idTxt;const c=await sb('/rest/v1/rpc/correo_de_usuario',{method:'POST',body:{p_usuario:idTxt}});if(!c)throw {code:'invalid_credentials'};return c}
+async function correoParaEntrar(idTxt){if(idTxt.includes('@'))return idTxt;const c=await sb('/rest/v1/rpc/correo_de_usuario',{method:'POST',body:{p_usuario:claveUsuario(idTxt)}});if(!c)throw {code:'invalid_credentials'};return c}
 async function accionEntrar(idTxt,clave){
   if(NUBE.on){const email=await correoParaEntrar(idTxt);const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:clave}});guardarSesion(d);
     const ca=cuentaActual();return {usuario:ca.usuario,correo:ca.correo,ir:()=>entrarConDatos()}}
   const id=await LOCAL.entrar(idTxt,clave),x=cuentasLocales()[id];return {usuario:x.usuario,correo:x.correo,ir:()=>entrarLocal(id)}}
-async function accionRegistrar({correo,usuario,clave}){
-  if(NUBE.on){const libre=await sb('/rest/v1/rpc/usuario_disponible',{method:'POST',body:{p_usuario:usuario}});if(libre===false)throw {code:'usuario_existe'};
-    const d=await sb('/auth/v1/signup',{method:'POST',body:{email:correo,password:clave,data:{usuario,rol:'profesor'}}});
+async function accionRegistrar({correo,usuario,llave,clave}){
+  if(NUBE.on){const libre=await sb('/rest/v1/rpc/usuario_disponible',{method:'POST',body:{p_usuario:llave}});if(libre===false)throw {code:'usuario_existe'};
+    const d=await sb('/auth/v1/signup',{method:'POST',body:{email:correo,password:clave,data:{usuario,usuario_clave:llave,rol:'profesor'}}});
     if(d?.access_token){guardarSesion(d);return {ir:()=>entrarConDatos(usuario)}}
     if(d&&Array.isArray(d.identities)&&!d.identities.length)throw {code:'user_already_exists'};
     return {confirmar:true}}
-  const id=await LOCAL.registrar({correo,usuario,clave});return {ir:()=>entrarLocal(id)}}
+  const id=await LOCAL.registrar({correo,usuario,llave,clave});return {ir:()=>entrarLocal(id)}}
 async function accionCambiarClave(actual,nueva){const ca=cuentaActual();
   if(NUBE.on){try{await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email:ca.correo,password:actual}})}catch(e){throw e.code==='red'?e:{code:'clave_actual'}}
     await sb('/auth/v1/user',{method:'PUT',token:await tokenNube(),body:{password:nueva}})}
@@ -1133,7 +1132,7 @@ const ERR_AUTH={
   email_not_confirmed:'La cuenta todavía no está activada. Abra el correo de activación que le llegó (revise también spam y promociones) y toque el enlace. Si no le llegó, el administrador puede apagar «Confirm email» en Supabase.',
   user_already_exists:'Ya existe una cuenta con ese correo. Toque «Iniciar sesión» y entre con ella; si no recuerda la contraseña, use «¿Olvidó su contraseña?».',
   email_exists:'Ya existe una cuenta con ese correo. Toque «Iniciar sesión» y entre con ella; si no recuerda la contraseña, use «¿Olvidó su contraseña?».',
-  usuario_existe:'Ese nombre de usuario ya lo tiene otra persona. Pruebe agregando su apellido o un número, por ejemplo ana.gomez2.',
+  usuario_existe:'Ese nombre de usuario ya lo tiene otra persona (no cuentan las mayúsculas ni las tildes). Pruebe agregando su segundo apellido o un número, por ejemplo «Julian Pinto 2».',
   weak_password:'Supabase considera la contraseña muy débil. Use 10 o más caracteres mezclando mayúsculas, minúsculas, números y un símbolo como ! o #.',
   over_email_send_rate_limit:'Supabase ya envió el máximo de correos permitido por ahora (su correo de prueba manda muy pocos por hora). Espere una hora, o pida al administrador configurar un correo propio (SMTP) en Supabase.',
   over_request_rate_limit:'Se hicieron demasiados intentos seguidos y Supabase los frenó por seguridad. Espere 5 minutos antes de volver a intentar.',
@@ -1166,11 +1165,12 @@ const errAuth=e=>{const msg=String(e?.msg||'');
 /* ----- Pantallas ----- */
 function pantallaCargando(txt){let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;
   a.innerHTML=`<div class="auth-cargando" role="status"><span class="spin"></span>${esc(txt)}</div>`}
-const AYUDA={aId:'Puede escribir su usuario o su correo.',aEmail:'Su correo completo, por ejemplo nombre@gmail.com. Sin espacios, comas ni tildes.',aUser:'De 3 a 20 caracteres. Empiece con una letra; use letras sin tilde, números, punto (.), guion (-) o guion bajo (_). Sin espacios ni comas.',aPassN:'Mínimo 8 caracteres combinando letras y números. Recomendada: 10 o más con mayúsculas, números y un símbolo (! # $).'};
-const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="none" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" data-ayuda="${esc(AYUDA[id]||'')}" aria-live="polite">${esc(AYUDA[id]||'')}</small></label>`;
+const AYUDA={aId:'Puede escribir su usuario o su correo. No importa si usa mayúsculas o minúsculas.',aEmail:'Su correo completo, por ejemplo nombre@gmail.com. Sin espacios, comas ni tildes.',aUser:'De 3 a 30 caracteres. Puede usar mayúsculas, espacios y tildes, por ejemplo «Julian Pinto». Empiece con una letra; sin comas ni @.',aPassN:'Mínimo 8 caracteres combinando letras y números. Recomendada: 10 o más con mayúsculas, números y un símbolo (! # $).'};
+const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="${id==='aUser'?'words':'none'}" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" data-ayuda="${esc(AYUDA[id]||'')}" aria-live="polite">${esc(AYUDA[id]||'')}</small></label>`;
 const campoClave=(id,label,ac,barra)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span>${barra?`<div class="fuerza" id="f_${id}" data-n="-1" aria-hidden="true"><i></i><i></i><i></i></div>`:''}<small class="fmsg" id="m_${id}" data-ayuda="${barra?esc(AYUDA.aPassN):''}" aria-live="polite">${barra?esc(AYUDA.aPassN):''}</small></label>`;
 function mostrarMsg(id,r){const m=$('#m_'+id),i=$('#'+id);if(!m)return;m.className='fmsg'+(r?.err?' err':r?.warn?' warn':r?.ok?' bien':'');
-  m.innerHTML=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):r?.ok&&id!=='aPass'?'✓ Correcto':esc(m.dataset.ayuda||'');i?.setAttribute('aria-invalid',r?.err?'true':'false')}
+  const html=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):r?.ok&&id!=='aPass'?'✓ Correcto':esc(m.dataset.ayuda||'');
+  if(m.innerHTML!==html)m.innerHTML=html;i?.setAttribute('aria-invalid',r?.err?'true':'false')}
 function pintarFuerza(id){const b=$('#f_'+id);if(!b)return;const f=fuerzaClave($('#'+id).value);b.dataset.n=f.nivel;const m=$('#m_'+id);
   if(f.nivel<0){m.textContent=m.dataset.ayuda||'';m.className='fmsg';return}m.className='fmsg f'+f.nivel;m.innerHTML=`<b>${f.txt}</b> · ${esc(f.tip)}`}
 function tarjetasRecordadas(){const R=recordadas();if(!R.length)return '';
@@ -1179,8 +1179,8 @@ function pantallaAuth(modo,aviso='',extra={}){
   let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;closeModal();
   const local=!NUBE.on;
   const T={
-    entrar:['Iniciar sesión','Entre como profesor para ver su planeación.',`${tarjetasRecordadas()}${campo('aId','Usuario o correo','text','username','Ej.: ana.gomez o ana@gmail.com')}${campoClave('aPass','Contraseña','current-password')}<label class="chk recordar"><input type="checkbox" id="aRecordar" checked><span>Recordar usuario y contraseña en este equipo</span></label><button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
-    registro:['Crear cuenta de profesor','Complete los tres datos para empezar.',`${campo('aEmail','Correo','email','email','nombre@gmail.com')}${campo('aUser','Usuario','text','username','Ej.: ana.gomez')}${campoClave('aPass','Contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
+    entrar:['Iniciar sesión','Entre como profesor para ver su planeación.',`${tarjetasRecordadas()}${campo('aId','Usuario o correo','text','username','Ej.: Julian Pinto o julian@gmail.com')}${campoClave('aPass','Contraseña','current-password')}<label class="chk recordar"><input type="checkbox" id="aRecordar" checked><span>Recordar usuario y contraseña en este equipo</span></label><button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
+    registro:['Crear cuenta de profesor','Complete los tres datos para empezar.',`${campo('aEmail','Correo','email','email','nombre@gmail.com')}${campo('aUser','Usuario','text','username','Ej.: Julian Pinto')}${campoClave('aPass','Contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
     recuperar:local?['Recuperar contraseña','Las cuentas de este equipo no tienen recuperación por correo.',`<div class="auth-aviso">La cuenta está guardada solo en este navegador. Si olvidó la contraseña, revise si quedó guardada arriba en "Cuentas guardadas en este equipo", o cree una cuenta nueva.</div><button type="button" class="btn ancho" data-auth="entrar">Volver a iniciar sesión</button>`]
       :['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${campo('aEmail','Correo de su cuenta','email','email','nombre@gmail.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
     nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${campoClave('aPass','Nueva contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
@@ -1200,6 +1200,8 @@ function pantallaAuth(modo,aviso='',extra={}){
   f.addEventListener('input',e=>{const id=e.target.id;if(REV[id]&&tocado.has(id))mostrarMsg(id,REV[id](e.target.value));if(id==='aPass'){if($('#f_aPass'))pintarFuerza('aPass');else mostrarMsg('aPass',null)}err('')});
   f.addEventListener('focusout',e=>{const id=e.target.id;if(REV[id]&&e.target.value){tocado.add(id);mostrarMsg(id,REV[id](e.target.value))}});
   f.addEventListener('keyup',e=>{if(e.target.type==='password'||e.target.id==='aPass'){const caps=e.getModifierState?.('CapsLock');const m=$('#m_aPass');if(!m)return;if(caps&&!m.dataset.caps){m.dataset.caps=1;if(!$('#f_aPass'))mostrarMsg('aPass',{warn:'Tiene activadas las mayúsculas (Bloq Mayús).'})}else if(!caps&&m.dataset.caps){delete m.dataset.caps;if(!$('#f_aPass'))mostrarMsg('aPass',null)}}});
+  // Tocar «Usar…» o «Ver» no le quita el foco al campo, así el mensaje no se redibuja y el toque no se pierde
+  f.addEventListener('mousedown',e=>{if(e.target.closest('[data-sug],[data-ver]'))e.preventDefault()});
   f.onclick=e=>{const v=e.target.closest('[data-ver]');if(v){const i=$('#'+v.dataset.ver);i.type=i.type==='password'?'text':'password';v.textContent=i.type==='password'?'Ver':'Ocultar';return}
     const sg=e.target.closest('[data-sug]');if(sg){const i=$('#'+sg.dataset.para);i.value=sg.dataset.sug;mostrarMsg(sg.dataset.para,REV[sg.dataset.para](i.value));i.focus();return}
     const us=e.target.closest('[data-usar]');if(us){const r=recordadas().find(x=>x.usuario===us.dataset.usar);$('#aId').value=r.usuario;$('#aPass').value=r.clave||'';mostrarMsg('aId',null);(r.clave?f.querySelector('[data-submit]'):$('#aPass')).focus();return}
@@ -1216,8 +1218,8 @@ function pantallaAuth(modo,aviso='',extra={}){
       if(modo==='entrar'){if(!revisar(['aId','aPass']))return;const idTxt=revisarId(val('aId')).val,clave=$('#aPass').value;ocupado(true);
         const r=await accionEntrar(idTxt,clave);if($('#aRecordar')?.checked)recordar({modo:NUBE.on?'nube':'local',usuario:r.usuario,correo:r.correo,clave});return r.ir()}
       if(modo==='registro'){if(!revisar(['aEmail','aUser','aPass']))return;ocupado(true);
-        const correo=revisarCorreo(val('aEmail')).val,usuario=revisarUsuario(val('aUser')).val,clave=$('#aPass').value;
-        const r=await accionRegistrar({correo,usuario,clave});recordar({modo:NUBE.on?'nube':'local',usuario,correo,clave});
+        const correo=revisarCorreo(val('aEmail')).val,ru=revisarUsuario(val('aUser')),usuario=ru.val,llave=ru.key,clave=$('#aPass').value;
+        const r=await accionRegistrar({correo,usuario,llave,clave});recordar({modo:NUBE.on?'nube':'local',usuario,correo,clave});
         if(r.confirmar)return pantallaAuth('confirmar','',{email:correo});return r.ir()}
       if(modo==='recuperar'){if(!revisar(['aEmail']))return;ocupado(true);await sb('/auth/v1/recover',{method:'POST',body:{email:revisarCorreo(val('aEmail')).val}});
         return pantallaAuth('entrar','Si ese correo tiene cuenta, le llegará un enlace para crear una nueva contraseña. Revise también la carpeta de spam.')}
