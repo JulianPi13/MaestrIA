@@ -6,7 +6,7 @@
 // Opcionales: IA_PROVEEDOR (gemini|openai|anthropic), IA_MODELO.
 // Con cuentas (SUPABASE_URL y SUPABASE_ANON_KEY): solo docentes con sesión iniciada, con un límite de guías al mes (IA_LIMITE_MES, 60 por defecto).
 // Sin cuentas: CODIGO_ACCESO (palabra secreta) protege el servicio.
-import { nubeActiva, limiteMensual, usuarioDesdeToken, usoDelMes, sumarUso } from './_supabase.js';
+import { nubeActiva, limiteMensual, usuarioDesdeToken, usoDelMes, sumarUso, esAdmin, perfilDe, vigente, tieneSecreta } from './_supabase.js';
 
 const PROVEEDORES = {
   gemini: {
@@ -69,6 +69,11 @@ export default async function handler(req, res) {
     const usuario = await usuarioDesdeToken(token);
     if (!usuario) return res.status(401).json({ code: 'sesion' });
     uid = usuario.id;
+    // Solo profesores con el plan al día (los administradores siempre)
+    if (tieneSecreta() && !esAdmin(usuario.email)) {
+      try { if (!vigente(await perfilDe(uid))) return res.status(403).json({ code: 'plan_vencido' }); }
+      catch (e) { console.error(e); return res.status(502).json({ code: 'uso_error' }); }
+    }
     try { usadas = await usoDelMes(uid); } catch (e) { console.error(e); return res.status(502).json({ code: e.status === 401 ? 'clave_secreta' : (e.status === 404 ? 'falta_sql' : 'uso_error') }); }
     if (req.method === 'GET') return res.status(200).json({ usadas, limite });
     if (usadas >= limite) return res.status(429).json({ code: 'limite_mes', limite });

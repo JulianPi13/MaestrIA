@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     if (url && raw.replace(/\/+$/, '') !== url) p.push(problema('aviso', 'SUPABASE_URL tenía algo de más (por ejemplo /rest/v1); la aplicación lo corrigió sola.', `Para dejarlo limpio, en Vercel ponga solo: ${url}`));
     if (!pub) p.push(problema('error', 'Falta la variable SUPABASE_PUBLISHABLE_KEY.', 'En Supabase → Project Settings → API Keys copie la Publishable key (empieza por sb_publishable_) y agréguela en Vercel. Luego haga Redeploy.'));
     else if (pub.startsWith('sb_secret_')) p.push(problema('error', 'En SUPABASE_PUBLISHABLE_KEY puso la clave secreta.', 'Cámbiela por la Publishable key (empieza por sb_publishable_). La Secret key va en SUPABASE_SECRET_KEY.'));
-    if (!sec) p.push(problema('aviso', 'Falta la variable SUPABASE_SECRET_KEY: no se puede contar cuántas guías usa cada docente.', 'En Supabase → Project Settings → API Keys copie la Secret key (empieza por sb_secret_) y agréguela en Vercel.'));
+    if (!sec) p.push(problema('error', 'Falta la variable SUPABASE_SECRET_KEY: sin ella no se pueden crear cuentas con código ni controlar los planes.', 'En Supabase → Project Settings → API Keys copie la Secret key (empieza por sb_secret_) y agréguela en Vercel.'));
     else if (sec.startsWith('sb_publishable_')) p.push(problema('error', 'En SUPABASE_SECRET_KEY puso la clave pública.', 'Cámbiela por la Secret key (empieza por sb_secret_).'));
 
     if (url && pub && !pub.startsWith('sb_secret_')) {
@@ -31,8 +31,7 @@ export default async function handler(req, res) {
         else if (r.status >= 500 || r.status === 404) p.push(problema('error', `Supabase no respondió bien (código ${r.status}).`, 'Entre a supabase.com: si el proyecto dice "Paused", tóquelo para reactivarlo (los proyectos gratis se pausan tras días sin uso). Si no, revise que SUPABASE_URL sea la de su proyecto.'));
         else if (r.ok) {
           const s = await r.json();
-          if (s.disable_signup) p.push(problema('aviso', 'En Supabase está desactivado crear cuentas nuevas.', 'Active "Allow new users to sign up" en Supabase → Authentication → Sign In / Providers.'));
-          if (s.mailer_autoconfirm === false) p.push(problema('aviso', 'Supabase pide confirmar el correo, pero con su correo de prueba solo envía a los miembros de su equipo de Supabase.', 'Para que cualquier docente pueda registrarse: apague "Confirm email" en Authentication → Sign In / Providers, o configure un correo propio en Authentication → Emails → SMTP Settings.'));
+          if (!s.disable_signup) p.push(problema('error', 'En Supabase está permitido crear cuentas sin código de activación (por fuera de la aplicación).', 'Apague "Allow new users to sign up" en Supabase → Authentication → Sign In / Providers. La aplicación seguirá creando cuentas, pero solo con un código válido.'));
           const f = await fetch(`${url}/rest/v1/rpc/usuario_disponible`, { method: 'POST', headers: { apikey: pub, 'content-type': 'application/json' }, body: JSON.stringify({ p_usuario: 'prueba-de-configuracion' }) });
           if (f.status === 404) p.push(problema('error', 'Faltan las tablas de la aplicación en Supabase.', 'En Supabase → SQL Editor → New query, pegue todo el archivo supabase.sql y toque Run.'));
         }
@@ -45,10 +44,13 @@ export default async function handler(req, res) {
           const r = await fetch(`${url}/rest/v1/uso_ia?select=mes&limit=1`, { headers: h });
           if (r.status === 401 || r.status === 403) p.push(problema('error', 'Supabase rechazó la Secret key.', 'Cópiela de nuevo desde Supabase → Project Settings → API Keys (Secret key, empieza por sb_secret_) en SUPABASE_SECRET_KEY.'));
           else if (r.status === 404) p.push(problema('error', 'Falta la tabla de uso de la IA en Supabase.', 'Ejecute de nuevo todo el archivo supabase.sql en Supabase → SQL Editor.'));
+          const c = await fetch(`${url}/rest/v1/codigos?select=codigo&limit=1`, { headers: h });
+          if (c.status === 404) p.push(problema('error', 'Falta la tabla de códigos de activación en Supabase.', 'Ejecute de nuevo todo el archivo supabase.sql en Supabase → SQL Editor.'));
         } catch {}
       }
     }
   }
+  if ((raw || pub) && !String(process.env.ADMIN_CORREOS || '').trim()) p.push(problema('error', 'No hay ningún administrador: nadie puede generar códigos de activación.', 'Agregue en Vercel la variable ADMIN_CORREOS con su correo (si son varios, sepárelos con comas) y haga Redeploy.'));
   if (!ia) p.push(problema('aviso', 'No hay clave de IA: no se podrán generar guías.', 'Agregue en Vercel GEMINI_API_KEY (gratis en aistudio.google.com) y haga Redeploy.'));
   res.status(200).json({ ok: !p.some(x => x.nivel === 'error'), problemas: p });
 }

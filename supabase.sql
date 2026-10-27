@@ -116,3 +116,42 @@ $$;
 
 grant execute on function public.correo_de_usuario(text) to anon, authenticated;
 grant execute on function public.usuario_disponible(text) to anon, authenticated;
+
+-- 4. Planes y códigos de activación
+-- Hasta cuándo puede usar la aplicación cada profesor
+alter table public.perfiles add column if not exists vence timestamptz;
+
+-- Códigos que el administrador genera al recibir un pago (cada uno sirve una sola vez)
+create table if not exists public.codigos (
+  codigo       text primary key,
+  plan_dias    integer not null check (plan_dias > 0),
+  nota         text,
+  creado       timestamptz not null default now(),
+  reservado_en timestamptz,
+  usado_por    uuid references auth.users (id) on delete set null,
+  usado_en     timestamptz,
+  anulado      boolean not null default false
+);
+
+-- Sin políticas: solo el servidor de la aplicación puede leer y cambiar los códigos
+alter table public.codigos enable row level security;
+
+-- ¿El profesor que está usando la app tiene el plan al día?
+create or replace function public.plan_vigente()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (select 1 from public.perfiles where id = auth.uid() and vence > now());
+$$;
+
+-- Con el plan vencido el profesor puede ver su planeación, pero no guardar cambios
+drop policy if exists "crear su planeacion" on public.planeaciones;
+create policy "crear su planeacion" on public.planeaciones
+  for insert with check (auth.uid() = user_id and public.plan_vigente());
+
+drop policy if exists "editar su planeacion" on public.planeaciones;
+create policy "editar su planeacion" on public.planeaciones
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id and public.plan_vigente());

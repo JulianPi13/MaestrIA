@@ -230,6 +230,11 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .rec-rol{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:2px 8px;flex:none}
 .chk.recordar{font-size:.88rem;color:var(--muted)}
 .fmsg.bien{color:var(--ok)}
+.cod{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;white-space:nowrap}
+.cod-nuevo{border:1px dashed var(--ok);background:var(--ok-bg);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}.cod-nuevo+.cod-nuevo{margin-top:10px}
+.cod-nuevo b.cod{font-size:1.4rem;color:var(--ink)}.cod-nuevo p{margin:0;color:var(--muted);font-size:.88rem}
+.tbl.adm td{vertical-align:middle}.tbl.adm td.acc{white-space:nowrap}.tbl.adm td.acc .btn{margin:2px}.tbl.adm small{color:var(--muted)}
+.chip.on{background:var(--board);color:var(--chalk);border-color:var(--board)}
 .auth-nota{margin:0;font-size:.8rem;color:var(--muted);text-align:center}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
@@ -346,6 +351,7 @@ const IC={
  pencil:'<path d="M3 21l3-1 12-12-2-2L4 18l-1 3z"/><path d="M14 6l2-2 4 4-2 2"/>',
  ruler:'<rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/>',
  down:'<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', up:'<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
 };
 const ic=(n)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
@@ -406,7 +412,7 @@ let V={name:'panel',grado:null,tab:'temas',f:{materia:'',periodo:'',estado:'',q:
 function go(name,extra={}){Object.assign(V,{name},extra);render();window.scrollTo(0,0)}
 
 /* ---------- Modal y avisos ---------- */
-function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2200)}
+function toast(t){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2200)}
 function openModal(title,html,mount){closeModal();const o=document.createElement('div');o.className='ov';o.id='ov';
   o.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><h2>${esc(title)}</h2><button class="ib" data-close aria-label="Cerrar">${ic('x')}</button></header><div id="mbody">${html}</div></div>`;
   o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-close]'))closeModal()});document.body.append(o);mount&&mount();const f=o.querySelector('input,select,textarea');f&&f.focus()}
@@ -491,7 +497,7 @@ function renderSide(){
   const n=gid=>S.temas.filter(t=>t.gradoId===gid&&estado(t)!=='completado').length;
   const b=(name,label,icon,extra='',on)=>`<button class="nav${on?' on':''}" data-act="go" data-v="${name}" ${extra}>${icon}${label}</button>`;
   $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>${enSesion()?'Profesor · '+esc(cuentaActual().usuario):esc(S.config.docente)+(S.config.institucion?' · '+esc(S.config.institucion):'')}</small></div></div>${NUBE.on?'<div id="nube" class="nube" role="status"></div>':''}
-  <nav class="navg" aria-label="General">${b('panel','Panel',ic('board'),'',V.name==='panel')}${b('calendario','Calendario',ic('cal'),'',V.name==='calendario')}${b('generador','Generador de temarios',ic('bulb'),'',V.name==='generador')}${b('imprimir','Imprimir y exportar',ic('print'),'',V.name==='imprimir')}${b('config','Configuración',ic('gear'),'',V.name==='config')}</nav>
+  <nav class="navg" aria-label="General">${b('panel','Panel',ic('board'),'',V.name==='panel')}${b('calendario','Calendario',ic('cal'),'',V.name==='calendario')}${b('generador','Generador de temarios',ic('bulb'),'',V.name==='generador')}${b('imprimir','Imprimir y exportar',ic('print'),'',V.name==='imprimir')}${b('config','Configuración',ic('gear'),'',V.name==='config')}${NUBE.on&&NUBE.perfil?.admin?b('admin','Administración',ic('key'),'',V.name==='admin'):''}</nav>
   <nav class="navg" aria-label="Grados"><h4>Grados</h4>${S.grados.map(g=>`<button class="nav${V.name==='grado'&&V.grado===g.id?' on':''}" data-act="grado" data-id="${g.id}"><span class="dot" style="background:${g.color}"></span>${esc(g.nombre)}<span class="cnt">${n(g.id)}</span></button>`).join('')}
   <button class="nav" data-act="addGrado" style="opacity:.8">${ic('plus')}Agregar grado</button></nav>`}
 
@@ -499,14 +505,14 @@ function renderSide(){
 function head(k,title,sub,tools=''){return `<div class="phead"><div><div class="k">${k}</div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="tools">${tools}</div></div>`}
 function temaRow(t){const g=G(t.gradoId),m=M(t.materiaId);return `<div class="row"><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${g?.color};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer" data-act="openTema" data-id="${t.id}">${esc(t.titulo)}</button><div class="s">${esc(g?.nombre)} · ${esc(m?.nombre||'')}</div></div><span class="date">${fmt(t.limite)}</span>${stBadge(t)}</div>`}
 const VIEWS={};
-VIEWS.panel=()=>{
+VIEWS.panel=()=>{const dp=NUBE.on&&NUBE.perfil&&!NUBE.perfil.admin&&NUBE.perfil.vigente?diasPlan():null;const avisoPlan=dp!=null&&dp<=7?`<div class="warnbox">${ic('cal')} <span>Su plan vence ${dp<=1?'mañana':'en '+dp+' días'} (el ${esc(fmtL(NUBE.perfil.vence.slice(0,10)).replace(/^\w+, /,''))}). Para no perder el acceso, renuévelo con un código. <button class="btn sm" data-act="renovar">Renovar ahora</button></span></div>`:'';
   const T=S.temas,at=T.filter(t=>estado(t)==='atrasado'),ec=T.filter(t=>estado(t)==='en curso'),pe=T.filter(t=>estado(t)==='pendiente'),co=T.filter(t=>t.estado==='completado');
   const lim=addD(HOY,14);const prox=[...T.filter(t=>t.estado!=='completado').flatMap(t=>[t.inicio>=HOY&&t.inicio<=lim?{f:t.inicio,txt:'Inicia: '+t.titulo,g:t.gradoId,a:`data-act="openTema" data-id="${t.id}"`}:null,t.limite>=HOY&&t.limite<=lim?{f:t.limite,txt:'Fecha límite: '+t.titulo,g:t.gradoId,a:`data-act="openTema" data-id="${t.id}"`}:null]).filter(Boolean),
     ...S.eventos.filter(e=>!e.hecho&&e.fecha>=HOY&&e.fecha<=lim).map(e=>({f:e.fecha,txt:e.tipo+': '+e.titulo,g:e.gradoId,a:`data-act="editEv" data-id="${e.id}"`}))].sort((a,b)=>a.f.localeCompare(b.f));
   const pa=perActual();
   return head(fmtL(HOY),`Panel de ${esc(S.config.docente)}`,pa?`${esc(pa.nombre)} · del ${fmt(pa.inicio)} al ${fmt(pa.fin)}`:'Fuera de los periodos académicos registrados',
     `<button class="btn pri" data-act="go" data-v="generador">${ic('bulb')} Generar temario</button><button class="btn" data-act="newEv">${ic('plus')} Tarea o evaluación</button>`)+
-  (storageOK?'':`<div class="warnbox">${ic('x')} Este navegador no permite guardar datos. Use “Configuración → Descargar respaldo” antes de cerrar.</div>`)+
+  avisoPlan+(storageOK?'':`<div class="warnbox">${ic('x')} Este navegador no permite guardar datos. Use “Configuración → Descargar respaldo” antes de cerrar.</div>`)+
   `<div class="stats"><div class="stat warn"><b>${ec.length}</b><span>Temas en curso</span></div><div class="stat"><b>${pe.length}</b><span>Temas pendientes</span></div><div class="stat bad"><b>${at.length}</b><span>Temas atrasados</span></div><div class="stat ok"><b>${avance(T)}%</b><span>Avance general (${co.length} de ${T.length})</span></div></div>
   <div class="cols"><section class="card"><h2>${ic('cal')} Próximos 14 días</h2><div class="list">${prox.map(p=>`<div class="row"><span class="date" style="width:52px">${fmt(p.f)}</span><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${G(p.g)?.color||'var(--muted)'};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600" ${p.a}>${esc(p.txt)}</button><div class="s">${esc(G(p.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||'<p class="empty">Nada programado en las próximas dos semanas.</p>'}</div></section>
   <section class="card"><h2>${ic('ruler')} Avance por grado</h2>${S.grados.map(g=>{const l=T.filter(t=>t.gradoId===g.id),p=avance(l);return `<button class="prog" data-act="grado" data-id="${g.id}"><span style="font-weight:600">${esc(g.nombre)}</span><span class="bar"><i style="width:${p}%;background:${g.color}"></i></span><span>${p}%</span></button>`}).join('')||'<p class="empty">Agregue un grado para empezar.</p>'}<p class="s" style="color:var(--muted);font-size:.82rem;margin:8px 0 0">Porcentaje de temas completados sobre los planeados.</p></section></div>
@@ -632,7 +638,7 @@ VIEWS.imprimir=()=>head('Planeación','Imprimir y exportar','Elija qué incluir 
  <div class="card">${planHTML()}</div>`;
 
 VIEWS.config=()=>head('Ajustes','Configuración',NUBE.on?'Su cuenta, grados, periodos y copias de seguridad.':'Grados, periodos y respaldo de la información.')+
- (enSesion()?(()=>{const ca=cuentaActual();return `<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Usuario</span><b>${esc(ca.usuario)}</b></div><div><span class="s">Correo</span><b>${esc(ca.correo)}</b></div><div><span class="s">Rol</span><b>Profesor</b></div>${NUBE.on?'<div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div>':''}<div><span class="s">Guardado</span><b>${NUBE.on?'Automático en la nube':'En este equipo'}</b></div></div><div class="tools"><button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`})():'')+
+ (enSesion()?(()=>{const ca=cuentaActual();return `<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Usuario</span><b>${esc(ca.usuario)}</b></div><div><span class="s">Correo</span><b>${esc(ca.correo)}</b></div><div><span class="s">Rol</span><b>Profesor</b></div>${NUBE.on&&NUBE.perfil?`<div><span class="s">Plan</span><b>${NUBE.perfil.admin?'Administrador (sin vencimiento)':NUBE.perfil.sinControl?'Sin control de planes':NUBE.perfil.vigente?'Vigente hasta el '+esc(fmtL(NUBE.perfil.vence.slice(0,10)).replace(/^\w+, /,'')):'Vencido'}</b></div>`:''}${NUBE.on?'<div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div>':''}<div><span class="s">Guardado</span><b>${NUBE.on?'Automático en la nube':'En este equipo'}</b></div></div><div class="tools">${NUBE.on&&NUBE.perfil&&!NUBE.perfil.admin&&!NUBE.perfil.sinControl?'<button class="btn pri" data-act="renovar">Renovar con código</button>':''}<button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`})():'')+
  `<div class="cols"><section class="card grid2"><h2 class="wide">Datos del docente</h2>${fieldHtml({k:'docente',label:'Nombre del docente'},S.config.docente)}${fieldHtml({k:'institucion',label:'Institución o sede'},S.config.institucion)}<div class="mact wide"><button class="btn pri" data-act="saveCfg">Guardar datos</button></div></section>
  <section class="card"><h2>${NUBE.on?'Copia de seguridad':'Respaldo'}</h2><p style="margin:0 0 12px;color:var(--muted)">${NUBE.on?'Su planeación se guarda sola en su cuenta y la puede abrir desde cualquier equipo. Si quiere, descargue también una copia en este equipo.':'La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.'}</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
  <div class="cols"><section class="card"><h2>Grados</h2><div class="list">${S.grados.map(g=>`<div class="row"><span style="width:14px;height:14px;border-radius:3px;background:${g.color};flex:none"></span><div class="grow t">${esc(g.nombre)}</div><span class="s">${matsDe(g.id).length} materias</span><button class="ib" data-act="materiasG" data-id="${g.id}" title="Materias" aria-label="Materias">${ic('book')}</button><button class="ib" data-act="editGrado" data-id="${g.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delGrado" data-id="${g.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')}</div><button class="btn sm" data-act="addGrado" style="margin-top:10px">${ic('plus')} Agregar grado</button></section>
@@ -940,7 +946,7 @@ async function pedirGuia(t,c,input,msg){
   try{const r=await sample.json(input,{modelTier:'default',cache:false});
     if(!r||!Array.isArray(r.secciones)||!r.secciones.length)throw {code:'invalid_json'};
     if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast(NUBE.on&&NUBE.uso?`Guía lista · le quedan ${Math.max(0,NUBE.uso.limite-NUBE.uso.usadas)} este mes`:'Guía lista')}
-  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'La IA alcanzó su límite de uso por ahora. Espere unos minutos; si usa el plan gratuito de Gemini, puede que deba esperar hasta mañana. Para evitarlo, el administrador puede activar la facturación en Google AI Studio.',invalid_json:'La IA respondió con la guía incompleta. Toque «Generar otra» para intentar de nuevo; si se repite, pida una guía más corta.',sin_clave:'No hay clave de IA configurada. El administrador debe agregar GEMINI_API_KEY en Vercel (gratis en aistudio.google.com) y hacer Redeploy.',clave_invalida:'La clave de la IA fue rechazada. El administrador debe crear una nueva en aistudio.google.com (Get API key), ponerla en GEMINI_API_KEY en Vercel y hacer Redeploy.',modelo:'El modelo de IA configurado no existe o no está disponible. El administrador debe borrar la variable IA_MODELO en Vercel (o corregirla) y hacer Redeploy.',proveedor_caido:'El servicio de IA está fallando en este momento. Espere unos minutos y vuelva a intentar.',clave_secreta:'No se pudo revisar su cupo de guías porque Supabase rechazó la Secret key. El administrador debe revisar SUPABASE_SECRET_KEY en Vercel.',falta_sql:'Falta la tabla de uso de la IA en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',uso_error:'No se pudo revisar su cupo de guías del mes. Vuelva a intentar en un momento; si sigue, avise al administrador.',vacio:'La guía no tenía contenido para enviar. Revise que la clase tenga «Qué vemos» escrito.',muy_largo:'La guía es demasiado larga para editarla de una vez. Pida cambios más cortos o genere una guía nueva.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise el wifi o los datos del celular y vuelva a intentar.',limite_mes:`Ya usó las ${NUBE.cfg?.limiteIA||''} guías con IA de este mes. El cupo se renueva el primer día del próximo mes.`,sesion:'Su sesión se cerró. Vuelva a iniciar sesión.',sin_sesion:'Su sesión se cerró. Vuelva a iniciar sesión.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
+  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'La IA alcanzó su límite de uso por ahora. Espere unos minutos; si usa el plan gratuito de Gemini, puede que deba esperar hasta mañana. Para evitarlo, el administrador puede activar la facturación en Google AI Studio.',invalid_json:'La IA respondió con la guía incompleta. Toque «Generar otra» para intentar de nuevo; si se repite, pida una guía más corta.',sin_clave:'No hay clave de IA configurada. El administrador debe agregar GEMINI_API_KEY en Vercel (gratis en aistudio.google.com) y hacer Redeploy.',clave_invalida:'La clave de la IA fue rechazada. El administrador debe crear una nueva en aistudio.google.com (Get API key), ponerla en GEMINI_API_KEY en Vercel y hacer Redeploy.',modelo:'El modelo de IA configurado no existe o no está disponible. El administrador debe borrar la variable IA_MODELO en Vercel (o corregirla) y hacer Redeploy.',proveedor_caido:'El servicio de IA está fallando en este momento. Espere unos minutos y vuelva a intentar.',clave_secreta:'No se pudo revisar su cupo de guías porque Supabase rechazó la Secret key. El administrador debe revisar SUPABASE_SECRET_KEY en Vercel.',falta_sql:'Falta la tabla de uso de la IA en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',uso_error:'No se pudo revisar su cupo de guías del mes. Vuelva a intentar en un momento; si sigue, avise al administrador.',vacio:'La guía no tenía contenido para enviar. Revise que la clase tenga «Qué vemos» escrito.',muy_largo:'La guía es demasiado larga para editarla de una vez. Pida cambios más cortos o genere una guía nueva.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise el wifi o los datos del celular y vuelva a intentar.',limite_mes:`Ya usó las ${NUBE.cfg?.limiteIA||''} guías con IA de este mes. El cupo se renueva el primer día del próximo mes.`,plan_vencido:'Su plan venció, por eso no se pueden generar guías. Renuévelo con un código en Configuración → Mi cuenta.',sesion:'Su sesión se cerró. Vuelva a iniciar sesión.',sin_sesion:'Su sesión se cerró. Vuelva a iniciar sesión.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
   if(V.name==='guia')render()}
 VIEWS.guia=()=>{
   const t=S.temas.find(x=>x.id===V.tema);if(!t){V.name='panel';return VIEWS.panel()}
@@ -1016,6 +1022,15 @@ function revisarUsuario(v){v=String(v||'').trim().replace(/\s{2,}/g,' ');
   if(v.length<3)return {err:'El usuario debe tener al menos 3 caracteres.'};
   if(v.length>30)return {err:'El usuario puede tener máximo 30 caracteres.'};
   return {ok:true,val:v,key:claveUsuario(v)}}
+// Códigos de activación: MAES-XXXX-XXXX, sin O, I, L, 0 ni 1 (se confunden al leerlos)
+const ALF_COD='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function formatoCodigo(v){let t=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(t.startsWith('MAES'))t=t.slice(4);t=t.slice(0,8);return t?'MAES-'+t.slice(0,4)+(t.length>4?'-'+t.slice(4):''):''}
+function revisarCodigo(v){let t=String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(t.startsWith('MAES'))t=t.slice(4);
+  if(!t)return {err:'Escriba el código de activación que recibió al pagar su plan.'};
+  const raro=t.match(new RegExp(`[^${ALF_COD}]`));if(raro)return {err:`El código no lleva «${raro[0]}». Los códigos no usan la O, la I, la L ni los números 0 y 1: revise si es otra letra o número parecido.`};
+  if(t.length<8)return {err:`Al código le ${8-t.length===1?'falta 1 carácter':'faltan '+(8-t.length)+' caracteres'}. Debe verse así: MAES-7K4P-92XQ.`};
+  if(t.length>8)return {err:'El código tiene caracteres de más. Debe verse así: MAES-7K4P-92XQ.'};
+  return {ok:true,val:`MAES-${t.slice(0,4)}-${t.slice(4)}`}}
 // En el inicio de sesión se acepta usuario o correo
 function revisarId(v){const t=String(v||'').trim();if(!t)return {err:'Escriba su usuario o su correo.'};return t.includes('@')||/[,;]\s*(com|co|net|org|es)\b/i.test(t)?revisarCorreo(t):revisarUsuario(t)}
 const COMUNES=/^(1234|12345|123456|1234567|12345678|123456789|1234567890|password|contraseña|contrasena|clave|qwerty|abc123|abcd1234|111111|000000|maestria|profesor|profesora|docente|colombia)\d*$/i;
@@ -1075,7 +1090,7 @@ async function subirDatos(){if(!NUBE.on||!NUBE.ses)return;if(NUBE.subiendo){clea
   try{const tk=await tokenNube(),ahora=new Date().toISOString();
     await sb('/rest/v1/planeaciones',{method:'POST',token:tk,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{user_id:NUBE.ses.user.id,datos:S,actualizado:ahora}});
     NUBE.base=ahora;lsSet(cacheKey()+'_base',ahora);if(!NUBE.pendiente){lsDel(cacheKey()+'_pend');marcarNube('ok')}}
-  catch(e){NUBE.pendiente=true;if(!NUBE.ses)return;marcarNube(e.code==='red'?'offline':'error');NUBE.timer=setTimeout(subirDatos,15000)}
+  catch(e){NUBE.pendiente=true;if(!NUBE.ses)return;if(e.code==='42501'||e.status===403){await cargarPerfil();if(NUBE.perfil?.vigente===false){NUBE.pendiente=false;return pantallaAuth('vencido')}}marcarNube(e.code==='red'?'offline':'error');NUBE.timer=setTimeout(subirDatos,15000)}
   finally{NUBE.subiendo=false}}
 window.addEventListener('online',()=>{if(NUBE.on&&NUBE.pendiente)subirDatos()});
 window.addEventListener('beforeunload',e=>{if(NUBE.on&&NUBE.pendiente){subirDatos();e.preventDefault();e.returnValue=''}});
@@ -1088,11 +1103,14 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)traerCambi
 /* ----- Entrar y salir ----- */
 const tieneDatosPropios=d=>!!d&&((d.temas||[]).some(t=>!/\(ejemplo\)/.test(t.titulo))||(d.recursos||[]).length>0||(d.observaciones||[]).length>0);
 function datosNuevos(nombre){const d=seed();d.config.docente=nombre||'Docente';d.config.institucion='';return d}
-function arrancar(){$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();if(NUBE.on)marcarNube(NUBE.pendiente?'guardando':'ok')}
+function arrancar(){if(NUBE.on&&NUBE.perfil&&NUBE.perfil.vigente===false)return pantallaAuth('vencido');$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();if(NUBE.on)marcarNube(NUBE.pendiente?'guardando':'ok')}
 function primeraVez(nombre){let local=null;try{local=JSON.parse(lsGet(KEY)||'null')}catch(e){}
   if(tieneDatosPropios(local))return pantallaAuth('migrar','',{local,nombre});S=datosNuevos(nombre);save();arrancar()}
+async function cargarPerfil(){if(!NUBE.on||!NUBE.ses)return null;try{NUBE.perfil=await apiJson('/api/cuenta',{token:await tokenNube()})}catch(e){NUBE.perfil=null}return NUBE.perfil}
+async function canjearCodigo(codigo){const d=await apiJson('/api/cuenta',{method:'POST',token:await tokenNube(),body:{accion:'canjear',codigo}});NUBE.perfil=d;return d}
+const diasPlan=()=>NUBE.perfil?.vence?Math.ceil((new Date(NUBE.perfil.vence)-new Date())/86400000):null;
 async function entrarConDatos(nombreNuevo){
-  pantallaCargando('Cargando su planeación…');let fila;
+  pantallaCargando('Cargando su planeación…');let fila;await cargarPerfil();
   try{fila=await bajarDatos()}
   catch(e){if(!NUBE.ses)return;const c=lsGet(cacheKey());if(e.code==='red'&&c){S=JSON.parse(c);NUBE.pendiente=lsGet(cacheKey()+'_pend')==='1';arrancar();marcarNube('offline');return}
     return pantallaAuth('entrar',e.code==='red'?'No hay conexión a internet. Revise la conexión e intente de nuevo.':'No se pudo abrir su planeación. Intente de nuevo.')}
@@ -1102,9 +1120,9 @@ async function entrarConDatos(nombreNuevo){
   primeraVez(nombreNuevo||NUBE.ses.user?.user_metadata?.usuario||'')}
 function entrarLocal(id){LOC.uid=id;lsSet('md_sesion_local',id);const d=lsJ('md_datos_'+id,null);if(d){S=d;arrancar();return}primeraVez(cuentasLocales()[id]?.usuario||'')}
 async function cerrarSesion(){
-  if(NUBE.on){if(NUBE.pendiente){toast('Guardando antes de salir…');await subirDatos();if(NUBE.pendiente){toast('No se pudo guardar el último cambio. Revise la conexión e intente de nuevo.');return}}
+  if(NUBE.on){if(NUBE.pendiente&&NUBE.perfil?.vigente!==false){toast('Guardando antes de salir…');await subirDatos();if(NUBE.pendiente){toast('No se pudo guardar el último cambio. Revise la conexión e intente de nuevo.');return}}
     const tk=NUBE.ses?.access_token;if(tk)sb('/auth/v1/logout',{method:'POST',token:tk}).catch(()=>{});
-    [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null}
+    [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null;NUBE.perfil=null;NUBE.pendiente=false;V.adm=null;V.admNuevos=null}
   else{lsDel('md_sesion_local');LOC.uid=null}
   S=seed();pantallaAuth('entrar','Cerró sesión.')}
 async function correoParaEntrar(idTxt){if(idTxt.includes('@'))return idTxt;const c=await sb('/rest/v1/rpc/correo_de_usuario',{method:'POST',body:{p_usuario:claveUsuario(idTxt)}});if(!c)throw {code:'invalid_credentials'};return c}
@@ -1112,12 +1130,11 @@ async function accionEntrar(idTxt,clave){
   if(NUBE.on){const email=await correoParaEntrar(idTxt);const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:clave}});guardarSesion(d);
     const ca=cuentaActual();return {usuario:ca.usuario,correo:ca.correo,ir:()=>entrarConDatos()}}
   const id=await LOCAL.entrar(idTxt,clave),x=cuentasLocales()[id];return {usuario:x.usuario,correo:x.correo,ir:()=>entrarLocal(id)}}
-async function accionRegistrar({correo,usuario,llave,clave}){
-  if(NUBE.on){const libre=await sb('/rest/v1/rpc/usuario_disponible',{method:'POST',body:{p_usuario:llave}});if(libre===false)throw {code:'usuario_existe'};
-    const d=await sb('/auth/v1/signup',{method:'POST',body:{email:correo,password:clave,data:{usuario,usuario_clave:llave,rol:'profesor'}}});
-    if(d?.access_token){guardarSesion(d);return {ir:()=>entrarConDatos(usuario)}}
-    if(d&&Array.isArray(d.identities)&&!d.identities.length)throw {code:'user_already_exists'};
-    return {confirmar:true}}
+async function apiJson(ruta,{method='GET',body,token}={}){let r;
+  try{r=await fetch(ruta,{method,cache:'no-store',headers:{'content-type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined})}catch(e){throw {code:'red'}}
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error',msg:d.detalle||'',status:r.status};return d}
+async function accionRegistrar({codigo,correo,usuario,llave,clave}){
+  if(NUBE.on){await apiJson('/api/registro',{method:'POST',body:{codigo,correo,usuario,llave,clave}});return await accionEntrar(correo,clave)}
   const id=await LOCAL.registrar({correo,usuario,llave,clave});return {ir:()=>entrarLocal(id)}}
 async function accionCambiarClave(actual,nueva){const ca=cuentaActual();
   if(NUBE.on){try{await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email:ca.correo,password:actual}})}catch(e){throw e.code==='red'?e:{code:'clave_actual'}}
@@ -1127,6 +1144,17 @@ async function accionCambiarClave(actual,nueva){const ca=cuentaActual();
 
 // Cada error dice qué pasó y cómo solucionarlo
 const ERR_AUTH={
+  codigo_vacio:'Escriba el código de activación que recibió al pagar su plan.',
+  codigo_formato:'El código no tiene la forma correcta. Debe verse así: MAES-7K4P-92XQ.',
+  codigo_no_existe:'Ese código no existe. Compárelo letra por letra con el que le enviaron (los códigos no usan O, I, L, 0 ni 1). Si sigue fallando, pida el código de nuevo a quien le vendió el plan.',
+  codigo_usado:'Ese código ya se usó: cada código sirve una sola vez. Si usted ya creó su cuenta con él, toque «Iniciar sesión». Si no, pida un código nuevo.',
+  codigo_anulado:'Ese código fue anulado. Pida un código nuevo a quien le vendió el plan.',
+  codigo_en_uso:'Ese código se está usando en este momento en otro registro. Espere 5 minutos y vuelva a intentar.',
+  sin_secreta:'No se pueden crear cuentas porque falta la clave secreta de Supabase. El administrador debe agregar SUPABASE_SECRET_KEY en Vercel y hacer Redeploy.',
+  usuario_invalido:'El usuario debe tener entre 3 y 30 caracteres.',
+  plan_vencido:'Su plan venció. Renuévelo con un código en Configuración → Mi cuenta.',
+  no_admin:'Esta sección es solo para administradores.',
+  sin_nube:'Las cuentas en internet no están configuradas.',
   invalid_credentials:'El usuario, el correo o la contraseña no coinciden. Revise que no tenga activadas las mayúsculas y que el usuario esté bien escrito. Si no recuerda la contraseña, toque «¿Olvidó su contraseña?».',
   invalid_grant:'El usuario, el correo o la contraseña no coinciden. Revise que no tenga activadas las mayúsculas. Si no recuerda la contraseña, toque «¿Olvidó su contraseña?».',
   email_not_confirmed:'La cuenta todavía no está activada. Abra el correo de activación que le llegó (revise también spam y promociones) y toque el enlace. Si no le llegó, el administrador puede apagar «Confirm email» en Supabase.',
@@ -1165,8 +1193,8 @@ const errAuth=e=>{const msg=String(e?.msg||'');
 /* ----- Pantallas ----- */
 function pantallaCargando(txt){let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;
   a.innerHTML=`<div class="auth-cargando" role="status"><span class="spin"></span>${esc(txt)}</div>`}
-const AYUDA={aId:'Puede escribir su usuario o su correo. No importa si usa mayúsculas o minúsculas.',aEmail:'Su correo completo, por ejemplo nombre@gmail.com. Sin espacios, comas ni tildes.',aUser:'De 3 a 30 caracteres. Puede usar mayúsculas, espacios y tildes, por ejemplo «Julian Pinto». Empiece con una letra; sin comas ni @.',aPassN:'Mínimo 8 caracteres combinando letras y números. Recomendada: 10 o más con mayúsculas, números y un símbolo (! # $).'};
-const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="${id==='aUser'?'words':'none'}" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" data-ayuda="${esc(AYUDA[id]||'')}" aria-live="polite">${esc(AYUDA[id]||'')}</small></label>`;
+const AYUDA={aId:'Puede escribir su usuario o su correo. No importa si usa mayúsculas o minúsculas.',aEmail:'Su correo completo, por ejemplo nombre@gmail.com. Sin espacios, comas ni tildes.',aUser:'De 3 a 30 caracteres. Puede usar mayúsculas, espacios y tildes, por ejemplo «Julian Pinto». Empiece con una letra; sin comas ni @.',aCodigo:'Se lo damos al pagar su plan. Ejemplo: MAES-7K4P-92XQ. Puede escribirlo en minúsculas y sin guiones.',aPassN:'Mínimo 8 caracteres combinando letras y números. Recomendada: 10 o más con mayúsculas, números y un símbolo (! # $).'};
+const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="${id==='aUser'?'words':id==='aCodigo'?'characters':'none'}" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" data-ayuda="${esc(AYUDA[id]||'')}" aria-live="polite">${esc(AYUDA[id]||'')}</small></label>`;
 const campoClave=(id,label,ac,barra)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span>${barra?`<div class="fuerza" id="f_${id}" data-n="-1" aria-hidden="true"><i></i><i></i><i></i></div>`:''}<small class="fmsg" id="m_${id}" data-ayuda="${barra?esc(AYUDA.aPassN):''}" aria-live="polite">${barra?esc(AYUDA.aPassN):''}</small></label>`;
 function mostrarMsg(id,r){const m=$('#m_'+id),i=$('#'+id);if(!m)return;m.className='fmsg'+(r?.err?' err':r?.warn?' warn':r?.ok?' bien':'');
   const html=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):r?.ok&&id!=='aPass'?'✓ Correcto':esc(m.dataset.ayuda||'');
@@ -1180,11 +1208,12 @@ function pantallaAuth(modo,aviso='',extra={}){
   const local=!NUBE.on;
   const T={
     entrar:['Iniciar sesión','Entre como profesor para ver su planeación.',`${tarjetasRecordadas()}${campo('aId','Usuario o correo','text','username','Ej.: Julian Pinto o julian@gmail.com')}${campoClave('aPass','Contraseña','current-password')}<label class="chk recordar"><input type="checkbox" id="aRecordar" checked><span>Recordar usuario y contraseña en este equipo</span></label><button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
-    registro:['Crear cuenta de profesor','Complete los tres datos para empezar.',`${campo('aEmail','Correo','email','email','nombre@gmail.com')}${campo('aUser','Usuario','text','username','Ej.: Julian Pinto')}${campoClave('aPass','Contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
+    registro:['Crear cuenta de profesor',NUBE.on?'Escriba el código que recibió al pagar y sus datos.':'Complete los tres datos para empezar.',`${NUBE.on?campo('aCodigo','Código de activación','text','off','MAES-XXXX-XXXX'):''}${campo('aEmail','Correo','email','email','nombre@gmail.com')}${campo('aUser','Usuario','text','username','Ej.: Julian Pinto')}${campoClave('aPass','Contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
     recuperar:local?['Recuperar contraseña','Las cuentas de este equipo no tienen recuperación por correo.',`<div class="auth-aviso">La cuenta está guardada solo en este navegador. Si olvidó la contraseña, revise si quedó guardada arriba en "Cuentas guardadas en este equipo", o cree una cuenta nueva.</div><button type="button" class="btn ancho" data-auth="entrar">Volver a iniciar sesión</button>`]
       :['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${campo('aEmail','Correo de su cuenta','email','email','nombre@gmail.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
     nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${campoClave('aPass','Nueva contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
     confirmar:['Revise su correo',`Le enviamos un enlace a <b>${esc(extra.email||'su correo')}</b>. Ábralo para activar la cuenta y entrar. Si no lo ve, busque en la carpeta de spam.`,`<button type="button" class="btn ancho" data-auth="entrar">Ya la activé, iniciar sesión</button>`],
+    vencido:['Su plan venció',`${NUBE.perfil?.vence?'Venció el '+esc(fmtL(NUBE.perfil.vence.slice(0,10)))+'. ':''}Su planeación sigue guardada y no se ha perdido nada. Para seguir usándola, escriba un código de renovación.`,`${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX')}<button type="button" data-submit class="btn pri ancho">Renovar plan</button><button type="button" class="btn ancho" data-auth="copia">${ic('down')} Descargar copia de mi planeación</button><p class="auth-alt"><button type="button" class="link" data-auth="salir">Cerrar sesión</button></p>`],
     migrar:['Encontramos datos en este equipo','Hay una planeación guardada en este navegador. ¿Quiere pasarla a su cuenta?',`<button type="button" class="btn pri ancho" data-auth="migrarSi">Sí, pasarla a mi cuenta</button><button type="button" class="btn ancho" data-auth="migrarNo">No, empezar desde cero</button>`]
   }[modo];
   a.innerHTML=`<aside class="auth-izq"><div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>Para docentes de escuela rural</small></div></div>
@@ -1192,12 +1221,12 @@ function pantallaAuth(modo,aviso='',extra={}){
     <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
     <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
   <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}
-    ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}</form></main>`;
+    ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}${!local&&NUBE.cfg?.contacto&&/registro|vencido/.test(modo)?`<p class="auth-nota">¿No tiene código? Escríbanos: <b>${esc(NUBE.cfg.contacto)}</b></p>`:''}</form></main>`;
   const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
   const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
-  const REV={aId:revisarId,aEmail:revisarCorreo,aUser:revisarUsuario};
+  const REV={aId:revisarId,aEmail:revisarCorreo,aUser:revisarUsuario,aCodigo:revisarCodigo};
   const tocado=new Set();
-  f.addEventListener('input',e=>{const id=e.target.id;if(REV[id]&&tocado.has(id))mostrarMsg(id,REV[id](e.target.value));if(id==='aPass'){if($('#f_aPass'))pintarFuerza('aPass');else mostrarMsg('aPass',null)}err('')});
+  f.addEventListener('input',e=>{const id=e.target.id;if(id==='aCodigo'){const v=formatoCodigo(e.target.value);if(v!==e.target.value)e.target.value=v}if(REV[id]&&tocado.has(id))mostrarMsg(id,REV[id](e.target.value));if(id==='aPass'){if($('#f_aPass'))pintarFuerza('aPass');else mostrarMsg('aPass',null)}err('')});
   f.addEventListener('focusout',e=>{const id=e.target.id;if(REV[id]&&e.target.value){tocado.add(id);mostrarMsg(id,REV[id](e.target.value))}});
   f.addEventListener('keyup',e=>{if(e.target.type==='password'||e.target.id==='aPass'){const caps=e.getModifierState?.('CapsLock');const m=$('#m_aPass');if(!m)return;if(caps&&!m.dataset.caps){m.dataset.caps=1;if(!$('#f_aPass'))mostrarMsg('aPass',{warn:'Tiene activadas las mayúsculas (Bloq Mayús).'})}else if(!caps&&m.dataset.caps){delete m.dataset.caps;if(!$('#f_aPass'))mostrarMsg('aPass',null)}}});
   // Tocar «Usar…» o «Ver» no le quita el foco al campo, así el mensaje no se redibuja y el toque no se pierde
@@ -1207,6 +1236,8 @@ function pantallaAuth(modo,aviso='',extra={}){
     const us=e.target.closest('[data-usar]');if(us){const r=recordadas().find(x=>x.usuario===us.dataset.usar);$('#aId').value=r.usuario;$('#aPass').value=r.clave||'';mostrarMsg('aId',null);(r.clave?f.querySelector('[data-submit]'):$('#aPass')).focus();return}
     const ol=e.target.closest('[data-olvidar]');if(ol){olvidar(NUBE.on?'nube':'local',ol.dataset.olvidar);pantallaAuth('entrar','Se quitó la cuenta de este equipo. La cuenta y su planeación siguen existiendo.');return}
     const b=e.target.closest('[data-auth]');if(!b)return;const m=b.dataset.auth;
+    if(m==='copia'){A.backup();return}
+    if(m==='salir'){cerrarSesion();return}
     if(m==='migrarSi'){S=extra.local;if(extra.nombre)S.config.docente=extra.nombre;save();arrancar();toast('Su planeación quedó guardada en su cuenta');return}
     if(m==='migrarNo'){S=datosNuevos(extra.nombre);save();arrancar();return}
     pantallaAuth(m)};
@@ -1217,15 +1248,16 @@ function pantallaAuth(modo,aviso='',extra={}){
     try{
       if(modo==='entrar'){if(!revisar(['aId','aPass']))return;const idTxt=revisarId(val('aId')).val,clave=$('#aPass').value;ocupado(true);
         const r=await accionEntrar(idTxt,clave);if($('#aRecordar')?.checked)recordar({modo:NUBE.on?'nube':'local',usuario:r.usuario,correo:r.correo,clave});return r.ir()}
-      if(modo==='registro'){if(!revisar(['aEmail','aUser','aPass']))return;ocupado(true);
-        const correo=revisarCorreo(val('aEmail')).val,ru=revisarUsuario(val('aUser')),usuario=ru.val,llave=ru.key,clave=$('#aPass').value;
-        const r=await accionRegistrar({correo,usuario,llave,clave});recordar({modo:NUBE.on?'nube':'local',usuario,correo,clave});
+      if(modo==='registro'){const conCod=NUBE.on&&val('aCodigo');if(!revisar(conCod?['aCodigo','aEmail','aUser','aPass']:['aEmail','aUser','aPass']))return;ocupado(true);
+        const codigo=conCod?revisarCodigo(val('aCodigo')).val:null,correo=revisarCorreo(val('aEmail')).val,ru=revisarUsuario(val('aUser')),usuario=ru.val,llave=ru.key,clave=$('#aPass').value;
+        const r=await accionRegistrar({codigo,correo,usuario,llave,clave});recordar({modo:NUBE.on?'nube':'local',usuario,correo,clave});
         if(r.confirmar)return pantallaAuth('confirmar','',{email:correo});return r.ir()}
       if(modo==='recuperar'){if(!revisar(['aEmail']))return;ocupado(true);await sb('/auth/v1/recover',{method:'POST',body:{email:revisarCorreo(val('aEmail')).val}});
         return pantallaAuth('entrar','Si ese correo tiene cuenta, le llegará un enlace para crear una nueva contraseña. Revise también la carpeta de spam.')}
+      if(modo==='vencido'){if(!revisar(['aCodigo']))return;ocupado(true);const d=await canjearCodigo(revisarCodigo(val('aCodigo')).val);toast(`Plan renovado hasta el ${fmtL(d.vence.slice(0,10))}`);return arrancar()}
       if(modo==='nueva'){if(!revisar(['aPass']))return;ocupado(true);const clave=$('#aPass').value;
         await sb('/auth/v1/user',{method:'PUT',token:NUBE.recup.access_token,body:{password:clave}});guardarSesion(NUBE.recup);NUBE.recup=null;actualizarRecordada(cuentaActual().usuario,clave);toast('Contraseña actualizada');return entrarConDatos()}
-    }catch(e){ocupado(false);err(errAuth(e));if(e?.code==='usuario_existe')mostrarMsg('aUser',{err:ERR_AUTH.usuario_existe})}};
+    }catch(e){ocupado(false);err(errAuth(e));if(e?.code==='usuario_existe')mostrarMsg('aUser',{err:ERR_AUTH.usuario_existe});if(String(e?.code).startsWith('codigo'))mostrarMsg('aCodigo',{err:errAuth(e)});if(e?.code==='user_already_exists')mostrarMsg('aEmail',{err:ERR_AUTH.user_already_exists})}};
   setTimeout(()=>f.querySelector('input:not([type=checkbox])')?.focus(),50)}
 function modalCambiarClave(){
   openModal('Cambiar contraseña',`<form id="ccForm" class="grid2" novalidate>${campoClave('ccActual','Contraseña actual','current-password').replace('class="fld"','class="fld wide"')}${campoClave('aPass','Nueva contraseña','new-password',true).replace('class="fld"','class="fld wide"')}<div class="auth-err wide" role="alert" hidden></div><div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Guardar</button></div></form>`,()=>{
@@ -1251,6 +1283,51 @@ async function iniciar(){
   let ses=null;try{ses=JSON.parse(lsGet('pd_sesion')||'null')}catch(e){}
   if(ses?.refresh_token){NUBE.ses=ses;return entrarConDatos()}
   pantallaAuth('entrar')}
+
+/* ---------- Administración: códigos de activación y planes de los profesores ---------- */
+const PLANES=[[30,'1 mes'],[90,'3 meses'],[180,'6 meses'],[365,'1 año']];
+const planTxt=d=>(PLANES.find(x=>x[0]===+d)||[0,d+' días'])[1];
+const fechaCorta=iso=>iso?fmtL(iso.slice(0,10)).replace(/^\w+, /,''):'—';
+function copiar(t){const ok=()=>toast('Copiado');try{navigator.clipboard.writeText(t).then(ok,()=>copiarViejo(t))}catch(e){copiarViejo(t)}}
+function copiarViejo(t){const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;left:-9999px';document.body.append(x);x.select();try{document.execCommand('copy');toast('Copiado')}catch(e){toast('No se pudo copiar: seleccione el texto y cópielo a mano')}x.remove()}
+function mensajeWhatsApp(c){const n=c.nota&&/[a-záéíóúñ]/i.test(c.nota)?' '+c.nota:'';return `Hola${n}. Su código de activación de ${NOMBRE_APP} es: ${c.codigo} (plan de ${planTxt(c.plan_dias)}). Entre a ${location.origin}, toque «Crear una cuenta» y escriba el código junto con su correo, un usuario y una contraseña.`}
+async function cargarAdmin(){V.admErr='';try{V.adm=await apiJson('/api/admin',{token:await tokenNube()})}catch(e){V.admErr=errAuth(e)}V.admCargando=false;if(V.name==='admin')render()}
+VIEWS.admin=()=>{
+  if(!NUBE.on||!NUBE.perfil?.admin){V.name='panel';return VIEWS.panel()}
+  if(!V.adm&&!V.admCargando&&!V.admErr){V.admCargando=true;cargarAdmin()}
+  const D=V.adm||{codigos:[],profesores:[]},porId=Object.fromEntries((D.profesores||[]).map(p=>[p.id,p]));
+  const ahora=Date.now(),est=v=>{if(!v||new Date(v)<=ahora)return ['atrasado','Vencido'];if(new Date(v).getFullYear()>2100)return ['completado','Sin vencimiento'];if(new Date(v)-ahora<7*86400000)return ['encurso','Vence pronto'];return ['completado','Activo']};
+  const filtro=V.admFiltro||'todos',C=(D.codigos||[]).filter(c=>filtro==='todos'||(filtro==='libres'&&!c.usado_en&&!c.anulado)||(filtro==='usados'&&c.usado_en)||(filtro==='anulados'&&c.anulado));
+  return head('Solo administradores','Administración','Cuando un profesor le pague, genere un código y envíeselo por WhatsApp. Cada código sirve una sola vez.',`<button class="btn" data-act="admRecargar">${ic('undo')} Actualizar</button>`)+
+  (V.admErr?`<div class="gerr">${esc(V.admErr)}</div>`:'')+
+  `<section class="card grid2" id="admForm"><h2 class="wide">${ic('key')} Generar códigos</h2>
+    ${fieldHtml({k:'admPlan',label:'Plan',type:'select',options:PLANES.map(([d,t])=>({v:d,t}))},V.admPlan||365)}
+    ${fieldHtml({k:'admCant',label:'Cantidad de códigos',type:'number',min:1,max:20},1)}
+    ${fieldHtml({k:'admNota',label:'Para quién (opcional)',wide:1,ph:'Ej.: Prof. Ana Gómez, 3001234567',help:'Le ayuda a recordar a quién le vendió cada código.'})}
+    <div class="mact wide"><button class="btn pri" data-act="admGen">${ic('plus')} Generar</button></div></section>`+
+  (V.admNuevos?.length?`<section class="card nuevos"><h2>${ic('check')} ${V.admNuevos.length===1?'Código generado':'Códigos generados'}</h2>${V.admNuevos.map(c=>`<div class="cod-nuevo"><b class="cod">${esc(c.codigo)}</b><p class="s">${esc(mensajeWhatsApp(c))}</p><div class="tools"><button class="btn sm pri" data-act="admCopiar" data-t="${esc(mensajeWhatsApp(c))}">Copiar mensaje para WhatsApp</button><button class="btn sm" data-act="admCopiar" data-t="${esc(c.codigo)}">Copiar solo el código</button></div></div>`).join('')}</section>`:'')+
+  `<section class="card"><h2>Códigos</h2><div class="filters" style="margin-bottom:10px">${[['todos','Todos'],['libres','Disponibles'],['usados','Usados'],['anulados','Anulados']].map(([k,t])=>`<button class="chip${filtro===k?' on':''}" data-act="admFiltro" data-v="${k}">${t}</button>`).join('')}</div>
+   ${V.admCargando&&!V.adm?'<p class="empty">Cargando…</p>':C.length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Código</th><th>Plan</th><th>Para</th><th>Estado</th><th></th></tr></thead><tbody>${C.map(c=>{const u=c.usado_por&&porId[c.usado_por];return `<tr><td class="cod">${esc(c.codigo)}</td><td>${planTxt(c.plan_dias)}</td><td>${esc(c.nota||'—')}</td><td>${c.anulado?'<span class="st">Anulado</span>':c.usado_en?`<span class="st completado">Usado</span> <small>${fechaCorta(c.usado_en)}${u?' · '+esc(u.usuario_visible||u.usuario):''}</small>`:'<span class="st pendiente">Disponible</span>'}</td><td class="acc">${!c.usado_en&&!c.anulado?`<button class="btn sm" data-act="admCopiar" data-t="${esc(mensajeWhatsApp(c))}">Copiar mensaje</button><button class="btn sm danger" data-act="admAnular" data-c="${esc(c.codigo)}">Anular</button>`:''}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">No hay códigos en esta lista.</p>'}</section>
+  <section class="card"><h2>Profesores</h2>${(D.profesores||[]).length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Usuario</th><th>Correo</th><th>Plan hasta</th><th>Estado</th><th></th></tr></thead><tbody>${D.profesores.map(p=>{const [cl,tx]=est(p.vence);return `<tr><td>${esc(p.usuario_visible||p.usuario)}</td><td>${esc(p.correo)}</td><td>${tx==='Sin vencimiento'?'—':fechaCorta(p.vence)}</td><td><span class="st ${cl}">${tx}</span></td><td class="acc">${tx==='Sin vencimiento'?'':`<button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="30">+1 mes</button><button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="365">+1 año</button><button class="btn sm danger" data-act="admSusp" data-id="${p.id}" data-n="${esc(p.usuario_visible||p.usuario)}">Suspender</button>`}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">Todavía no hay profesores registrados.</p>'}</section>`};
+function modalRenovar(){
+  openModal('Renovar plan',`<form id="rnForm" class="grid2" novalidate>${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX').replace('class="fld"','class="fld wide"')}<div class="auth-err wide" role="alert" hidden></div><div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Renovar</button></div></form>`,()=>{
+    const f=$('#rnForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m};
+    f.addEventListener('input',e=>{if(e.target.id==='aCodigo'){const v=formatoCodigo(e.target.value);if(v!==e.target.value)e.target.value=v}err('')});
+    f._go=async()=>{const r=revisarCodigo($('#aCodigo').value);if(r.err){mostrarMsg('aCodigo',r);return}f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
+      try{const d=await canjearCodigo(r.val);closeModal();render();toast(`Plan renovado hasta el ${fechaCorta(d.vence)}`)}catch(e){f.querySelectorAll('button,input').forEach(b=>b.disabled=false);err(errAuth(e))}}})}
+Object.assign(A,{
+  renovar:()=>modalRenovar(),
+  admRecargar:()=>{V.adm=null;V.admCargando=false;V.admErr='';render()},
+  admFiltro:d=>{V.admFiltro=d.v;render()},
+  admCopiar:d=>copiar(d.t),
+  admGen:async()=>{const dias=+$('#f_admPlan').value,cantidad=Math.min(20,Math.max(1,+$('#f_admCant').value||1)),nota=$('#f_admNota').value.trim();V.admPlan=dias;
+    const b=$('[data-act="admGen"]');b.disabled=true;b.innerHTML='<span class="spin"></span> Generando…';
+    try{const d=await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'crear',dias,cantidad,nota}});V.admNuevos=d.codigos;toast(cantidad===1?'Código generado':cantidad+' códigos generados');await cargarAdmin()}
+    catch(e){toast(errAuth(e));render()}},
+  admAnular:d=>confirmar(`¿Anular el código ${d.c}? Ya no servirá para crear cuentas.`,async()=>{try{await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'anular',codigo:d.c}});toast('Código anulado');V.admNuevos=(V.admNuevos||[]).filter(c=>c.codigo!==d.c);await cargarAdmin()}catch(e){toast(errAuth(e))}}),
+  admExt:async d=>{try{const r=await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'extender',id:d.id,dias:+d.d}});toast(`Plan extendido hasta el ${fechaCorta(r.vence)}`);await cargarAdmin()}catch(e){toast(errAuth(e))}},
+  admSusp:d=>confirmar(`¿Suspender a ${d.n}? Podrá entrar y ver su planeación, pero no guardar cambios ni generar guías hasta que renueve.`,async()=>{try{await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'suspender',id:d.id}});toast('Profesor suspendido');await cargarAdmin()}catch(e){toast(errAuth(e))}})
+});
 
 window.addEventListener('hashchange',()=>{if(NUBE.on&&/access_token=|error_description=/.test(location.hash))iniciar()});
 iniciar();

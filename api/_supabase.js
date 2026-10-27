@@ -56,3 +56,43 @@ export async function sumarUso(uid) {
   if (!r.ok) { console.error('No se pudo sumar el uso de la IA', r.status); return null; }
   return r.json();
 }
+
+// ---------- Planes, códigos y administración ----------
+import { randomInt } from 'node:crypto';
+
+// Correos con permiso de administrador (variable ADMIN_CORREOS en Vercel, separados por coma)
+export const esAdmin = email => (process.env.ADMIN_CORREOS || '').split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(Boolean).includes(String(email || '').trim().toLowerCase());
+export const tieneSecreta = () => Boolean(servicio());
+
+// Llamada a Supabase con la clave secreta (solo desde el servidor)
+export async function sv(path, { method = 'GET', body, prefer } = {}) {
+  if (!servicio()) { const e = new Error('Falta SUPABASE_SECRET_KEY'); e.code = 'sin_secreta'; throw e; }
+  const r = await fetch(base() + path, { method, headers: { ...cabServicio(), ...(prefer ? { Prefer: prefer } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const t = await r.text(); let d = null; try { d = t ? JSON.parse(t) : null; } catch {}
+  if (!r.ok) { const e = new Error((d && (d.msg || d.message || d.error_description)) || ('HTTP ' + r.status)); e.status = r.status; e.code = d?.error_code || d?.code; throw e; }
+  return d;
+}
+export async function leerBody(req) { let b = req.body; if (typeof b === 'string') { try { b = JSON.parse(b); } catch { b = {}; } } return b || {}; }
+export const tokenDe = req => String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+
+// Códigos con la forma MAES-XXXX-XXXX, sin letras que se confunden (O, 0, I, 1, L)
+const ALFABETO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+export function generarCodigo() { let s = ''; for (let i = 0; i < 8; i++) s += ALFABETO[randomInt(ALFABETO.length)]; return `MAES-${s.slice(0, 4)}-${s.slice(4)}`; }
+export function normalizarCodigo(v) { let t = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); if (t.startsWith('MAES')) t = t.slice(4); return t.length === 8 ? `MAES-${t.slice(0, 4)}-${t.slice(4)}` : null; }
+
+export async function perfilDe(uid) { const d = await sv(`/rest/v1/perfiles?select=id,usuario,usuario_visible,correo,vence,creado&id=eq.${encodeURIComponent(uid)}`); return d?.[0] || null; }
+export const vigente = p => Boolean(p?.vence) && new Date(p.vence) > new Date();
+export const nuevoVence = (actual, dias) => { const desde = actual && new Date(actual) > new Date() ? new Date(actual) : new Date(); return new Date(desde.getTime() + dias * 86400000).toISOString(); };
+
+// Aparta un código por 5 minutos para que dos personas no lo usen a la vez; si no se puede, dice por qué
+export async function reservarCodigo(codigo) {
+  const c = encodeURIComponent(codigo), hace = new Date(Date.now() - 5 * 60000).toISOString();
+  const d = await sv(`/rest/v1/codigos?codigo=eq.${c}&usado_en=is.null&anulado=eq.false&or=${encodeURIComponent(`(reservado_en.is.null,reservado_en.lt.${hace})`)}`, { method: 'PATCH', body: { reservado_en: new Date().toISOString() }, prefer: 'return=representation' });
+  if (d?.length) return d[0];
+  const x = (await sv(`/rest/v1/codigos?select=codigo,usado_en,anulado&codigo=eq.${c}`))?.[0];
+  const e = new Error('codigo'); e.code = !x ? 'codigo_no_existe' : x.anulado ? 'codigo_anulado' : x.usado_en ? 'codigo_usado' : 'codigo_en_uso'; throw e;
+}
+export const liberarCodigo = codigo => sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}&usado_en=is.null`, { method: 'PATCH', body: { reservado_en: null }, prefer: 'return=minimal' }).catch(() => {});
+export const marcarUsado = (codigo, uid) => sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}`, { method: 'PATCH', body: { usado_por: uid, usado_en: new Date().toISOString() }, prefer: 'return=minimal' });
+export const ponerVence = (uid, vence) => sv(`/rest/v1/perfiles?id=eq.${encodeURIComponent(uid)}`, { method: 'PATCH', body: { vence }, prefer: 'return=minimal' });
+export const ERRORES_CODIGO = new Set(['codigo_no_existe', 'codigo_anulado', 'codigo_usado', 'codigo_en_uso']);

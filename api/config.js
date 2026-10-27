@@ -10,5 +10,6 @@ export default function handler(req, res) {
     supabaseUrl: nube ? urlSupabase() : null,
     supabaseAnonKey: nube ? clavePublica() : null,
     limiteIA: limiteMensual(),
+    contacto: process.env.CONTACTO_VENTAS || null,
   });
 }
