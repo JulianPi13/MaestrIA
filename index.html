@@ -230,9 +230,6 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .rec-rol{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:2px 8px;flex:none}
 .chk.recordar{font-size:.88rem;color:var(--muted)}
 .fmsg.bien{color:var(--ok)}
-.cfg-aviso{border:1px solid var(--warn);background:var(--warn-bg);border-radius:10px;padding:8px 12px;font-size:.88rem}.cfg-aviso.grave{border-color:var(--bad);background:var(--bad-bg)}
-.cfg-aviso summary{cursor:pointer;font-weight:700}.cfg-aviso summary small{font-weight:400;color:var(--muted)}
-.cfg-aviso ul{margin:8px 0 2px;padding-left:18px;display:flex;flex-direction:column;gap:8px}.cfg-aviso li span{display:block;color:var(--muted)}.cfg-aviso li.error b{color:var(--bad)}
 .auth-nota{margin:0;font-size:.8rem;color:var(--muted);text-align:center}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
@@ -1178,10 +1175,6 @@ function pintarFuerza(id){const b=$('#f_'+id);if(!b)return;const f=fuerzaClave($
   if(f.nivel<0){m.textContent=m.dataset.ayuda||'';m.className='fmsg';return}m.className='fmsg f'+f.nivel;m.innerHTML=`<b>${f.txt}</b> · ${esc(f.tip)}`}
 function tarjetasRecordadas(){const R=recordadas();if(!R.length)return '';
   return `<div class="recordadas"><p class="s">Cuentas guardadas en este equipo</p>${R.map(r=>`<div class="rec"><button type="button" class="rec-usar" data-usar="${esc(r.usuario)}"><span class="av">${esc((r.usuario||'?')[0].toUpperCase())}</span><span class="rec-txt"><b>${esc(r.usuario)}</b><small>${esc(r.correo)}${r.clave?' · contraseña guardada':''}</small></span><span class="rec-rol">Profesor</span></button><button type="button" class="ib" data-olvidar="${esc(r.usuario)}" aria-label="Quitar ${esc(r.usuario)} de este equipo" title="Quitar de este equipo">${ic('x')}</button></div>`).join('')}</div>`}
-var ESTADO=null;
-function avisoConfig(){const P=ESTADO?.problemas||[];if(!P.length)return '';const err=P.filter(x=>x.nivel==='error');
-  return `<details class="cfg-aviso${err.length?' grave':''}"${err.length?' open':''}><summary>${err.length?`${err.length===1?'Hay un problema':'Hay '+err.length+' problemas'} de configuración que impedirán entrar`:'Avisos de configuración'} <small>(para el administrador)</small></summary><ul>${P.map(x=>`<li class="${x.nivel}"><b>${esc(x.que)}</b><span>Cómo arreglarlo: ${esc(x.como)}</span></li>`).join('')}</ul></details>`}
-async function revisarConfig(){if(window.claude||!/^https?:/.test(location.protocol))return;try{const r=await fetch('/api/estado',{cache:'no-store'});if(r.ok)ESTADO=await r.json()}catch(e){}}
 function pantallaAuth(modo,aviso='',extra={}){
   let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;closeModal();
   const local=!NUBE.on;
@@ -1198,7 +1191,7 @@ function pantallaAuth(modo,aviso='',extra={}){
     <div class="auth-msg"><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
     <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
     <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
-  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}${avisoConfig()}<div class="auth-err" role="alert" hidden></div>${T[2]}
+  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}
     ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}</form></main>`;
   const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
   const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
@@ -1242,7 +1235,7 @@ function modalCambiarClave(){
       try{await accionCambiarClave(actual,nueva);closeModal();toast('Contraseña actualizada')}catch(e){f.querySelectorAll('button,input').forEach(b=>b.disabled=false);err(errAuth(e))}}})}
 async function usoIA(){if(!NUBE.on)return null;try{const tk=await tokenNube();const r=await fetch('/api/guia',{headers:{Authorization:'Bearer '+tk}});if(!r.ok)return null;NUBE.uso=await r.json();return NUBE.uso}catch(e){return null}}
 async function iniciar(){
-  const [cfg]=await Promise.all([cargarConfig(),revisarConfig()]);
+  const cfg=await cargarConfig();
   if(cfg?.nombre){NOMBRE_APP=cfg.nombre;document.title=cfg.nombre}
   if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey){LOC.on=true;const id=lsGet('md_sesion_local');if(id&&cuentasLocales()[id])return entrarLocal(id);return pantallaAuth('entrar')}
   NUBE.cfg=cfg;NUBE.on=true;
