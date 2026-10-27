@@ -69,7 +69,7 @@ export default async function handler(req, res) {
     const usuario = await usuarioDesdeToken(token);
     if (!usuario) return res.status(401).json({ code: 'sesion' });
     uid = usuario.id;
-    try { usadas = await usoDelMes(uid); } catch (e) { console.error(e); return res.status(502).json({ code: 'error' }); }
+    try { usadas = await usoDelMes(uid); } catch (e) { console.error(e); return res.status(502).json({ code: e.status === 401 ? 'clave_secreta' : (e.status === 404 ? 'falta_sql' : 'uso_error') }); }
     if (req.method === 'GET') return res.status(200).json({ usadas, limite });
     if (usadas >= limite) return res.status(429).json({ code: 'limite_mes', limite });
   }
@@ -101,12 +101,15 @@ export default async function handler(req, res) {
       }
       ultimo = r;
       console.error(`Falló ${proveedor}/${modelo}:`, r.status, r.error);
-      if (r.status === 401 || r.status === 403) break; // clave inválida: no tiene sentido seguir
+      if (r.status === 401 || r.status === 403 || /api key not valid|invalid api key|incorrect api key/i.test(r.error || '')) break; // clave inválida: no tiene sentido seguir
     } catch (e) {
       console.error(`Error con ${proveedor}/${modelo}:`, e);
     }
   }
-  if (ultimo?.status === 401 || ultimo?.status === 403) return res.status(502).json({ code: 'clave_invalida' });
-  if (ultimo?.status === 429 || ultimo?.status === 529) return res.status(429).json({ code: 'rate_limited' });
-  return res.status(502).json({ code: 'error' });
+  const msg = String(ultimo?.error || '');
+  if (ultimo?.status === 401 || ultimo?.status === 403 || /api key|api_key|apikey|permission/i.test(msg)) return res.status(502).json({ code: 'clave_invalida', proveedor });
+  if (ultimo?.status === 429 || ultimo?.status === 529 || /quota|rate/i.test(msg)) return res.status(429).json({ code: 'rate_limited', proveedor });
+  if (ultimo?.status === 404 || /model/i.test(msg)) return res.status(502).json({ code: 'modelo', proveedor });
+  if (ultimo?.status >= 500) return res.status(502).json({ code: 'proveedor_caido', proveedor });
+  return res.status(502).json({ code: 'error', proveedor, detalle: msg.slice(0, 160) });
 }

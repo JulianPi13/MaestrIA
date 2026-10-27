@@ -229,6 +229,10 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .rec-txt{display:flex;flex-direction:column;min-width:0}.rec-txt b,.rec-txt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rec-txt small{color:var(--muted);font-size:.78rem}
 .rec-rol{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:2px 8px;flex:none}
 .chk.recordar{font-size:.88rem;color:var(--muted)}
+.fmsg.bien{color:var(--ok)}
+.cfg-aviso{border:1px solid var(--warn);background:var(--warn-bg);border-radius:10px;padding:8px 12px;font-size:.88rem}.cfg-aviso.grave{border-color:var(--bad);background:var(--bad-bg)}
+.cfg-aviso summary{cursor:pointer;font-weight:700}.cfg-aviso summary small{font-weight:400;color:var(--muted)}
+.cfg-aviso ul{margin:8px 0 2px;padding-left:18px;display:flex;flex-direction:column;gap:8px}.cfg-aviso li span{display:block;color:var(--muted)}.cfg-aviso li.error b{color:var(--bad)}
 .auth-nota{margin:0;font-size:.8rem;color:var(--muted);text-align:center}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
@@ -801,7 +805,7 @@ async function pdfDe(el,nombre){
       const bin=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),jpg=new Uint8Array(bin.length);for(let k=0;k<bin.length;k++)jpg[k]=bin.charCodeAt(k);
       paginas.push({jpg,pw:cv.width,ph:cv.height,x:CARTA.m,y:CARTA.m,w:W*ptPx,h:h*ptPx})}
     await download(nombre,armarPdf(paginas),'application/pdf')
-  }catch(e){console.error(e);toast('No se pudo crear el PDF')}finally{host.remove()}}
+  }catch(e){console.error(e);toast('No se pudo crear el PDF. Vuelva a intentar; si sigue fallando, use «Descargar en Word», que funciona en más equipos.')}finally{host.remove()}}
 
 /* ---------- Word (.docx) propio, sin librerías ---------- */
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
@@ -939,7 +943,7 @@ async function pedirGuia(t,c,input,msg){
   try{const r=await sample.json(input,{modelTier:'default',cache:false});
     if(!r||!Array.isArray(r.secciones)||!r.secciones.length)throw {code:'invalid_json'};
     if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast(NUBE.on&&NUBE.uso?`Guía lista · le quedan ${Math.max(0,NUBE.uso.limite-NUBE.uso.usadas)} este mes`:'Guía lista')}
-  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se alcanzó el límite de uso de la IA. Espere un rato (en el plan gratuito, hasta el día siguiente) e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA en Vercel (por ejemplo GEMINI_API_KEY).',clave_invalida:'La clave de la IA no es válida. Revísela en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',limite_mes:`Ya usó las ${NUBE.cfg?.limiteIA||''} guías con IA de este mes. El cupo se renueva el primer día del próximo mes.`,sesion:'Su sesión se cerró. Vuelva a iniciar sesión.',sin_sesion:'Su sesión se cerró. Vuelva a iniciar sesión.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
+  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'La IA alcanzó su límite de uso por ahora. Espere unos minutos; si usa el plan gratuito de Gemini, puede que deba esperar hasta mañana. Para evitarlo, el administrador puede activar la facturación en Google AI Studio.',invalid_json:'La IA respondió con la guía incompleta. Toque «Generar otra» para intentar de nuevo; si se repite, pida una guía más corta.',sin_clave:'No hay clave de IA configurada. El administrador debe agregar GEMINI_API_KEY en Vercel (gratis en aistudio.google.com) y hacer Redeploy.',clave_invalida:'La clave de la IA fue rechazada. El administrador debe crear una nueva en aistudio.google.com (Get API key), ponerla en GEMINI_API_KEY en Vercel y hacer Redeploy.',modelo:'El modelo de IA configurado no existe o no está disponible. El administrador debe borrar la variable IA_MODELO en Vercel (o corregirla) y hacer Redeploy.',proveedor_caido:'El servicio de IA está fallando en este momento. Espere unos minutos y vuelva a intentar.',clave_secreta:'No se pudo revisar su cupo de guías porque Supabase rechazó la Secret key. El administrador debe revisar SUPABASE_SECRET_KEY en Vercel.',falta_sql:'Falta la tabla de uso de la IA en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',uso_error:'No se pudo revisar su cupo de guías del mes. Vuelva a intentar en un momento; si sigue, avise al administrador.',vacio:'La guía no tenía contenido para enviar. Revise que la clase tenga «Qué vemos» escrito.',muy_largo:'La guía es demasiado larga para editarla de una vez. Pida cambios más cortos o genere una guía nueva.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise el wifi o los datos del celular y vuelva a intentar.',limite_mes:`Ya usó las ${NUBE.cfg?.limiteIA||''} guías con IA de este mes. El cupo se renueva el primer día del próximo mes.`,sesion:'Su sesión se cerró. Vuelva a iniciar sesión.',sin_sesion:'Su sesión se cerró. Vuelva a iniciar sesión.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
   if(V.name==='guia')render()}
 VIEWS.guia=()=>{
   const t=S.temas.find(x=>x.id===V.tema);if(!t){V.name='panel';return VIEWS.panel()}
@@ -966,7 +970,7 @@ Object.assign(A,{
   guiaUndo:d=>{const {c}=TC(d);[c.guia,c.guiaPrev]=[c.guiaPrev,null];save();render();toast('Cambio deshecho')},
   guardarCod:()=>{try{localStorage.setItem('planeacion_codigo_ia',$('#codIA').value.trim())}catch(e){}GU={busy:false,err:''};render();toast('Código guardado. Toque de nuevo Generar guía')},
   guiaWord:async d=>{const t=S.temas.find(x=>x.id===d.id);const {C,c,i}=d.c?claseDe(t,d.c):(()=>{const C=clasesDe(t);return {C,c:C[+d.i],i:+d.i}})();if(!c?.guia)return;
-    toast('Preparando el documento de Word…');try{const blob=await guiaDocx(t,c,i,C.length);const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.docx';await download(nom,blob,blob.type)}catch(e){console.error(e);toast('No se pudo crear el documento de Word')}},
+    toast('Preparando el documento de Word…');try{const blob=await guiaDocx(t,c,i,C.length);const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.docx';await download(nom,blob,blob.type)}catch(e){console.error(e);toast('No se pudo crear el documento de Word. Vuelva a intentar; si sigue fallando, use «Descargar en PDF».')}},
   gSug:d=>{const a=$('#gPedido');a.value=(a.value.trim()?a.value.trim()+'. ':'')+d.v;a.focus()},
   guiaPdf:async d=>{const t=S.temas.find(x=>x.id===d.id);const {C,c,i}=d.c?claseDe(t,d.c):(()=>{const C=clasesDe(t);return {C,c:C[+d.i],i:+d.i}})();if(!c?.guia)return;
     let el=$('#guiaDoc');if(!el){const w=document.createElement('div');w.innerHTML=guiaHtml(t,c,i,C.length);el=w.firstElementChild}
@@ -1004,12 +1008,13 @@ function revisarCorreo(v){v=String(v||'').trim();
   if(!/\.[A-Za-z]{2,}$/.test(dom))return {err:'Al final del correo falta algo como .com o .co',sug:/^(gmail|hotmail|outlook|yahoo|icloud)$/i.test(dom)?`${loc}@${dom.toLowerCase()}.com`:undefined};
   const d=dom.toLowerCase();if(DOM_TYPO[d])return {warn:`¿Quiso decir ${loc}@${DOM_TYPO[d]}?`,sug:`${loc}@${DOM_TYPO[d]}`,val:v.toLowerCase()};
   return {ok:true,val:v.toLowerCase()}}
+const limpiarUsuario=v=>sinTildes(String(v)).replace(/ñ/gi,'n').trim().replace(/[\s,;]+/g,'.').replace(/[^A-Za-z0-9._-]/g,'').replace(/\.{2,}/g,'.').toLowerCase();
 function revisarUsuario(v){v=String(v||'').trim();
   if(!v)return {err:'Escriba un nombre de usuario.'};
-  if(/\s/.test(v))return {err:'El usuario no puede tener espacios.',sug:v.replace(/\s+/g,'.').toLowerCase()};
-  if(/[,;]/.test(v))return {err:'El usuario no puede tener comas ni punto y coma.',sug:v.replace(/[,;]+/g,'.').toLowerCase()};
+  if(/\s/.test(v))return {err:'El usuario no puede tener espacios.',sug:limpiarUsuario(v)};
+  if(/[,;]/.test(v))return {err:'El usuario no puede tener comas ni punto y coma.',sug:limpiarUsuario(v)};
   if(v.includes('@'))return {err:'El usuario no puede tener @. El correo va en su propia casilla.'};
-  if(/[À-ÿ]/.test(v))return {err:'El usuario no puede tener tildes ni ñ.',sug:sinTildes(v).replace(/ñ/gi,'n').toLowerCase()};
+  if(/[À-ÿ]/.test(v))return {err:'El usuario no puede tener tildes ni ñ.',sug:limpiarUsuario(v)};
   const raro=v.match(/[^A-Za-z0-9._-]/);if(raro)return {err:`El usuario tiene un carácter que no se permite: «${raro[0]}». Use letras, números, punto, guion o guion bajo.`};
   if(!/^[A-Za-z]/.test(v))return {err:'El usuario debe empezar con una letra.'};
   if(v.length<3)return {err:'El usuario debe tener al menos 3 caracteres.'};
@@ -1124,25 +1129,59 @@ async function accionCambiarClave(actual,nueva){const ca=cuentaActual();
   else await LOCAL.cambiar(LOC.uid,actual,nueva);
   actualizarRecordada(ca.usuario,nueva)}
 
-const ERR_AUTH={invalid_credentials:'Usuario, correo o contraseña incorrectos.',invalid_grant:'Usuario, correo o contraseña incorrectos.',email_not_confirmed:'Primero confirme su correo: revise su bandeja de entrada y la carpeta de spam.',user_already_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',email_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',usuario_existe:'Ese nombre de usuario ya está ocupado. Pruebe con otro.',weak_password:'La contraseña es muy débil: use al menos 8 caracteres, con letras y números.',over_email_send_rate_limit:'Se enviaron muchos correos seguidos. Espere unos minutos e intente de nuevo.',over_request_rate_limit:'Demasiados intentos seguidos. Espere unos minutos.',email_address_invalid:'Ese correo no es válido.',validation_failed:'Revise el correo y la contraseña.',same_password:'La nueva contraseña debe ser distinta de la anterior.',clave_actual:'La contraseña actual no es correcta.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',signup_disabled:'Por ahora no se están creando cuentas nuevas.'};
+// Cada error dice qué pasó y cómo solucionarlo
+const ERR_AUTH={
+  invalid_credentials:'El usuario, el correo o la contraseña no coinciden. Revise que no tenga activadas las mayúsculas y que el usuario esté bien escrito. Si no recuerda la contraseña, toque «¿Olvidó su contraseña?».',
+  invalid_grant:'El usuario, el correo o la contraseña no coinciden. Revise que no tenga activadas las mayúsculas. Si no recuerda la contraseña, toque «¿Olvidó su contraseña?».',
+  email_not_confirmed:'La cuenta todavía no está activada. Abra el correo de activación que le llegó (revise también spam y promociones) y toque el enlace. Si no le llegó, el administrador puede apagar «Confirm email» en Supabase.',
+  user_already_exists:'Ya existe una cuenta con ese correo. Toque «Iniciar sesión» y entre con ella; si no recuerda la contraseña, use «¿Olvidó su contraseña?».',
+  email_exists:'Ya existe una cuenta con ese correo. Toque «Iniciar sesión» y entre con ella; si no recuerda la contraseña, use «¿Olvidó su contraseña?».',
+  usuario_existe:'Ese nombre de usuario ya lo tiene otra persona. Pruebe agregando su apellido o un número, por ejemplo ana.gomez2.',
+  weak_password:'Supabase considera la contraseña muy débil. Use 10 o más caracteres mezclando mayúsculas, minúsculas, números y un símbolo como ! o #.',
+  over_email_send_rate_limit:'Supabase ya envió el máximo de correos permitido por ahora (su correo de prueba manda muy pocos por hora). Espere una hora, o pida al administrador configurar un correo propio (SMTP) en Supabase.',
+  over_request_rate_limit:'Se hicieron demasiados intentos seguidos y Supabase los frenó por seguridad. Espere 5 minutos antes de volver a intentar.',
+  email_address_invalid:'Supabase no aceptó ese correo. Revise que esté completo y bien escrito, por ejemplo nombre@gmail.com.',
+  email_address_not_authorized:'Supabase no puede enviar el correo de activación a esa dirección: sin un correo propio configurado, solo envía a los miembros del equipo de Supabase. El administrador debe apagar «Confirm email» en Authentication → Sign In / Providers, o configurar SMTP.',
+  validation_failed:'Supabase rechazó los datos. Revise el correo (sin espacios ni comas) y que la contraseña tenga al menos 8 caracteres.',
+  same_password:'La contraseña nueva es igual a la anterior. Escriba una distinta.',
+  clave_actual:'La contraseña actual no es correcta. Revise las mayúsculas; si no la recuerda, cierre sesión y use «¿Olvidó su contraseña?».',
+  signup_disabled:'En Supabase está desactivado crear cuentas nuevas. El administrador debe activar «Allow new users to sign up» en Authentication → Sign In / Providers.',
+  red:'No hay conexión a internet o Supabase no respondió. Revise el wifi o los datos del celular y vuelva a intentar.',
+  otp_expired:'El enlace del correo ya venció o ya se usó. Pida uno nuevo con «¿Olvidó su contraseña?».',
+  session_not_found:'Su sesión se cerró. Vuelva a iniciar sesión.',
+  refresh_token_not_found:'Su sesión se cerró. Vuelva a iniciar sesión.',
+  bad_jwt:'Su sesión se cerró. Vuelva a iniciar sesión.',
+  PGRST202:'Faltan las funciones de la aplicación en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',
+  PGRST205:'Faltan las tablas de la aplicación en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',
+  '42P01':'Faltan las tablas de la aplicación en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.'};
 const errAuth=e=>{const msg=String(e?.msg||'');
-  if(e?.code==='email_address_not_authorized'||/not authorized/i.test(msg))return 'Supabase no permite enviar el correo de activación a esa dirección: con su servicio de correo de prueba solo envía a los miembros del equipo del proyecto. Desactive "Confirm email" o configure un servicio de correo propio (SMTP) en Supabase.';
-  if(/sending (confirmation|recovery|magic)|error sending/i.test(msg))return 'Supabase no pudo enviar el correo. Revise la configuración de correo (SMTP) en Supabase o desactive "Confirm email" mientras prueba.';
-  if(/database error/i.test(msg))return 'La base de datos rechazó la cuenta. Ejecute de nuevo el archivo supabase.sql completo en Supabase (SQL Editor).';
-  if(ERR_AUTH[e?.code])return ERR_AUTH[e.code];if(e?.status===429)return ERR_AUTH.over_request_rate_limit;
-  return 'Algo salió mal. Intente de nuevo en un momento.'+(msg||e?.code?` (Detalle: ${msg||e.code})`:'')};
+  if(e?.code==='email_address_not_authorized'||/not authorized/i.test(msg))return ERR_AUTH.email_address_not_authorized;
+  if(/invalid path|no route matched|requested path is invalid/i.test(msg)||(e?.status===404&&!e?.code?.startsWith?.('PGRST')))return 'La dirección de Supabase está mal puesta en Vercel. El administrador debe poner en SUPABASE_URL solo la Project URL (https://abcdxyz.supabase.co, sin /rest/v1) y hacer Redeploy.';
+  if(/invalid api key|no api key|apikey/i.test(msg)||(e?.status===401&&!e?.code))return 'Supabase rechazó la clave pública. El administrador debe revisar SUPABASE_PUBLISHABLE_KEY en Vercel (debe empezar por sb_publishable_ y ser del mismo proyecto) y hacer Redeploy.';
+  if(/sending (confirmation|recovery|magic)|error sending/i.test(msg))return 'Supabase no pudo enviar el correo. El administrador debe revisar el correo propio (SMTP) en Supabase, o apagar «Confirm email» mientras prueba.';
+  if(/database error/i.test(msg))return 'La base de datos rechazó la cuenta, casi siempre porque falta ejecutar supabase.sql. El administrador debe ejecutar todo el archivo en Supabase → SQL Editor. Si ya lo hizo, pruebe con otro nombre de usuario.';
+  if(/could not find the (function|table)/i.test(msg))return ERR_AUTH.PGRST202;
+  if(ERR_AUTH[e?.code])return ERR_AUTH[e.code];
+  if(e?.status===429)return ERR_AUTH.over_request_rate_limit;
+  if(e?.status>=500)return 'Supabase tuvo una falla. Espere un minuto y vuelva a intentar. Si sigue, el administrador debe entrar a supabase.com y revisar que el proyecto no esté en pausa (los gratuitos se pausan tras varios días sin uso).';
+  return 'No se pudo completar. Vuelva a intentar en un momento. Si se repite, envíe una captura de este mensaje al administrador.'+(msg||e?.code?` (Detalle técnico: ${msg||e.code})`:'')};
 
 /* ----- Pantallas ----- */
 function pantallaCargando(txt){let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;
   a.innerHTML=`<div class="auth-cargando" role="status"><span class="spin"></span>${esc(txt)}</div>`}
-const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="none" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" aria-live="polite"></small></label>`;
-const campoClave=(id,label,ac,barra)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span>${barra?`<div class="fuerza" id="f_${id}" data-n="-1" aria-hidden="true"><i></i><i></i><i></i></div>`:''}<small class="fmsg" id="m_${id}" aria-live="polite"></small></label>`;
-function mostrarMsg(id,r){const m=$('#m_'+id),i=$('#'+id);if(!m)return;m.className='fmsg'+(r?.err?' err':r?.warn?' warn':'');
-  m.innerHTML=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):'';i?.setAttribute('aria-invalid',r?.err?'true':'false')}
+const AYUDA={aId:'Puede escribir su usuario o su correo.',aEmail:'Su correo completo, por ejemplo nombre@gmail.com. Sin espacios, comas ni tildes.',aUser:'De 3 a 20 caracteres. Empiece con una letra; use letras sin tilde, números, punto (.), guion (-) o guion bajo (_). Sin espacios ni comas.',aPassN:'Mínimo 8 caracteres combinando letras y números. Recomendada: 10 o más con mayúsculas, números y un símbolo (! # $).'};
+const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="none" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" data-ayuda="${esc(AYUDA[id]||'')}" aria-live="polite">${esc(AYUDA[id]||'')}</small></label>`;
+const campoClave=(id,label,ac,barra)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span>${barra?`<div class="fuerza" id="f_${id}" data-n="-1" aria-hidden="true"><i></i><i></i><i></i></div>`:''}<small class="fmsg" id="m_${id}" data-ayuda="${barra?esc(AYUDA.aPassN):''}" aria-live="polite">${barra?esc(AYUDA.aPassN):''}</small></label>`;
+function mostrarMsg(id,r){const m=$('#m_'+id),i=$('#'+id);if(!m)return;m.className='fmsg'+(r?.err?' err':r?.warn?' warn':r?.ok?' bien':'');
+  m.innerHTML=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):r?.ok&&id!=='aPass'?'✓ Correcto':esc(m.dataset.ayuda||'');i?.setAttribute('aria-invalid',r?.err?'true':'false')}
 function pintarFuerza(id){const b=$('#f_'+id);if(!b)return;const f=fuerzaClave($('#'+id).value);b.dataset.n=f.nivel;const m=$('#m_'+id);
-  if(f.nivel<0){m.textContent='';m.className='fmsg';return}m.className='fmsg f'+f.nivel;m.innerHTML=`<b>${f.txt}</b> · ${esc(f.tip)}`}
+  if(f.nivel<0){m.textContent=m.dataset.ayuda||'';m.className='fmsg';return}m.className='fmsg f'+f.nivel;m.innerHTML=`<b>${f.txt}</b> · ${esc(f.tip)}`}
 function tarjetasRecordadas(){const R=recordadas();if(!R.length)return '';
   return `<div class="recordadas"><p class="s">Cuentas guardadas en este equipo</p>${R.map(r=>`<div class="rec"><button type="button" class="rec-usar" data-usar="${esc(r.usuario)}"><span class="av">${esc((r.usuario||'?')[0].toUpperCase())}</span><span class="rec-txt"><b>${esc(r.usuario)}</b><small>${esc(r.correo)}${r.clave?' · contraseña guardada':''}</small></span><span class="rec-rol">Profesor</span></button><button type="button" class="ib" data-olvidar="${esc(r.usuario)}" aria-label="Quitar ${esc(r.usuario)} de este equipo" title="Quitar de este equipo">${ic('x')}</button></div>`).join('')}</div>`}
+var ESTADO=null;
+function avisoConfig(){const P=ESTADO?.problemas||[];if(!P.length)return '';const err=P.filter(x=>x.nivel==='error');
+  return `<details class="cfg-aviso${err.length?' grave':''}"${err.length?' open':''}><summary>${err.length?`${err.length===1?'Hay un problema':'Hay '+err.length+' problemas'} de configuración que impedirán entrar`:'Avisos de configuración'} <small>(para el administrador)</small></summary><ul>${P.map(x=>`<li class="${x.nivel}"><b>${esc(x.que)}</b><span>Cómo arreglarlo: ${esc(x.como)}</span></li>`).join('')}</ul></details>`}
+async function revisarConfig(){if(window.claude||!/^https?:/.test(location.protocol))return;try{const r=await fetch('/api/estado',{cache:'no-store'});if(r.ok)ESTADO=await r.json()}catch(e){}}
 function pantallaAuth(modo,aviso='',extra={}){
   let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;closeModal();
   const local=!NUBE.on;
@@ -1159,7 +1198,7 @@ function pantallaAuth(modo,aviso='',extra={}){
     <div class="auth-msg"><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
     <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
     <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
-  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}
+  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}${avisoConfig()}<div class="auth-err" role="alert" hidden></div>${T[2]}
     ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}</form></main>`;
   const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
   const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
@@ -1203,7 +1242,7 @@ function modalCambiarClave(){
       try{await accionCambiarClave(actual,nueva);closeModal();toast('Contraseña actualizada')}catch(e){f.querySelectorAll('button,input').forEach(b=>b.disabled=false);err(errAuth(e))}}})}
 async function usoIA(){if(!NUBE.on)return null;try{const tk=await tokenNube();const r=await fetch('/api/guia',{headers:{Authorization:'Bearer '+tk}});if(!r.ok)return null;NUBE.uso=await r.json();return NUBE.uso}catch(e){return null}}
 async function iniciar(){
-  const cfg=await cargarConfig();
+  const [cfg]=await Promise.all([cargarConfig(),revisarConfig()]);
   if(cfg?.nombre){NOMBRE_APP=cfg.nombre;document.title=cfg.nombre}
   if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey){LOC.on=true;const id=lsGet('md_sesion_local');if(id&&cuentasLocales()[id])return entrarLocal(id);return pantallaAuth('entrar')}
   NUBE.cfg=cfg;NUBE.on=true;

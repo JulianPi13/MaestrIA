@@ -17,6 +17,7 @@ En el inicio de sesión la app revisa lo que se escribe (comas, espacios, tildes
 | `api/config.js` | Le dice a la página el nombre de la app y cómo conectarse a las cuentas |
 | `api/guia.js` | Genera las guías con IA y lleva la cuenta de cuántas usa cada docente al mes |
 | `api/_supabase.js` | Ayudas internas para hablar con Supabase |
+| `api/estado.js` | Revisa la configuración y, si algo está mal, la pantalla de entrada dice qué es y cómo arreglarlo |
 | `supabase.sql` | Crea las tablas de la base de datos (se ejecuta una sola vez) |
 
 ## Puesta en marcha (una sola vez)
@@ -49,6 +50,8 @@ La variable `CODIGO_ACCESO` ya no hace falta: ahora solo los docentes con cuenta
 Después vaya a **Deployments**, toque los tres puntos del último y elija **Redeploy**.
 
 ### 3. Probar
+
+Si algo quedó mal configurado, la pantalla de inicio de sesión muestra un recuadro **"Avisos de configuración (para el administrador)"** con el problema y cómo arreglarlo.
 
 Abra su página, toque **Crear una cuenta**, active la cuenta con el correo que llega y entre.
 
