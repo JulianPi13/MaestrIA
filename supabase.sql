@@ -48,3 +48,67 @@ $$;
 
 revoke execute on function public.sumar_uso_ia(uuid, text) from public, anon, authenticated;
 grant execute on function public.sumar_uso_ia(uuid, text) to service_role;
+
+-- 3. Perfil de cada cuenta: nombre de usuario único y rol (siempre "profesor")
+create table if not exists public.perfiles (
+  id      uuid primary key references auth.users (id) on delete cascade,
+  usuario text not null unique,
+  correo  text not null,
+  rol     text not null default 'profesor' check (rol = 'profesor'),
+  creado  timestamptz not null default now()
+);
+
+alter table public.perfiles enable row level security;
+
+drop policy if exists "ver su perfil" on public.perfiles;
+create policy "ver su perfil" on public.perfiles
+  for select using (auth.uid() = id);
+
+-- Al crear una cuenta se crea su perfil; el rol siempre es "profesor", sin importar lo que se envíe
+create or replace function public.crear_perfil()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.perfiles (id, usuario, correo, rol)
+  values (
+    new.id,
+    lower(coalesce(nullif(new.raw_user_meta_data ->> 'usuario', ''), split_part(new.email, '@', 1))),
+    new.email,
+    'profesor'
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists al_crear_cuenta on auth.users;
+create trigger al_crear_cuenta
+  after insert on auth.users
+  for each row execute function public.crear_perfil();
+
+-- Para poder entrar escribiendo el usuario en vez del correo
+create or replace function public.correo_de_usuario(p_usuario text)
+returns text
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select correo from public.perfiles where usuario = lower(trim(p_usuario)) limit 1;
+$$;
+
+-- Para avisar en el registro si el usuario ya está ocupado
+create or replace function public.usuario_disponible(p_usuario text)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select not exists (select 1 from public.perfiles where usuario = lower(trim(p_usuario)));
+$$;
+
+grant execute on function public.correo_de_usuario(text) to anon, authenticated;
+grant execute on function public.usuario_disponible(text) to anon, authenticated;

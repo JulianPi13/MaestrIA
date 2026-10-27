@@ -2,7 +2,12 @@
 
 Aplicación para planear clases en escuelas rurales multigrado: grados, materias, periodos, clases con fecha, calendario, generador de temarios y guías de aprendizaje hechas con IA (se descargan en PDF y Word).
 
-Cada docente tiene su **cuenta** (correo y contraseña). Su planeación se guarda en internet y la puede abrir desde cualquier computador o celular.
+Cada docente entra con su **cuenta de profesor** (correo, usuario y contraseña):
+
+- **Con Supabase configurado:** las cuentas y la planeación quedan en internet y se abren desde cualquier computador o celular.
+- **Sin Supabase:** el inicio de sesión funciona igual, pero las cuentas y la planeación quedan guardadas solo en ese equipo.
+
+En el inicio de sesión la app revisa lo que se escribe (comas, espacios, tildes, la @, dominios mal escritos como "gmial.com", mayúsculas activadas), muestra la seguridad de la contraseña (débil, usable o recomendada) y puede recordar las cuentas usadas en el equipo.
 
 ## Archivos
 
@@ -19,7 +24,7 @@ Cada docente tiene su **cuenta** (correo y contraseña). Su planeación se guard
 ### 1. Base de datos y cuentas (Supabase, plan gratuito)
 
 1. Entre a [supabase.com](https://supabase.com), cree una cuenta y toque **New project**. Elija un nombre, una contraseña para la base de datos (guárdela) y la región más cercana.
-2. Cuando el proyecto esté listo, abra **SQL Editor → New query**, pegue todo el contenido de `supabase.sql` y toque **Run**.
+2. Cuando el proyecto esté listo, abra **SQL Editor → New query**, pegue todo el contenido de `supabase.sql` y toque **Run**. Si ya lo había ejecutado antes, ejecútelo otra vez: agrega lo nuevo sin borrar nada.
 3. En **Authentication → URL Configuration**, en **Site URL**, escriba la dirección de su página en Vercel (por ejemplo `https://su-app.vercel.app`). Ahí llegan los enlaces de los correos de activación y de cambio de contraseña.
 4. En **Settings → API Keys** copie:
    - la **Publishable key** (empieza por `sb_publishable_`),

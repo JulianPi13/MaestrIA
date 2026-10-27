@@ -33,6 +33,7 @@
   --ok:#5CC48A; --warn:#E3B04B; --bad:#EE7468; --info:#78A9E6;
   --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; color-scheme:dark}
 [hidden]{display:none!important}
+[hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -216,6 +217,19 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .auth-cargando{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:center;color:var(--muted);font-weight:600;min-height:60vh}
 @media (max-width:860px){#auth{grid-template-columns:minmax(0,1fr);align-content:start}.auth-izq{border-right:0;border-bottom:4px solid #8B5E34;padding:18px max(16px,env(safe-area-inset-left,0px));min-height:0;gap:10px}.auth-lista,.auth-pie{display:none}.auth-msg h1{font-size:1.2rem}.auth-der{padding-block:20px}.auth-card{padding:20px}.nube{font-size:0;padding:0 4px}.cuenta-datos{grid-template-columns:minmax(0,1fr)}}
 .brand b .ia{color:var(--pencil)}
+.fmsg{font-size:.82rem;min-height:0;color:var(--muted)}.fmsg:empty{display:none}.fmsg.err{color:var(--bad)}.fmsg.warn{color:var(--warn)}.fmsg.f0 b{color:var(--bad)}.fmsg.f1 b{color:var(--warn)}.fmsg.f2 b{color:var(--ok)}
+.fld input[aria-invalid="true"]{border-color:var(--bad)}
+.link.sug{font-size:.82rem;margin-left:4px}
+.fuerza{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:2px}.fuerza i{height:6px;border-radius:99px;background:var(--line)}
+.fuerza[data-n="0"] i:nth-child(-n+1){background:var(--bad)}.fuerza[data-n="1"] i:nth-child(-n+2){background:var(--warn)}.fuerza[data-n="2"] i{background:var(--ok)}
+.recordadas{display:flex;flex-direction:column;gap:6px}.recordadas>.s{margin:0;font-size:.8rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.rec{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.rec:hover{border-color:var(--muted)}
+.rec-usar{flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:none;border:0;padding:8px 10px;cursor:pointer;text-align:left;color:var(--ink)}
+.rec .av{width:34px;height:34px;border-radius:50%;background:var(--board);color:var(--chalk);display:grid;place-items:center;font-weight:700;flex:none}
+.rec-txt{display:flex;flex-direction:column;min-width:0}.rec-txt b,.rec-txt small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rec-txt small{color:var(--muted);font-size:.78rem}
+.rec-rol{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--ok);background:var(--ok-bg);border-radius:99px;padding:2px 8px;flex:none}
+.chk.recordar{font-size:.88rem;color:var(--muted)}
+.auth-nota{margin:0;font-size:.8rem;color:var(--muted);text-align:center}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
 .gedit textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
@@ -373,7 +387,7 @@ function seed(){
   return S0;
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){storageOK=false}return seed()}
-function save(){try{localStorage.setItem(NUBE?.on&&NUBE.ses?cacheKey():KEY,JSON.stringify(S))}catch(e){storageOK=false}if(NUBE?.on&&NUBE.ses)programarSubida()}
+function save(){try{localStorage.setItem(claveDatos(),JSON.stringify(S))}catch(e){storageOK=false}if(NUBE?.on&&NUBE.ses)programarSubida()}
 let S=load(); save();
 
 const G=id=>S.grados.find(x=>x.id===id);
@@ -475,7 +489,7 @@ function modalMaterias(gid){
 function renderSide(){
   const n=gid=>S.temas.filter(t=>t.gradoId===gid&&estado(t)!=='completado').length;
   const b=(name,label,icon,extra='',on)=>`<button class="nav${on?' on':''}" data-act="go" data-v="${name}" ${extra}>${icon}${label}</button>`;
-  $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>${esc(S.config.docente)}${S.config.institucion?' · '+esc(S.config.institucion):''}</small></div></div>${NUBE.on?'<div id="nube" class="nube" role="status"></div>':''}
+  $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>${enSesion()?'Profesor · '+esc(cuentaActual().usuario):esc(S.config.docente)+(S.config.institucion?' · '+esc(S.config.institucion):'')}</small></div></div>${NUBE.on?'<div id="nube" class="nube" role="status"></div>':''}
   <nav class="navg" aria-label="General">${b('panel','Panel',ic('board'),'',V.name==='panel')}${b('calendario','Calendario',ic('cal'),'',V.name==='calendario')}${b('generador','Generador de temarios',ic('bulb'),'',V.name==='generador')}${b('imprimir','Imprimir y exportar',ic('print'),'',V.name==='imprimir')}${b('config','Configuración',ic('gear'),'',V.name==='config')}</nav>
   <nav class="navg" aria-label="Grados"><h4>Grados</h4>${S.grados.map(g=>`<button class="nav${V.name==='grado'&&V.grado===g.id?' on':''}" data-act="grado" data-id="${g.id}"><span class="dot" style="background:${g.color}"></span>${esc(g.nombre)}<span class="cnt">${n(g.id)}</span></button>`).join('')}
   <button class="nav" data-act="addGrado" style="opacity:.8">${ic('plus')}Agregar grado</button></nav>`}
@@ -617,7 +631,7 @@ VIEWS.imprimir=()=>head('Planeación','Imprimir y exportar','Elija qué incluir 
  <div class="card">${planHTML()}</div>`;
 
 VIEWS.config=()=>head('Ajustes','Configuración',NUBE.on?'Su cuenta, grados, periodos y copias de seguridad.':'Grados, periodos y respaldo de la información.')+
- (NUBE.on?`<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Correo</span><b>${esc(NUBE.ses?.user?.email||'')}</b></div><div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div><div><span class="s">Guardado</span><b>Automático en la nube</b></div></div><div class="tools"><button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`:'')+
+ (enSesion()?(()=>{const ca=cuentaActual();return `<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Usuario</span><b>${esc(ca.usuario)}</b></div><div><span class="s">Correo</span><b>${esc(ca.correo)}</b></div><div><span class="s">Rol</span><b>Profesor</b></div>${NUBE.on?'<div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div>':''}<div><span class="s">Guardado</span><b>${NUBE.on?'Automático en la nube':'En este equipo'}</b></div></div><div class="tools"><button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`})():'')+
  `<div class="cols"><section class="card grid2"><h2 class="wide">Datos del docente</h2>${fieldHtml({k:'docente',label:'Nombre del docente'},S.config.docente)}${fieldHtml({k:'institucion',label:'Institución o sede'},S.config.institucion)}<div class="mact wide"><button class="btn pri" data-act="saveCfg">Guardar datos</button></div></section>
  <section class="card"><h2>${NUBE.on?'Copia de seguridad':'Respaldo'}</h2><p style="margin:0 0 12px;color:var(--muted)">${NUBE.on?'Su planeación se guarda sola en su cuenta y la puede abrir desde cualquier equipo. Si quiere, descargue también una copia en este equipo.':'La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.'}</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
  <div class="cols"><section class="card"><h2>Grados</h2><div class="list">${S.grados.map(g=>`<div class="row"><span style="width:14px;height:14px;border-radius:3px;background:${g.color};flex:none"></span><div class="grow t">${esc(g.nombre)}</div><span class="s">${matsDe(g.id).length} materias</span><button class="ib" data-act="materiasG" data-id="${g.id}" title="Materias" aria-label="Materias">${ic('book')}</button><button class="ib" data-act="editGrado" data-id="${g.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delGrado" data-id="${g.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')}</div><button class="btn sm" data-act="addGrado" style="margin-top:10px">${ic('plus')} Agregar grado</button></section>
@@ -676,7 +690,7 @@ const A={
  backup:()=>{download(`respaldo_planeacion_${HOY}.json`,JSON.stringify(S,null,1),'application/json');},
  restore:()=>$('#fileIn').click(),
  salir:()=>confirmar('¿Cerrar sesión en este equipo? Su planeación queda guardada en su cuenta.',cerrarSesion),
- cambiarClave:async()=>{try{await sb('/auth/v1/recover',{method:'POST',body:{email:NUBE.ses.user.email}});toast('Le enviamos un correo con el enlace para cambiar la contraseña')}catch(e){toast(errAuth(e))}},
+ cambiarClave:()=>modalCambiarClave(),
  reset:()=>confirmar('¿Borrar toda la información y volver a la configuración inicial? Descargue un respaldo antes si lo necesita.',()=>{S=seed();S.temas=[];S.eventos=[];save();V.name='panel';render();toast('Información reiniciada')})
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.closest('#mbody'))return;const f=A[b.dataset.act];if(f){if(b.tagName!=='INPUT')e.preventDefault();f(b.dataset,b)}});
@@ -958,13 +972,86 @@ Object.assign(A,{
     let el=$('#guiaDoc');if(!el){const w=document.createElement('div');w.innerHTML=guiaHtml(t,c,i,C.length);el=w.firstElementChild}
     const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.pdf';await pdfDe(el,nom)}
 });
-/* ---------- Cuentas y datos en la nube (se activa solo cuando la app está publicada con Supabase) ---------- */
+/* ---------- Cuentas: en la nube (Supabase) cuando está configurada; si no, guardadas en este equipo ---------- */
 var NUBE={on:false,cfg:null,ses:null,timer:null,base:null,pendiente:false,subiendo:false,uso:null};
+var LOC={on:false,uid:null};
 var NOMBRE_APP='MaestrIA';
 // Nombre de marca: si termina en "IA", esas dos letras van en el color del lápiz
 const marca=()=>{const n=esc(NOMBRE_APP);return /IA$/.test(NOMBRE_APP)?n.slice(0,-2)+'<span class="ia">IA</span>':n};
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
+const lsJ=(k,d)=>{try{return JSON.parse(lsGet(k))??d}catch(e){return d}};
 const cacheKey=()=>'pd_cuenta_'+(NUBE.ses?.user?.id||'x');
+function claveDatos(){if(NUBE?.on&&NUBE.ses)return cacheKey();if(LOC?.uid)return 'md_datos_'+LOC.uid;return KEY}
+const enSesion=()=>Boolean((NUBE.on&&NUBE.ses)||(LOC.on&&LOC.uid));
+
+/* ----- Revisión de lo que se escribe ----- */
+const DOM_TYPO={'gmial.com':'gmail.com','gamil.com':'gmail.com','gmai.com':'gmail.com','gmal.com':'gmail.com','gmil.com':'gmail.com','gmaill.com':'gmail.com','gnail.com':'gmail.com','gmail.co':'gmail.com','gmail.con':'gmail.com','gmail.cm':'gmail.com','gmail.om':'gmail.com','gmail.comm':'gmail.com','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','hotmil.com':'hotmail.com','hotmai.com':'hotmail.com','hotmail.con':'hotmail.com','hotmail.co':'hotmail.com','hotmail.cm':'hotmail.com','outlok.com':'outlook.com','outloo.com':'outlook.com','outlook.con':'outlook.com','outlook.co':'outlook.com','yaho.com':'yahoo.com','yahooo.com':'yahoo.com','yahoo.con':'yahoo.com','yahoo.co':'yahoo.com','iclud.com':'icloud.com','icloud.con':'icloud.com'};
+const sinTildes=v=>v.normalize('NFD').replace(/[̀-ͯ]/g,'');
+function revisarCorreo(v){v=String(v||'').trim();
+  if(!v)return {err:'Escriba su correo.'};
+  if(/\s/.test(v))return {err:'El correo no puede tener espacios.',sug:v.replace(/\s+/g,'')};
+  if(v.includes(','))return {err:'El correo tiene una coma (,). En los correos se usa punto (.).',sug:v.replace(/,/g,'.')};
+  if(v.includes(';'))return {err:'El correo tiene punto y coma (;). En los correos se usa punto (.).',sug:v.replace(/;/g,'.')};
+  const nAt=(v.match(/@/g)||[]).length;
+  if(!nAt)return {err:'Al correo le falta la arroba (@). Ejemplo: nombre@gmail.com'};
+  if(nAt>1)return {err:'El correo tiene más de una arroba (@).'};
+  const [loc,dom]=v.split('@');
+  if(!loc)return {err:'Falta la parte que va antes de la @.'};
+  if(!dom)return {err:'Falta la parte que va después de la @. Ejemplo: gmail.com'};
+  const raro=v.match(/[^A-Za-z0-9._%+\-@]/);
+  if(raro)return {err:`El correo tiene un carácter que no se permite: «${raro[0]}».`,sug:/[À-ÿ]/.test(raro[0])?sinTildes(v):undefined};
+  if(/\.\./.test(v)||/^\.|\.@|@\.|\.$/.test(v))return {err:'Revise los puntos del correo: hay uno de más o en mal lugar.'};
+  if(!/\.[A-Za-z]{2,}$/.test(dom))return {err:'Al final del correo falta algo como .com o .co',sug:/^(gmail|hotmail|outlook|yahoo|icloud)$/i.test(dom)?`${loc}@${dom.toLowerCase()}.com`:undefined};
+  const d=dom.toLowerCase();if(DOM_TYPO[d])return {warn:`¿Quiso decir ${loc}@${DOM_TYPO[d]}?`,sug:`${loc}@${DOM_TYPO[d]}`,val:v.toLowerCase()};
+  return {ok:true,val:v.toLowerCase()}}
+function revisarUsuario(v){v=String(v||'').trim();
+  if(!v)return {err:'Escriba un nombre de usuario.'};
+  if(/\s/.test(v))return {err:'El usuario no puede tener espacios.',sug:v.replace(/\s+/g,'.').toLowerCase()};
+  if(/[,;]/.test(v))return {err:'El usuario no puede tener comas ni punto y coma.',sug:v.replace(/[,;]+/g,'.').toLowerCase()};
+  if(v.includes('@'))return {err:'El usuario no puede tener @. El correo va en su propia casilla.'};
+  if(/[À-ÿ]/.test(v))return {err:'El usuario no puede tener tildes ni ñ.',sug:sinTildes(v).replace(/ñ/gi,'n').toLowerCase()};
+  const raro=v.match(/[^A-Za-z0-9._-]/);if(raro)return {err:`El usuario tiene un carácter que no se permite: «${raro[0]}». Use letras, números, punto, guion o guion bajo.`};
+  if(!/^[A-Za-z]/.test(v))return {err:'El usuario debe empezar con una letra.'};
+  if(v.length<3)return {err:'El usuario debe tener al menos 3 caracteres.'};
+  if(v.length>20)return {err:'El usuario puede tener máximo 20 caracteres.'};
+  return {ok:true,val:v.toLowerCase()}}
+// En el inicio de sesión se acepta usuario o correo
+function revisarId(v){const t=String(v||'').trim();if(!t)return {err:'Escriba su usuario o su correo.'};return t.includes('@')||/[,;]\s*(com|co|net|org|es)\b/i.test(t)?revisarCorreo(t):revisarUsuario(t)}
+const COMUNES=/^(1234|12345|123456|1234567|12345678|123456789|1234567890|password|contraseña|contrasena|clave|qwerty|abc123|abcd1234|111111|000000|maestria|profesor|profesora|docente|colombia)\d*$/i;
+function fuerzaClave(p){p=p||'';const clases=[/[a-z]/,/[A-Z]/,/\d/,/[^A-Za-z0-9]/].filter(r=>r.test(p)).length,comun=COMUNES.test(p)||/^(.)\1+$/.test(p);
+  if(!p)return {nivel:-1};
+  if(p.length<8||comun||clases<2)return {nivel:0,txt:'Débil',tip:p.length<8?'Use al menos 8 caracteres.':comun?'Es muy fácil de adivinar.':'Combine letras y números.'};
+  if((p.length>=10&&clases>=3)||(p.length>=14&&clases>=2))return {nivel:2,txt:'Recomendada',tip:'Buena contraseña.'};
+  return {nivel:1,txt:'Usable',tip:'Para que sea recomendada: 10 o más caracteres con mayúsculas, números o símbolos.'}}
+function revisarClave(p,nueva){if(!p)return {err:'Escriba la contraseña.'};if(/^\s|\s$/.test(p))return {warn:'La contraseña empieza o termina con un espacio. Revise que sea a propósito.'};
+  if(nueva){const f=fuerzaClave(p);if(f.nivel<1)return {err:'La contraseña es débil. '+f.tip}}return {ok:true}}
+
+/* ----- Cuentas recordadas en este equipo ----- */
+const recordadas=()=>lsJ('md_recordadas',[]).filter(r=>r.modo===(NUBE.on?'nube':'local'));
+function recordar(r){const todas=lsJ('md_recordadas',[]).filter(x=>!(x.modo===r.modo&&x.usuario===r.usuario));todas.unshift({...r,t:Date.now()});lsSet('md_recordadas',JSON.stringify(todas.slice(0,5)))}
+function olvidar(modo,usuario){lsSet('md_recordadas',JSON.stringify(lsJ('md_recordadas',[]).filter(x=>!(x.modo===modo&&x.usuario===usuario))))}
+function actualizarRecordada(usuario,clave){const t=lsJ('md_recordadas',[]);const r=t.find(x=>x.modo===(NUBE.on?'nube':'local')&&x.usuario===usuario);if(r&&r.clave){r.clave=clave;lsSet('md_recordadas',JSON.stringify(t))}}
+
+/* ----- Cuentas guardadas en este equipo (cuando no hay nube) ----- */
+async function hashClave(clave,sal){const txt=sal+':'+clave;
+  if(crypto?.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  let h=2166136261;for(let i=0;i<txt.length;i++){h^=txt.charCodeAt(i);h=Math.imul(h,16777619)}return 'f'+(h>>>0).toString(16)}
+const cuentasLocales=()=>lsJ('md_cuentas',{}),guardarCuentas=c=>lsSet('md_cuentas',JSON.stringify(c));
+const LOCAL={
+  async registrar({correo,usuario,clave}){const c=cuentasLocales();
+    if(Object.values(c).some(x=>x.usuario===usuario))throw {code:'usuario_existe'};
+    if(Object.values(c).some(x=>x.correo===correo))throw {code:'user_already_exists'};
+    const id=uid()+uid(),sal=uid()+uid();c[id]={id,usuario,correo,rol:'profesor',sal,hash:await hashClave(clave,sal),creado:new Date().toISOString()};guardarCuentas(c);return id},
+  async entrar(idTxt,clave){const t=idTxt.toLowerCase(),c=Object.values(cuentasLocales()).find(x=>x.usuario===t||x.correo===t);
+    if(!c||await hashClave(clave,c.sal)!==c.hash)throw {code:'invalid_credentials'};return c.id},
+  async cambiar(id,actual,nueva){const c=cuentasLocales(),x=c[id];if(!x||await hashClave(actual,x.sal)!==x.hash)throw {code:'clave_actual'};
+    x.sal=uid()+uid();x.hash=await hashClave(nueva,x.sal);guardarCuentas(c)}};
+function cuentaActual(){
+  if(NUBE.on&&NUBE.ses){const u=NUBE.ses.user||{};return {usuario:u.user_metadata?.usuario||(u.email||'').split('@')[0],correo:u.email||'',rol:'Profesor',modo:'nube'}}
+  if(LOC.uid){const x=cuentasLocales()[LOC.uid]||{};return {usuario:x.usuario||'',correo:x.correo||'',rol:'Profesor',modo:'local'}}
+  return null}
+
+/* ----- Nube (Supabase) ----- */
 async function cargarConfig(){if(window.claude||!/^https?:/.test(location.protocol))return null;try{const r=await fetch('/api/config',{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
 async function sb(path,{method='GET',body,token,headers={}}={}){let r;
   try{r=await fetch(NUBE.cfg.supabaseUrl+path,{method,headers:{apikey:NUBE.cfg.supabaseAnonKey,'content-type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...headers},body:body?JSON.stringify(body):undefined})}catch(e){throw {code:'red'}}
@@ -974,7 +1061,7 @@ function guardarSesion(d){NUBE.ses={access_token:d.access_token,refresh_token:d.
 let _refrescando=null;
 async function tokenNube(){if(!NUBE.ses)throw {code:'sin_sesion'};
   if(Date.now()>NUBE.ses.expira){_refrescando??=sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:NUBE.ses.refresh_token}}).then(guardarSesion).finally(()=>{_refrescando=null});
-    try{await _refrescando}catch(e){if(e.code!=='red'){sesionVencida();}throw e}}
+    try{await _refrescando}catch(e){if(e.code!=='red')sesionVencida();throw e}}
   return NUBE.ses.access_token}
 function sesionVencida(){lsDel('pd_sesion');NUBE.ses=null;pantallaAuth('entrar','Su sesión se cerró. Vuelva a iniciar sesión.')}
 async function bajarDatos(){const tk=await tokenNube();const d=await sb(`/rest/v1/planeaciones?select=datos,actualizado&user_id=eq.${NUBE.ses.user.id}`,{token:tk});return d?.[0]||null}
@@ -991,80 +1078,135 @@ async function subirDatos(){if(!NUBE.on||!NUBE.ses)return;if(NUBE.subiendo){clea
   finally{NUBE.subiendo=false}}
 window.addEventListener('online',()=>{if(NUBE.on&&NUBE.pendiente)subirDatos()});
 window.addEventListener('beforeunload',e=>{if(NUBE.on&&NUBE.pendiente){subirDatos();e.preventDefault();e.returnValue=''}});
-// Al volver a la app (otro equipo pudo haber cambiado algo), se trae lo último
 async function traerCambios(){if(!NUBE.on||!NUBE.ses||NUBE.pendiente||NUBE.subiendo||document.hidden)return;
   try{const f=await bajarDatos();if(f&&f.actualizado!==NUBE.base&&!NUBE.pendiente){S=f.datos;NUBE.base=f.actualizado;lsSet(cacheKey(),JSON.stringify(S));lsSet(cacheKey()+'_base',f.actualizado);
     if(!$('#ov')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')&&!(typeof GU!=='undefined'&&GU.busy))render();toast('Se cargaron los cambios hechos en otro equipo')}marcarNube(NUBE.pendiente?'guardando':'ok')}
   catch(e){if(e.code==='red')marcarNube('offline')}}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)traerCambios()});
+
+/* ----- Entrar y salir ----- */
 const tieneDatosPropios=d=>!!d&&((d.temas||[]).some(t=>!/\(ejemplo\)/.test(t.titulo))||(d.recursos||[]).length>0||(d.observaciones||[]).length>0);
 function datosNuevos(nombre){const d=seed();d.config.docente=nombre||'Docente';d.config.institucion='';return d}
-function arrancar(){$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();marcarNube(NUBE.pendiente?'guardando':'ok')}
+function arrancar(){$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();if(NUBE.on)marcarNube(NUBE.pendiente?'guardando':'ok')}
+function primeraVez(nombre){let local=null;try{local=JSON.parse(lsGet(KEY)||'null')}catch(e){}
+  if(tieneDatosPropios(local))return pantallaAuth('migrar','',{local,nombre});S=datosNuevos(nombre);save();arrancar()}
 async function entrarConDatos(nombreNuevo){
-  pantallaCargando('Cargando su planeación…');
-  let fila;
+  pantallaCargando('Cargando su planeación…');let fila;
   try{fila=await bajarDatos()}
   catch(e){if(!NUBE.ses)return;const c=lsGet(cacheKey());if(e.code==='red'&&c){S=JSON.parse(c);NUBE.pendiente=lsGet(cacheKey()+'_pend')==='1';arrancar();marcarNube('offline');return}
     return pantallaAuth('entrar',e.code==='red'?'No hay conexión a internet. Revise la conexión e intente de nuevo.':'No se pudo abrir su planeación. Intente de nuevo.')}
   if(fila){const c=lsGet(cacheKey()),base=lsGet(cacheKey()+'_base');
     if(c&&lsGet(cacheKey()+'_pend')==='1'&&base===fila.actualizado){S=JSON.parse(c);NUBE.base=base;NUBE.pendiente=true;arrancar();subirDatos();return}
     S=fila.datos;NUBE.base=fila.actualizado;lsSet(cacheKey(),JSON.stringify(S));lsSet(cacheKey()+'_base',fila.actualizado);lsDel(cacheKey()+'_pend');arrancar();return}
-  // Cuenta nueva: se ofrece pasar lo que ya había en este equipo
-  const nombre=nombreNuevo||NUBE.ses.user?.user_metadata?.nombre||'';let local=null;try{local=JSON.parse(lsGet(KEY)||'null')}catch(e){}
-  if(tieneDatosPropios(local))return pantallaAuth('migrar','',{local,nombre});
-  S=datosNuevos(nombre);arrancar();subirDatos()}
-async function cerrarSesion(){if(NUBE.pendiente){toast('Guardando antes de salir…');await subirDatos();if(NUBE.pendiente){toast('No se pudo guardar el último cambio. Revise la conexión e intente de nuevo.');return}}
-  const tk=NUBE.ses?.access_token;if(tk)sb('/auth/v1/logout',{method:'POST',token:tk}).catch(()=>{});
-  [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null;S=seed();pantallaAuth('entrar','Cerró sesión.')}
-const ERR_AUTH={invalid_credentials:'Correo o contraseña incorrectos.',invalid_grant:'Correo o contraseña incorrectos.',email_not_confirmed:'Primero confirme su correo: revise su bandeja de entrada y la carpeta de spam.',user_already_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',email_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',weak_password:'La contraseña es muy débil: use al menos 8 caracteres, con letras y números.',over_email_send_rate_limit:'Se enviaron muchos correos seguidos. Espere unos minutos e intente de nuevo.',over_request_rate_limit:'Demasiados intentos seguidos. Espere unos minutos.',email_address_invalid:'Ese correo no es válido.',validation_failed:'Revise el correo y la contraseña.',same_password:'La nueva contraseña debe ser distinta de la anterior.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',signup_disabled:'Por ahora no se están creando cuentas nuevas.'};
-const errAuth=e=>ERR_AUTH[e?.code]||(e?.status===429?ERR_AUTH.over_request_rate_limit:'Algo salió mal. Intente de nuevo en un momento.');
+  primeraVez(nombreNuevo||NUBE.ses.user?.user_metadata?.usuario||'')}
+function entrarLocal(id){LOC.uid=id;lsSet('md_sesion_local',id);const d=lsJ('md_datos_'+id,null);if(d){S=d;arrancar();return}primeraVez(cuentasLocales()[id]?.usuario||'')}
+async function cerrarSesion(){
+  if(NUBE.on){if(NUBE.pendiente){toast('Guardando antes de salir…');await subirDatos();if(NUBE.pendiente){toast('No se pudo guardar el último cambio. Revise la conexión e intente de nuevo.');return}}
+    const tk=NUBE.ses?.access_token;if(tk)sb('/auth/v1/logout',{method:'POST',token:tk}).catch(()=>{});
+    [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null}
+  else{lsDel('md_sesion_local');LOC.uid=null}
+  S=seed();pantallaAuth('entrar','Cerró sesión.')}
+async function correoParaEntrar(idTxt){if(idTxt.includes('@'))return idTxt;const c=await sb('/rest/v1/rpc/correo_de_usuario',{method:'POST',body:{p_usuario:idTxt}});if(!c)throw {code:'invalid_credentials'};return c}
+async function accionEntrar(idTxt,clave){
+  if(NUBE.on){const email=await correoParaEntrar(idTxt);const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:clave}});guardarSesion(d);
+    const ca=cuentaActual();return {usuario:ca.usuario,correo:ca.correo,ir:()=>entrarConDatos()}}
+  const id=await LOCAL.entrar(idTxt,clave),x=cuentasLocales()[id];return {usuario:x.usuario,correo:x.correo,ir:()=>entrarLocal(id)}}
+async function accionRegistrar({correo,usuario,clave}){
+  if(NUBE.on){const libre=await sb('/rest/v1/rpc/usuario_disponible',{method:'POST',body:{p_usuario:usuario}});if(libre===false)throw {code:'usuario_existe'};
+    const d=await sb('/auth/v1/signup',{method:'POST',body:{email:correo,password:clave,data:{usuario,rol:'profesor'}}});
+    if(d?.access_token){guardarSesion(d);return {ir:()=>entrarConDatos(usuario)}}
+    if(d&&Array.isArray(d.identities)&&!d.identities.length)throw {code:'user_already_exists'};
+    return {confirmar:true}}
+  const id=await LOCAL.registrar({correo,usuario,clave});return {ir:()=>entrarLocal(id)}}
+async function accionCambiarClave(actual,nueva){const ca=cuentaActual();
+  if(NUBE.on){try{await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email:ca.correo,password:actual}})}catch(e){throw e.code==='red'?e:{code:'clave_actual'}}
+    await sb('/auth/v1/user',{method:'PUT',token:await tokenNube(),body:{password:nueva}})}
+  else await LOCAL.cambiar(LOC.uid,actual,nueva);
+  actualizarRecordada(ca.usuario,nueva)}
+
+const ERR_AUTH={invalid_credentials:'Usuario, correo o contraseña incorrectos.',invalid_grant:'Usuario, correo o contraseña incorrectos.',email_not_confirmed:'Primero confirme su correo: revise su bandeja de entrada y la carpeta de spam.',user_already_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',email_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',usuario_existe:'Ese nombre de usuario ya está ocupado. Pruebe con otro.',weak_password:'La contraseña es muy débil: use al menos 8 caracteres, con letras y números.',over_email_send_rate_limit:'Se enviaron muchos correos seguidos. Espere unos minutos e intente de nuevo.',over_request_rate_limit:'Demasiados intentos seguidos. Espere unos minutos.',email_address_invalid:'Ese correo no es válido.',validation_failed:'Revise el correo y la contraseña.',same_password:'La nueva contraseña debe ser distinta de la anterior.',clave_actual:'La contraseña actual no es correcta.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',signup_disabled:'Por ahora no se están creando cuentas nuevas.'};
+const errAuth=e=>{const msg=String(e?.msg||'');
+  if(e?.code==='email_address_not_authorized'||/not authorized/i.test(msg))return 'Supabase no permite enviar el correo de activación a esa dirección: con su servicio de correo de prueba solo envía a los miembros del equipo del proyecto. Desactive "Confirm email" o configure un servicio de correo propio (SMTP) en Supabase.';
+  if(/sending (confirmation|recovery|magic)|error sending/i.test(msg))return 'Supabase no pudo enviar el correo. Revise la configuración de correo (SMTP) en Supabase o desactive "Confirm email" mientras prueba.';
+  if(/database error/i.test(msg))return 'La base de datos rechazó la cuenta. Ejecute de nuevo el archivo supabase.sql completo en Supabase (SQL Editor).';
+  if(ERR_AUTH[e?.code])return ERR_AUTH[e.code];if(e?.status===429)return ERR_AUTH.over_request_rate_limit;
+  return 'Algo salió mal. Intente de nuevo en un momento.'+(msg||e?.code?` (Detalle: ${msg||e.code})`:'')};
+
+/* ----- Pantallas ----- */
 function pantallaCargando(txt){let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;
   a.innerHTML=`<div class="auth-cargando" role="status"><span class="spin"></span>${esc(txt)}</div>`}
+const campo=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}" autocapitalize="none" spellcheck="false"${type==='email'?' inputmode="email"':''}><small class="fmsg" id="m_${id}" aria-live="polite"></small></label>`;
+const campoClave=(id,label,ac,barra)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span>${barra?`<div class="fuerza" id="f_${id}" data-n="-1" aria-hidden="true"><i></i><i></i><i></i></div>`:''}<small class="fmsg" id="m_${id}" aria-live="polite"></small></label>`;
+function mostrarMsg(id,r){const m=$('#m_'+id),i=$('#'+id);if(!m)return;m.className='fmsg'+(r?.err?' err':r?.warn?' warn':'');
+  m.innerHTML=r?.err||r?.warn?esc(r.err||r.warn)+(r.sug?` <button type="button" class="link sug" data-sug="${esc(r.sug)}" data-para="${id}">Usar «${esc(r.sug)}»</button>`:''):'';i?.setAttribute('aria-invalid',r?.err?'true':'false')}
+function pintarFuerza(id){const b=$('#f_'+id);if(!b)return;const f=fuerzaClave($('#'+id).value);b.dataset.n=f.nivel;const m=$('#m_'+id);
+  if(f.nivel<0){m.textContent='';m.className='fmsg';return}m.className='fmsg f'+f.nivel;m.innerHTML=`<b>${f.txt}</b> · ${esc(f.tip)}`}
+function tarjetasRecordadas(){const R=recordadas();if(!R.length)return '';
+  return `<div class="recordadas"><p class="s">Cuentas guardadas en este equipo</p>${R.map(r=>`<div class="rec"><button type="button" class="rec-usar" data-usar="${esc(r.usuario)}"><span class="av">${esc((r.usuario||'?')[0].toUpperCase())}</span><span class="rec-txt"><b>${esc(r.usuario)}</b><small>${esc(r.correo)}${r.clave?' · contraseña guardada':''}</small></span><span class="rec-rol">Profesor</span></button><button type="button" class="ib" data-olvidar="${esc(r.usuario)}" aria-label="Quitar ${esc(r.usuario)} de este equipo" title="Quitar de este equipo">${ic('x')}</button></div>`).join('')}</div>`}
 function pantallaAuth(modo,aviso='',extra={}){
   let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;closeModal();
-  const F=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}"${type==='email'?' inputmode="email"':''}></label>`;
-  const pw=(id,label,ac)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span></label>`;
+  const local=!NUBE.on;
   const T={
-    entrar:['Iniciar sesión','Entre para ver su planeación.',`${F('aEmail','Correo','email','email','nombre@correo.com')}${pw('aPass','Contraseña','current-password')}<button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
-    registro:['Crear cuenta','Empiece a organizar sus clases hoy.',`${F('aNombre','Su nombre','text','name','Ej.: Ana Gómez')}${F('aEmail','Correo','email','email','nombre@correo.com')}${pw('aPass','Contraseña (mínimo 8 caracteres)','new-password')}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
-    recuperar:['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${F('aEmail','Correo de su cuenta','email','email','nombre@correo.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
-    nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${pw('aPass','Nueva contraseña (mínimo 8 caracteres)','new-password')}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
+    entrar:['Iniciar sesión','Entre como profesor para ver su planeación.',`${tarjetasRecordadas()}${campo('aId','Usuario o correo','text','username','Ej.: ana.gomez o ana@gmail.com')}${campoClave('aPass','Contraseña','current-password')}<label class="chk recordar"><input type="checkbox" id="aRecordar" checked><span>Recordar usuario y contraseña en este equipo</span></label><button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
+    registro:['Crear cuenta de profesor','Complete los tres datos para empezar.',`${campo('aEmail','Correo','email','email','nombre@gmail.com')}${campo('aUser','Usuario','text','username','Ej.: ana.gomez')}${campoClave('aPass','Contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
+    recuperar:local?['Recuperar contraseña','Las cuentas de este equipo no tienen recuperación por correo.',`<div class="auth-aviso">La cuenta está guardada solo en este navegador. Si olvidó la contraseña, revise si quedó guardada arriba en "Cuentas guardadas en este equipo", o cree una cuenta nueva.</div><button type="button" class="btn ancho" data-auth="entrar">Volver a iniciar sesión</button>`]
+      :['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${campo('aEmail','Correo de su cuenta','email','email','nombre@gmail.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
+    nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${campoClave('aPass','Nueva contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
     confirmar:['Revise su correo',`Le enviamos un enlace a <b>${esc(extra.email||'su correo')}</b>. Ábralo para activar la cuenta y entrar. Si no lo ve, busque en la carpeta de spam.`,`<button type="button" class="btn ancho" data-auth="entrar">Ya la activé, iniciar sesión</button>`],
-    migrar:['Encontramos datos en este equipo',`Hay una planeación guardada en este navegador. ¿Quiere pasarla a su cuenta para tenerla en todos sus equipos?`,`<button type="button" class="btn pri ancho" data-auth="migrarSi">Sí, pasarla a mi cuenta</button><button type="button" class="btn ancho" data-auth="migrarNo">No, empezar desde cero</button>`]
+    migrar:['Encontramos datos en este equipo','Hay una planeación guardada en este navegador. ¿Quiere pasarla a su cuenta?',`<button type="button" class="btn pri ancho" data-auth="migrarSi">Sí, pasarla a mi cuenta</button><button type="button" class="btn ancho" data-auth="migrarNo">No, empezar desde cero</button>`]
   }[modo];
   a.innerHTML=`<aside class="auth-izq"><div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>Para docentes de escuela rural</small></div></div>
     <div class="auth-msg"><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
     <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
     <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
-  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="alert">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}</form></main>`;
+  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}
+    ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}</form></main>`;
   const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
   const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
+  const REV={aId:revisarId,aEmail:revisarCorreo,aUser:revisarUsuario};
+  const tocado=new Set();
+  f.addEventListener('input',e=>{const id=e.target.id;if(REV[id]&&tocado.has(id))mostrarMsg(id,REV[id](e.target.value));if(id==='aPass'){if($('#f_aPass'))pintarFuerza('aPass');else mostrarMsg('aPass',null)}err('')});
+  f.addEventListener('focusout',e=>{const id=e.target.id;if(REV[id]&&e.target.value){tocado.add(id);mostrarMsg(id,REV[id](e.target.value))}});
+  f.addEventListener('keyup',e=>{if(e.target.type==='password'||e.target.id==='aPass'){const caps=e.getModifierState?.('CapsLock');const m=$('#m_aPass');if(!m)return;if(caps&&!m.dataset.caps){m.dataset.caps=1;if(!$('#f_aPass'))mostrarMsg('aPass',{warn:'Tiene activadas las mayúsculas (Bloq Mayús).'})}else if(!caps&&m.dataset.caps){delete m.dataset.caps;if(!$('#f_aPass'))mostrarMsg('aPass',null)}}});
   f.onclick=e=>{const v=e.target.closest('[data-ver]');if(v){const i=$('#'+v.dataset.ver);i.type=i.type==='password'?'text':'password';v.textContent=i.type==='password'?'Ver':'Ocultar';return}
+    const sg=e.target.closest('[data-sug]');if(sg){const i=$('#'+sg.dataset.para);i.value=sg.dataset.sug;mostrarMsg(sg.dataset.para,REV[sg.dataset.para](i.value));i.focus();return}
+    const us=e.target.closest('[data-usar]');if(us){const r=recordadas().find(x=>x.usuario===us.dataset.usar);$('#aId').value=r.usuario;$('#aPass').value=r.clave||'';mostrarMsg('aId',null);(r.clave?f.querySelector('[data-submit]'):$('#aPass')).focus();return}
+    const ol=e.target.closest('[data-olvidar]');if(ol){olvidar(NUBE.on?'nube':'local',ol.dataset.olvidar);pantallaAuth('entrar','Se quitó la cuenta de este equipo. La cuenta y su planeación siguen existiendo.');return}
     const b=e.target.closest('[data-auth]');if(!b)return;const m=b.dataset.auth;
-    if(m==='migrarSi'){S=extra.local;if(extra.nombre&&(!S.config.docente||S.config.docente==='Jerson'||S.config.docente==='Docente'))S.config.docente=extra.nombre;arrancar();subirDatos();toast('Su planeación quedó guardada en su cuenta');return}
-    if(m==='migrarNo'){S=datosNuevos(extra.nombre);arrancar();subirDatos();return}
+    if(m==='migrarSi'){S=extra.local;if(extra.nombre)S.config.docente=extra.nombre;save();arrancar();toast('Su planeación quedó guardada en su cuenta');return}
+    if(m==='migrarNo'){S=datosNuevos(extra.nombre);save();arrancar();return}
     pantallaAuth(m)};
   f._go=async()=>{err('');
+    const revisar=ids=>{let bien=true,primero=null;for(const id of ids){const r=id==='aPass'?revisarClave($('#aPass').value,modo!=='entrar'):REV[id](val(id));tocado.add(id);
+      if(id==='aPass'&&$('#f_aPass')){pintarFuerza('aPass');if(r.err){const m=$('#m_aPass');m.className='fmsg err';m.textContent=r.err}}else mostrarMsg(id,r.err||r.warn?r:null);
+      if(r.err||(r.warn&&modo==='registro'&&id==='aEmail')){bien=false;primero??=id}}if(primero)$('#'+primero).focus();return bien};
     try{
-      if(modo==='entrar'){const email=val('aEmail'),password=$('#aPass').value;if(!email||!password)return err('Escriba su correo y su contraseña.');
-        ocupado(true);const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});guardarSesion(d);return entrarConDatos()}
-      if(modo==='registro'){const nombre=val('aNombre'),email=val('aEmail'),password=$('#aPass').value;
-        if(!nombre||!email||!password)return err('Complete su nombre, su correo y una contraseña.');if(password.length<8)return err('La contraseña debe tener al menos 8 caracteres.');
-        ocupado(true);const d=await sb('/auth/v1/signup',{method:'POST',body:{email,password,data:{nombre}}});
-        if(d?.access_token){guardarSesion(d);return entrarConDatos(nombre)}
-        if(d&&Array.isArray(d.identities)&&!d.identities.length)return pantallaAuth('entrar','Ya existe una cuenta con ese correo. Inicie sesión.');
-        return pantallaAuth('confirmar','',{email})}
-      if(modo==='recuperar'){const email=val('aEmail');if(!email)return err('Escriba el correo de su cuenta.');ocupado(true);
-        await sb('/auth/v1/recover',{method:'POST',body:{email}});return pantallaAuth('entrar','Si ese correo tiene cuenta, le llegará un enlace para crear una nueva contraseña. Revise también la carpeta de spam.')}
-      if(modo==='nueva'){const password=$('#aPass').value;if(password.length<8)return err('La contraseña debe tener al menos 8 caracteres.');ocupado(true);
-        await sb('/auth/v1/user',{method:'PUT',token:NUBE.recup.access_token,body:{password}});guardarSesion(NUBE.recup);NUBE.recup=null;toast('Contraseña actualizada');return entrarConDatos()}
-    }catch(e){ocupado(false);err(errAuth(e))}};
-  setTimeout(()=>f.querySelector('input')?.focus(),50)}
+      if(modo==='entrar'){if(!revisar(['aId','aPass']))return;const idTxt=revisarId(val('aId')).val,clave=$('#aPass').value;ocupado(true);
+        const r=await accionEntrar(idTxt,clave);if($('#aRecordar')?.checked)recordar({modo:NUBE.on?'nube':'local',usuario:r.usuario,correo:r.correo,clave});return r.ir()}
+      if(modo==='registro'){if(!revisar(['aEmail','aUser','aPass']))return;ocupado(true);
+        const correo=revisarCorreo(val('aEmail')).val,usuario=revisarUsuario(val('aUser')).val,clave=$('#aPass').value;
+        const r=await accionRegistrar({correo,usuario,clave});recordar({modo:NUBE.on?'nube':'local',usuario,correo,clave});
+        if(r.confirmar)return pantallaAuth('confirmar','',{email:correo});return r.ir()}
+      if(modo==='recuperar'){if(!revisar(['aEmail']))return;ocupado(true);await sb('/auth/v1/recover',{method:'POST',body:{email:revisarCorreo(val('aEmail')).val}});
+        return pantallaAuth('entrar','Si ese correo tiene cuenta, le llegará un enlace para crear una nueva contraseña. Revise también la carpeta de spam.')}
+      if(modo==='nueva'){if(!revisar(['aPass']))return;ocupado(true);const clave=$('#aPass').value;
+        await sb('/auth/v1/user',{method:'PUT',token:NUBE.recup.access_token,body:{password:clave}});guardarSesion(NUBE.recup);NUBE.recup=null;actualizarRecordada(cuentaActual().usuario,clave);toast('Contraseña actualizada');return entrarConDatos()}
+    }catch(e){ocupado(false);err(errAuth(e));if(e?.code==='usuario_existe')mostrarMsg('aUser',{err:ERR_AUTH.usuario_existe})}};
+  setTimeout(()=>f.querySelector('input:not([type=checkbox])')?.focus(),50)}
+function modalCambiarClave(){
+  openModal('Cambiar contraseña',`<form id="ccForm" class="grid2" novalidate>${campoClave('ccActual','Contraseña actual','current-password').replace('class="fld"','class="fld wide"')}${campoClave('aPass','Nueva contraseña','new-password',true).replace('class="fld"','class="fld wide"')}<div class="auth-err wide" role="alert" hidden></div><div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Guardar</button></div></form>`,()=>{
+    const f=$('#ccForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m};
+    f.addEventListener('input',e=>{if(e.target.id==='aPass')pintarFuerza('aPass');err('')});
+    f.onclick=e=>{const v=e.target.closest('[data-ver]');if(v){const i=$('#'+v.dataset.ver);i.type=i.type==='password'?'text':'password';v.textContent=i.type==='password'?'Ver':'Ocultar'}};
+    f._go=async()=>{const actual=$('#ccActual').value,nueva=$('#aPass').value;if(!actual)return err('Escriba su contraseña actual.');const r=revisarClave(nueva,true);if(r.err)return err(r.err);if(nueva===actual)return err(ERR_AUTH.same_password);
+      f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
+      try{await accionCambiarClave(actual,nueva);closeModal();toast('Contraseña actualizada')}catch(e){f.querySelectorAll('button,input').forEach(b=>b.disabled=false);err(errAuth(e))}}})}
 async function usoIA(){if(!NUBE.on)return null;try{const tk=await tokenNube();const r=await fetch('/api/guia',{headers:{Authorization:'Bearer '+tk}});if(!r.ok)return null;NUBE.uso=await r.json();return NUBE.uso}catch(e){return null}}
 async function iniciar(){
   const cfg=await cargarConfig();
-  if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey){render();return}
-  NUBE.cfg=cfg;NUBE.on=true;if(cfg.nombre){NOMBRE_APP=cfg.nombre;document.title=cfg.nombre}
+  if(cfg?.nombre){NOMBRE_APP=cfg.nombre;document.title=cfg.nombre}
+  if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey){LOC.on=true;const id=lsGet('md_sesion_local');if(id&&cuentasLocales()[id])return entrarLocal(id);return pantallaAuth('entrar')}
+  NUBE.cfg=cfg;NUBE.on=true;
   const h=new URLSearchParams(location.hash.slice(1));
   if(h.get('error_description')||h.get('error')){history.replaceState(null,'',location.pathname+location.search);return pantallaAuth('entrar','El enlace del correo ya no es válido o ya se usó. Pida uno nuevo.')}
   if(h.get('access_token')){history.replaceState(null,'',location.pathname+location.search);
