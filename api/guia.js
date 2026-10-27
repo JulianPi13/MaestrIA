@@ -3,7 +3,10 @@
 //   GEMINI_API_KEY     → Google Gemini (tiene plan gratuito, se saca en aistudio.google.com)
 //   OPENAI_API_KEY     → ChatGPT de OpenAI (de pago, se saca en platform.openai.com)
 //   ANTHROPIC_API_KEY  → Claude de Anthropic (de pago, se saca en console.anthropic.com)
-// Opcionales: CODIGO_ACCESO (palabra secreta), IA_PROVEEDOR (gemini|openai|anthropic), IA_MODELO.
+// Opcionales: IA_PROVEEDOR (gemini|openai|anthropic), IA_MODELO.
+// Con cuentas (SUPABASE_URL y SUPABASE_ANON_KEY): solo docentes con sesión iniciada, con un límite de guías al mes (IA_LIMITE_MES, 60 por defecto).
+// Sin cuentas: CODIGO_ACCESO (palabra secreta) protege el servicio.
+import { nubeActiva, limiteMensual, usuarioDesdeToken, usoDelMes, sumarUso } from './_supabase.js';
 
 const PROVEEDORES = {
   gemini: {
@@ -54,7 +57,22 @@ async function pedirAnthropic(clave, modelo, prompt) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ code: 'metodo' });
+  res.setHeader('Cache-Control', 'no-store');
+  const nube = nubeActiva();
+  if (req.method !== 'POST' && !(nube && req.method === 'GET')) return res.status(405).json({ code: 'metodo' });
+
+  // Con cuentas: se identifica al docente y se revisa su cupo del mes
+  let uid = null, usadas = 0;
+  const limite = limiteMensual();
+  if (nube) {
+    const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    const usuario = await usuarioDesdeToken(token);
+    if (!usuario) return res.status(401).json({ code: 'sesion' });
+    uid = usuario.id;
+    try { usadas = await usoDelMes(uid); } catch (e) { console.error(e); return res.status(502).json({ code: 'error' }); }
+    if (req.method === 'GET') return res.status(200).json({ usadas, limite });
+    if (usadas >= limite) return res.status(429).json({ code: 'limite_mes', limite });
+  }
 
   const proveedor = elegirProveedor();
   if (!proveedor) return res.status(500).json({ code: 'sin_clave' });
@@ -65,7 +83,7 @@ export default async function handler(req, res) {
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   const { prompt, codigo } = body || {};
 
-  if (process.env.CODIGO_ACCESO && codigo !== process.env.CODIGO_ACCESO) return res.status(401).json({ code: 'codigo' });
+  if (!nube && process.env.CODIGO_ACCESO && codigo !== process.env.CODIGO_ACCESO) return res.status(401).json({ code: 'codigo' });
   if (typeof prompt !== 'string' || !prompt.trim()) return res.status(400).json({ code: 'vacio' });
   if (prompt.length > 60000) return res.status(413).json({ code: 'muy_largo' });
 
@@ -77,7 +95,10 @@ export default async function handler(req, res) {
       const r = proveedor === 'anthropic'
         ? await pedirAnthropic(clave, modelo, prompt)
         : await pedirOpenAICompatible(cfg, clave, modelo, prompt);
-      if (r.ok && r.text) return res.status(200).json({ text: r.text, proveedor, modelo });
+      if (r.ok && r.text) {
+        if (uid) await sumarUso(uid);
+        return res.status(200).json({ text: r.text, proveedor, modelo, ...(uid ? { usadas: usadas + 1, limite } : {}) });
+      }
       ultimo = r;
       console.error(`Falló ${proveedor}/${modelo}:`, r.status, r.error);
       if (r.status === 401 || r.status === 403) break; // clave inválida: no tiene sentido seguir

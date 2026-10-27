@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Planeación docente para escuela rural multigrado: grados, clases, calendario y guías con IA.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Crect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%2324433A%22/%3E%3Cpath d=%22M6 18l1-3 8-8 2 2-8 8-3 1z%22 fill=%22%23E2A62A%22/%3E%3C/svg%3E">
-<title>Planeación Docente Jerson</title>
+<title>MaestrIA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap">
 <style>
@@ -194,6 +194,28 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .pdfw,.pdfw *{font-family:Arial, Helvetica, sans-serif!important}
 .pdfw h1,.pdfw h2,.pdfw h3,.pdfw .gsec-h b{font-family:Georgia, 'Times New Roman', serif!important}
 .guia.pdfw{padding:0;gap:20px}.guia.pdfw .gbody{flex-direction:row}.guia.pdfw .gimg{width:220px;max-width:40%;align-self:flex-start}.guia.pdfw .gdatos{grid-template-columns:2fr 1fr 1fr}
+.nube{font-size:.78rem;color:var(--chalk-dim);padding:0 8px;display:flex;align-items:center;gap:6px;min-height:18px}
+.nube::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--chalk-dim);flex:none}.nube.ok::before{background:#5CC48A}.nube.wait::before{background:var(--pencil)}.nube.off::before{background:#EE7468}
+.cuenta-datos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}.cuenta-datos div{display:flex;flex-direction:column;gap:2px;min-width:0}.cuenta-datos b{overflow-wrap:anywhere}.cuenta-datos .s{color:var(--muted);font-size:.82rem}
+#auth{position:fixed;inset:0;z-index:30;background:var(--paper);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);overflow:auto;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.auth-izq{background:var(--board);color:var(--chalk);border-right:6px solid #8B5E34;padding:40px 48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px;min-height:100%}
+.auth-izq .brand{padding:0}.auth-izq .brand small{color:var(--chalk-dim)}
+.auth-msg h1{font-size:2.2rem;color:var(--chalk);max-width:18ch}
+.auth-lista{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:16px}
+.auth-lista li{display:flex;gap:12px;align-items:center;color:var(--chalk-dim);font-size:1.02rem}.auth-lista svg.i{color:var(--pencil);width:22px;height:22px}
+.auth-pie{color:var(--chalk-dim);font-size:.8rem}
+.auth-der{display:flex;align-items:center;justify-content:center;padding-block:32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.auth-card{width:100%;max-width:400px;display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px}
+.auth-card h2{font-size:1.55rem}.auth-sub{margin:-6px 0 4px;color:var(--muted)}
+.auth-err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:8px 12px;font-size:.92rem}
+.auth-aviso{background:var(--info-bg);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:.92rem}
+.btn.ancho{width:100%;justify-content:center;padding:11px}
+.link{background:none;border:0;padding:0;color:var(--info);font-weight:600;cursor:pointer;align-self:flex-start;font-size:.9rem}
+.auth-alt{margin:0;text-align:center;color:var(--muted);font-size:.92rem}
+.pw{display:flex;gap:6px}.pw input{flex:1;min-width:0}.pwv{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:0 12px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--ink)}
+.auth-cargando{grid-column:1/-1;display:flex;gap:12px;align-items:center;justify-content:center;color:var(--muted);font-weight:600;min-height:60vh}
+@media (max-width:860px){#auth{grid-template-columns:minmax(0,1fr);align-content:start}.auth-izq{border-right:0;border-bottom:4px solid #8B5E34;padding:18px max(16px,env(safe-area-inset-left,0px));min-height:0;gap:10px}.auth-lista,.auth-pie{display:none}.auth-msg h1{font-size:1.2rem}.auth-der{padding-block:20px}.auth-card{padding:20px}.nube{font-size:0;padding:0 4px}.cuenta-datos{grid-template-columns:minmax(0,1fr)}}
+.brand b .ia{color:var(--pencil)}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
 .gedit textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
@@ -351,7 +373,7 @@ function seed(){
   return S0;
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){storageOK=false}return seed()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOK=false}}
+function save(){try{localStorage.setItem(NUBE?.on&&NUBE.ses?cacheKey():KEY,JSON.stringify(S))}catch(e){storageOK=false}if(NUBE?.on&&NUBE.ses)programarSubida()}
 let S=load(); save();
 
 const G=id=>S.grados.find(x=>x.id===id);
@@ -453,7 +475,7 @@ function modalMaterias(gid){
 function renderSide(){
   const n=gid=>S.temas.filter(t=>t.gradoId===gid&&estado(t)!=='completado').length;
   const b=(name,label,icon,extra='',on)=>`<button class="nav${on?' on':''}" data-act="go" data-v="${name}" ${extra}>${icon}${label}</button>`;
-  $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>Planeación Docente</b><small>${esc(S.config.docente)} · ${esc(S.config.institucion)}</small></div></div>
+  $('#side').innerHTML=`<div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>${esc(S.config.docente)}${S.config.institucion?' · '+esc(S.config.institucion):''}</small></div></div>${NUBE.on?'<div id="nube" class="nube" role="status"></div>':''}
   <nav class="navg" aria-label="General">${b('panel','Panel',ic('board'),'',V.name==='panel')}${b('calendario','Calendario',ic('cal'),'',V.name==='calendario')}${b('generador','Generador de temarios',ic('bulb'),'',V.name==='generador')}${b('imprimir','Imprimir y exportar',ic('print'),'',V.name==='imprimir')}${b('config','Configuración',ic('gear'),'',V.name==='config')}</nav>
   <nav class="navg" aria-label="Grados"><h4>Grados</h4>${S.grados.map(g=>`<button class="nav${V.name==='grado'&&V.grado===g.id?' on':''}" data-act="grado" data-id="${g.id}"><span class="dot" style="background:${g.color}"></span>${esc(g.nombre)}<span class="cnt">${n(g.id)}</span></button>`).join('')}
   <button class="nav" data-act="addGrado" style="opacity:.8">${ic('plus')}Agregar grado</button></nav>`}
@@ -594,18 +616,20 @@ VIEWS.imprimir=()=>head('Planeación','Imprimir y exportar','Elija qué incluir 
  `<div class="filters"><select id="prG" aria-label="Grado">${optG('Todos los grados').map(o=>`<option value="${o.v}"${o.v===V.pr.g?' selected':''}>${esc(o.t)}</option>`).join('')}</select><select id="prP" aria-label="Periodo">${optP('Todos los periodos').map(o=>`<option value="${o.v}"${o.v===V.pr.p?' selected':''}>${esc(o.t)}</option>`).join('')}</select></div>
  <div class="card">${planHTML()}</div>`;
 
-VIEWS.config=()=>head('Ajustes','Configuración','Grados, periodos y respaldo de la información.')+
+VIEWS.config=()=>head('Ajustes','Configuración',NUBE.on?'Su cuenta, grados, periodos y copias de seguridad.':'Grados, periodos y respaldo de la información.')+
+ (NUBE.on?`<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Correo</span><b>${esc(NUBE.ses?.user?.email||'')}</b></div><div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div><div><span class="s">Guardado</span><b>Automático en la nube</b></div></div><div class="tools"><button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`:'')+
  `<div class="cols"><section class="card grid2"><h2 class="wide">Datos del docente</h2>${fieldHtml({k:'docente',label:'Nombre del docente'},S.config.docente)}${fieldHtml({k:'institucion',label:'Institución o sede'},S.config.institucion)}<div class="mact wide"><button class="btn pri" data-act="saveCfg">Guardar datos</button></div></section>
- <section class="card"><h2>Respaldo</h2><p style="margin:0 0 12px;color:var(--muted)">La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
+ <section class="card"><h2>${NUBE.on?'Copia de seguridad':'Respaldo'}</h2><p style="margin:0 0 12px;color:var(--muted)">${NUBE.on?'Su planeación se guarda sola en su cuenta y la puede abrir desde cualquier equipo. Si quiere, descargue también una copia en este equipo.':'La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.'}</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
  <div class="cols"><section class="card"><h2>Grados</h2><div class="list">${S.grados.map(g=>`<div class="row"><span style="width:14px;height:14px;border-radius:3px;background:${g.color};flex:none"></span><div class="grow t">${esc(g.nombre)}</div><span class="s">${matsDe(g.id).length} materias</span><button class="ib" data-act="materiasG" data-id="${g.id}" title="Materias" aria-label="Materias">${ic('book')}</button><button class="ib" data-act="editGrado" data-id="${g.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delGrado" data-id="${g.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')}</div><button class="btn sm" data-act="addGrado" style="margin-top:10px">${ic('plus')} Agregar grado</button></section>
  <section class="card"><h2>Periodos académicos</h2><div class="list">${S.periodos.map(p=>`<div class="row"><div class="grow"><div class="t">${esc(p.nombre)}</div><div class="s">${fmt(p.inicio)} – ${fmt(p.fin)}${p===perActual()?' · actual':''}</div></div><button class="ib" data-act="editPer" data-id="${p.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delPer" data-id="${p.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Sin periodos.</p>'}</div><button class="btn sm" data-act="addPer" style="margin-top:10px">${ic('plus')} Agregar periodo</button></section></div>`;
 
 /* ---------- Render ---------- */
-function render(){renderSide();$('#main').innerHTML=VIEWS[V.name]();bindInputs()}
+function render(){renderSide();$('#main').innerHTML=VIEWS[V.name]();bindInputs();if(NUBE.on)marcarNube(NUBE.estadoTxt||'ok')}
 function bindInputs(){
   const on=(id,fn)=>{const e=$(id);if(e)e.onchange=fn};
   on('#fMat',e=>{V.f.materia=e.target.value;render()});on('#fPer',e=>{V.f.periodo=e.target.value;render()});on('#fEst',e=>{V.f.estado=e.target.value;render()});
   const q=$('#fQ');if(q)q.oninput=e=>{V.f.q=e.target.value;const p=q.selectionStart;render();const n=$('#fQ');n.focus();n.setSelectionRange(p,p)};
+  if(V.name==='config'&&NUBE.on)usoIA().then(u=>{const e=$('#usoIA');if(e)e.textContent=u?`${u.usadas} de ${u.limite}`:'—'});
   on('#calG',e=>{V.cal.g=e.target.value;render()});on('#prG',e=>{V.pr.g=e.target.value;render()});on('#prP',e=>{V.pr.p=e.target.value;render()});
   const gf=$('#genF');if(gf){$('#f_gradoId').onchange=e=>{V.genG=e.target.value;$('#f_materiaId').innerHTML=optM(e.target.value).map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join('')};
     gf._go=()=>{if(V.loading)return;const o={gradoId:$('#f_gradoId').value,materiaId:$('#f_materiaId').value,tema:$('#f_tema').value.trim(),inicio:$('#f_inicio').value||HOY,periodoId:$('#f_periodoId').value,semanas:Math.min(16,Math.max(1,+$('#f_semanas').value||1)),clases:Math.min(10,Math.max(1,+$('#f_clases').value||1))};
@@ -651,6 +675,8 @@ const A={
  saveCfg:()=>{S.config.docente=$('#f_docente').value.trim()||'Docente';S.config.institucion=$('#f_institucion').value.trim();save();render();toast('Datos guardados')},
  backup:()=>{download(`respaldo_planeacion_${HOY}.json`,JSON.stringify(S,null,1),'application/json');},
  restore:()=>$('#fileIn').click(),
+ salir:()=>confirmar('¿Cerrar sesión en este equipo? Su planeación queda guardada en su cuenta.',cerrarSesion),
+ cambiarClave:async()=>{try{await sb('/auth/v1/recover',{method:'POST',body:{email:NUBE.ses.user.email}});toast('Le enviamos un correo con el enlace para cambiar la contraseña')}catch(e){toast(errAuth(e))}},
  reset:()=>confirmar('¿Borrar toda la información y volver a la configuración inicial? Descargue un respaldo antes si lo necesita.',()=>{S=seed();S.temas=[];S.eventos=[];save();V.name='panel';render();toast('Información reiniciada')})
 };
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.closest('#mbody'))return;const f=A[b.dataset.act];if(f){if(b.tagName!=='INPUT')e.preventDefault();f(b.dataset,b)}});
@@ -711,8 +737,9 @@ function capa(n){if(window.claude?.use)return _capas[n]??=window.claude.use(n).c
 /* Fuera de Claude (por ejemplo en Vercel) la IA se pide al servicio /api/guia */
 const codigoIA=()=>{try{return localStorage.getItem('planeacion_codigo_ia')||''}catch(e){return ''}};
 function leerJson(t){const s=String(t||'').replace(/```(?:json)?/g,'');const i=s.indexOf('{'),j=s.lastIndexOf('}');try{return JSON.parse(s.slice(i,j+1))}catch(e){throw {code:'invalid_json'}}}
-const httpSample={json:async input=>{let r;try{r=await fetch('/api/guia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt:input,codigo:codigoIA()})})}catch(e){throw {code:'red'}}
-  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error'};return leerJson(d.text)}};
+const httpSample={json:async input=>{let r;const cab={'content-type':'application/json'};if(NUBE.on)cab.Authorization='Bearer '+await tokenNube();
+  try{r=await fetch('/api/guia',{method:'POST',headers:cab,body:JSON.stringify({prompt:input,codigo:codigoIA()})})}catch(e){throw {code:'red'}}
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error'};if(d.limite)NUBE.uso={usadas:d.usadas,limite:d.limite};return leerJson(d.text)}};
 /* ---------- PDF propio: tamaño carta, márgenes iguales y cortes de página sin partir ejercicios ---------- */
 const enc=new TextEncoder();
 const CARTA={w:612,h:792,m:36}; // puntos (1/72 pulgada): carta 8,5×11 in, márgenes de 0,5 in
@@ -897,8 +924,8 @@ async function pedirGuia(t,c,input,msg){
   GU={busy:msg,err:''};render();$('#guiaOut')?.scrollIntoView({behavior:'smooth',block:'center'});
   try{const r=await sample.json(input,{modelTier:'default',cache:false});
     if(!r||!Array.isArray(r.secciones)||!r.secciones.length)throw {code:'invalid_json'};
-    if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast('Guía lista')}
-  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se alcanzó el límite de uso de la IA. Espere un rato (en el plan gratuito, hasta el día siguiente) e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA en Vercel (por ejemplo GEMINI_API_KEY).',clave_invalida:'La clave de la IA no es válida. Revísela en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
+    if(c.guia)c.guiaPrev=c.guia;c.guia=r;save();GU={busy:false,err:''};toast(NUBE.on&&NUBE.uso?`Guía lista · le quedan ${Math.max(0,NUBE.uso.limite-NUBE.uso.usadas)} este mes`:'Guía lista')}
+  catch(e){GU={busy:false,err:{not_granted:'No se dio permiso para usar la IA en esta página.',rate_limited:'Se alcanzó el límite de uso de la IA. Espere un rato (en el plan gratuito, hasta el día siguiente) e intente de nuevo.',invalid_json:'La respuesta llegó incompleta. Intente de nuevo.',sin_clave:'Falta configurar la clave de la IA en Vercel (por ejemplo GEMINI_API_KEY).',clave_invalida:'La clave de la IA no es válida. Revísela en Vercel.',codigo:'Escriba el código de acceso para usar la IA.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',limite_mes:`Ya usó las ${NUBE.cfg?.limiteIA||''} guías con IA de este mes. El cupo se renueva el primer día del próximo mes.`,sesion:'Su sesión se cerró. Vuelva a iniciar sesión.',sin_sesion:'Su sesión se cerró. Vuelva a iniciar sesión.'}[e?.code]||'No se pudo generar la guía. Intente de nuevo en un momento.',pedirCod:e?.code==='codigo'}}
   if(V.name==='guia')render()}
 VIEWS.guia=()=>{
   const t=S.temas.find(x=>x.id===V.tema);if(!t){V.name='panel';return VIEWS.panel()}
@@ -931,7 +958,126 @@ Object.assign(A,{
     let el=$('#guiaDoc');if(!el){const w=document.createElement('div');w.innerHTML=guiaHtml(t,c,i,C.length);el=w.firstElementChild}
     const nom=('guia_'+G(t.gradoId)?.nombre+'_'+t.titulo+'_clase_'+(i+1)).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'_').slice(0,80)+'.pdf';await pdfDe(el,nom)}
 });
-render();
+/* ---------- Cuentas y datos en la nube (se activa solo cuando la app está publicada con Supabase) ---------- */
+var NUBE={on:false,cfg:null,ses:null,timer:null,base:null,pendiente:false,subiendo:false,uso:null};
+var NOMBRE_APP='MaestrIA';
+// Nombre de marca: si termina en "IA", esas dos letras van en el color del lápiz
+const marca=()=>{const n=esc(NOMBRE_APP);return /IA$/.test(NOMBRE_APP)?n.slice(0,-2)+'<span class="ia">IA</span>':n};
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
+const cacheKey=()=>'pd_cuenta_'+(NUBE.ses?.user?.id||'x');
+async function cargarConfig(){if(window.claude||!/^https?:/.test(location.protocol))return null;try{const r=await fetch('/api/config',{cache:'no-store'});if(!r.ok)return null;return await r.json()}catch(e){return null}}
+async function sb(path,{method='GET',body,token,headers={}}={}){let r;
+  try{r=await fetch(NUBE.cfg.supabaseUrl+path,{method,headers:{apikey:NUBE.cfg.supabaseAnonKey,'content-type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...headers},body:body?JSON.stringify(body):undefined})}catch(e){throw {code:'red'}}
+  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch(e){}
+  if(!r.ok)throw {status:r.status,code:d?.error_code||d?.error||d?.code||'error',msg:d?.msg||d?.error_description||d?.message||''};return d}
+function guardarSesion(d){NUBE.ses={access_token:d.access_token,refresh_token:d.refresh_token,expira:Date.now()+Math.max(30,(d.expires_in||3600)-60)*1000,user:d.user||NUBE.ses?.user};lsSet('pd_sesion',JSON.stringify(NUBE.ses))}
+let _refrescando=null;
+async function tokenNube(){if(!NUBE.ses)throw {code:'sin_sesion'};
+  if(Date.now()>NUBE.ses.expira){_refrescando??=sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:NUBE.ses.refresh_token}}).then(guardarSesion).finally(()=>{_refrescando=null});
+    try{await _refrescando}catch(e){if(e.code!=='red'){sesionVencida();}throw e}}
+  return NUBE.ses.access_token}
+function sesionVencida(){lsDel('pd_sesion');NUBE.ses=null;pantallaAuth('entrar','Su sesión se cerró. Vuelva a iniciar sesión.')}
+async function bajarDatos(){const tk=await tokenNube();const d=await sb(`/rest/v1/planeaciones?select=datos,actualizado&user_id=eq.${NUBE.ses.user.id}`,{token:tk});return d?.[0]||null}
+function marcarNube(e){NUBE.estadoTxt=e;const el=$('#nube');if(!el)return;
+  const T={ok:['ok','Guardado en la nube'],guardando:['wait','Guardando…'],offline:['off','Sin conexión: se guardará al volver'],error:['off','No se pudo guardar. Reintentando…']}[e]||['wait',''];
+  el.className='nube '+T[0];el.textContent=T[1]}
+function programarSubida(){NUBE.pendiente=true;lsSet(cacheKey()+'_pend','1');marcarNube('guardando');clearTimeout(NUBE.timer);NUBE.timer=setTimeout(subirDatos,1200)}
+async function subirDatos(){if(!NUBE.on||!NUBE.ses)return;if(NUBE.subiendo){clearTimeout(NUBE.timer);NUBE.timer=setTimeout(subirDatos,800);return}
+  clearTimeout(NUBE.timer);NUBE.pendiente=false;NUBE.subiendo=true;marcarNube('guardando');
+  try{const tk=await tokenNube(),ahora=new Date().toISOString();
+    await sb('/rest/v1/planeaciones',{method:'POST',token:tk,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:{user_id:NUBE.ses.user.id,datos:S,actualizado:ahora}});
+    NUBE.base=ahora;lsSet(cacheKey()+'_base',ahora);if(!NUBE.pendiente){lsDel(cacheKey()+'_pend');marcarNube('ok')}}
+  catch(e){NUBE.pendiente=true;if(!NUBE.ses)return;marcarNube(e.code==='red'?'offline':'error');NUBE.timer=setTimeout(subirDatos,15000)}
+  finally{NUBE.subiendo=false}}
+window.addEventListener('online',()=>{if(NUBE.on&&NUBE.pendiente)subirDatos()});
+window.addEventListener('beforeunload',e=>{if(NUBE.on&&NUBE.pendiente){subirDatos();e.preventDefault();e.returnValue=''}});
+// Al volver a la app (otro equipo pudo haber cambiado algo), se trae lo último
+async function traerCambios(){if(!NUBE.on||!NUBE.ses||NUBE.pendiente||NUBE.subiendo||document.hidden)return;
+  try{const f=await bajarDatos();if(f&&f.actualizado!==NUBE.base&&!NUBE.pendiente){S=f.datos;NUBE.base=f.actualizado;lsSet(cacheKey(),JSON.stringify(S));lsSet(cacheKey()+'_base',f.actualizado);
+    if(!$('#ov')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||'')&&!(typeof GU!=='undefined'&&GU.busy))render();toast('Se cargaron los cambios hechos en otro equipo')}marcarNube(NUBE.pendiente?'guardando':'ok')}
+  catch(e){if(e.code==='red')marcarNube('offline')}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)traerCambios()});
+const tieneDatosPropios=d=>!!d&&((d.temas||[]).some(t=>!/\(ejemplo\)/.test(t.titulo))||(d.recursos||[]).length>0||(d.observaciones||[]).length>0);
+function datosNuevos(nombre){const d=seed();d.config.docente=nombre||'Docente';d.config.institucion='';return d}
+function arrancar(){$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();marcarNube(NUBE.pendiente?'guardando':'ok')}
+async function entrarConDatos(nombreNuevo){
+  pantallaCargando('Cargando su planeación…');
+  let fila;
+  try{fila=await bajarDatos()}
+  catch(e){if(!NUBE.ses)return;const c=lsGet(cacheKey());if(e.code==='red'&&c){S=JSON.parse(c);NUBE.pendiente=lsGet(cacheKey()+'_pend')==='1';arrancar();marcarNube('offline');return}
+    return pantallaAuth('entrar',e.code==='red'?'No hay conexión a internet. Revise la conexión e intente de nuevo.':'No se pudo abrir su planeación. Intente de nuevo.')}
+  if(fila){const c=lsGet(cacheKey()),base=lsGet(cacheKey()+'_base');
+    if(c&&lsGet(cacheKey()+'_pend')==='1'&&base===fila.actualizado){S=JSON.parse(c);NUBE.base=base;NUBE.pendiente=true;arrancar();subirDatos();return}
+    S=fila.datos;NUBE.base=fila.actualizado;lsSet(cacheKey(),JSON.stringify(S));lsSet(cacheKey()+'_base',fila.actualizado);lsDel(cacheKey()+'_pend');arrancar();return}
+  // Cuenta nueva: se ofrece pasar lo que ya había en este equipo
+  const nombre=nombreNuevo||NUBE.ses.user?.user_metadata?.nombre||'';let local=null;try{local=JSON.parse(lsGet(KEY)||'null')}catch(e){}
+  if(tieneDatosPropios(local))return pantallaAuth('migrar','',{local,nombre});
+  S=datosNuevos(nombre);arrancar();subirDatos()}
+async function cerrarSesion(){if(NUBE.pendiente){toast('Guardando antes de salir…');await subirDatos();if(NUBE.pendiente){toast('No se pudo guardar el último cambio. Revise la conexión e intente de nuevo.');return}}
+  const tk=NUBE.ses?.access_token;if(tk)sb('/auth/v1/logout',{method:'POST',token:tk}).catch(()=>{});
+  [cacheKey(),cacheKey()+'_base',cacheKey()+'_pend','pd_sesion'].forEach(lsDel);NUBE.ses=null;NUBE.base=null;NUBE.uso=null;S=seed();pantallaAuth('entrar','Cerró sesión.')}
+const ERR_AUTH={invalid_credentials:'Correo o contraseña incorrectos.',invalid_grant:'Correo o contraseña incorrectos.',email_not_confirmed:'Primero confirme su correo: revise su bandeja de entrada y la carpeta de spam.',user_already_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',email_exists:'Ya existe una cuenta con ese correo. Inicie sesión.',weak_password:'La contraseña es muy débil: use al menos 8 caracteres, con letras y números.',over_email_send_rate_limit:'Se enviaron muchos correos seguidos. Espere unos minutos e intente de nuevo.',over_request_rate_limit:'Demasiados intentos seguidos. Espere unos minutos.',email_address_invalid:'Ese correo no es válido.',validation_failed:'Revise el correo y la contraseña.',same_password:'La nueva contraseña debe ser distinta de la anterior.',red:'No hay conexión a internet. Revise la conexión e intente de nuevo.',signup_disabled:'Por ahora no se están creando cuentas nuevas.'};
+const errAuth=e=>ERR_AUTH[e?.code]||(e?.status===429?ERR_AUTH.over_request_rate_limit:'Algo salió mal. Intente de nuevo en un momento.');
+function pantallaCargando(txt){let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;
+  a.innerHTML=`<div class="auth-cargando" role="status"><span class="spin"></span>${esc(txt)}</div>`}
+function pantallaAuth(modo,aviso='',extra={}){
+  let a=$('#auth');if(!a){a=document.createElement('div');a.id='auth';document.body.append(a)}document.querySelector('.app').hidden=true;closeModal();
+  const F=(id,label,type,ac,ph='')=>`<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="${type}" autocomplete="${ac}" placeholder="${esc(ph)}"${type==='email'?' inputmode="email"':''}></label>`;
+  const pw=(id,label,ac)=>`<label class="fld" for="${id}"><span>${label}</span><span class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pwv" data-ver="${id}" aria-label="Mostrar contraseña">Ver</button></span></label>`;
+  const T={
+    entrar:['Iniciar sesión','Entre para ver su planeación.',`${F('aEmail','Correo','email','email','nombre@correo.com')}${pw('aPass','Contraseña','current-password')}<button type="button" class="link" data-auth="recuperar">¿Olvidó su contraseña?</button><button type="button" data-submit class="btn pri ancho">Entrar</button><p class="auth-alt">¿No tiene cuenta? <button type="button" class="link" data-auth="registro">Crear una cuenta</button></p>`],
+    registro:['Crear cuenta','Empiece a organizar sus clases hoy.',`${F('aNombre','Su nombre','text','name','Ej.: Ana Gómez')}${F('aEmail','Correo','email','email','nombre@correo.com')}${pw('aPass','Contraseña (mínimo 8 caracteres)','new-password')}<button type="button" data-submit class="btn pri ancho">Crear cuenta</button><p class="auth-alt">¿Ya tiene cuenta? <button type="button" class="link" data-auth="entrar">Iniciar sesión</button></p>`],
+    recuperar:['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${F('aEmail','Correo de su cuenta','email','email','nombre@correo.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
+    nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${pw('aPass','Nueva contraseña (mínimo 8 caracteres)','new-password')}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
+    confirmar:['Revise su correo',`Le enviamos un enlace a <b>${esc(extra.email||'su correo')}</b>. Ábralo para activar la cuenta y entrar. Si no lo ve, busque en la carpeta de spam.`,`<button type="button" class="btn ancho" data-auth="entrar">Ya la activé, iniciar sesión</button>`],
+    migrar:['Encontramos datos en este equipo',`Hay una planeación guardada en este navegador. ¿Quiere pasarla a su cuenta para tenerla en todos sus equipos?`,`<button type="button" class="btn pri ancho" data-auth="migrarSi">Sí, pasarla a mi cuenta</button><button type="button" class="btn ancho" data-auth="migrarNo">No, empezar desde cero</button>`]
+  }[modo];
+  a.innerHTML=`<aside class="auth-izq"><div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>Para docentes de escuela rural</small></div></div>
+    <div class="auth-msg"><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
+    <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
+    <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
+  <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="alert">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}</form></main>`;
+  const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
+  const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
+  f.onclick=e=>{const v=e.target.closest('[data-ver]');if(v){const i=$('#'+v.dataset.ver);i.type=i.type==='password'?'text':'password';v.textContent=i.type==='password'?'Ver':'Ocultar';return}
+    const b=e.target.closest('[data-auth]');if(!b)return;const m=b.dataset.auth;
+    if(m==='migrarSi'){S=extra.local;if(extra.nombre&&(!S.config.docente||S.config.docente==='Jerson'||S.config.docente==='Docente'))S.config.docente=extra.nombre;arrancar();subirDatos();toast('Su planeación quedó guardada en su cuenta');return}
+    if(m==='migrarNo'){S=datosNuevos(extra.nombre);arrancar();subirDatos();return}
+    pantallaAuth(m)};
+  f._go=async()=>{err('');
+    try{
+      if(modo==='entrar'){const email=val('aEmail'),password=$('#aPass').value;if(!email||!password)return err('Escriba su correo y su contraseña.');
+        ocupado(true);const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password}});guardarSesion(d);return entrarConDatos()}
+      if(modo==='registro'){const nombre=val('aNombre'),email=val('aEmail'),password=$('#aPass').value;
+        if(!nombre||!email||!password)return err('Complete su nombre, su correo y una contraseña.');if(password.length<8)return err('La contraseña debe tener al menos 8 caracteres.');
+        ocupado(true);const d=await sb('/auth/v1/signup',{method:'POST',body:{email,password,data:{nombre}}});
+        if(d?.access_token){guardarSesion(d);return entrarConDatos(nombre)}
+        if(d&&Array.isArray(d.identities)&&!d.identities.length)return pantallaAuth('entrar','Ya existe una cuenta con ese correo. Inicie sesión.');
+        return pantallaAuth('confirmar','',{email})}
+      if(modo==='recuperar'){const email=val('aEmail');if(!email)return err('Escriba el correo de su cuenta.');ocupado(true);
+        await sb('/auth/v1/recover',{method:'POST',body:{email}});return pantallaAuth('entrar','Si ese correo tiene cuenta, le llegará un enlace para crear una nueva contraseña. Revise también la carpeta de spam.')}
+      if(modo==='nueva'){const password=$('#aPass').value;if(password.length<8)return err('La contraseña debe tener al menos 8 caracteres.');ocupado(true);
+        await sb('/auth/v1/user',{method:'PUT',token:NUBE.recup.access_token,body:{password}});guardarSesion(NUBE.recup);NUBE.recup=null;toast('Contraseña actualizada');return entrarConDatos()}
+    }catch(e){ocupado(false);err(errAuth(e))}};
+  setTimeout(()=>f.querySelector('input')?.focus(),50)}
+async function usoIA(){if(!NUBE.on)return null;try{const tk=await tokenNube();const r=await fetch('/api/guia',{headers:{Authorization:'Bearer '+tk}});if(!r.ok)return null;NUBE.uso=await r.json();return NUBE.uso}catch(e){return null}}
+async function iniciar(){
+  const cfg=await cargarConfig();
+  if(!cfg?.supabaseUrl||!cfg?.supabaseAnonKey){render();return}
+  NUBE.cfg=cfg;NUBE.on=true;if(cfg.nombre){NOMBRE_APP=cfg.nombre;document.title=cfg.nombre}
+  const h=new URLSearchParams(location.hash.slice(1));
+  if(h.get('error_description')||h.get('error')){history.replaceState(null,'',location.pathname+location.search);return pantallaAuth('entrar','El enlace del correo ya no es válido o ya se usó. Pida uno nuevo.')}
+  if(h.get('access_token')){history.replaceState(null,'',location.pathname+location.search);
+    const d={access_token:h.get('access_token'),refresh_token:h.get('refresh_token'),expires_in:+h.get('expires_in')||3600};
+    try{d.user=await sb('/auth/v1/user',{token:d.access_token})}catch(e){return pantallaAuth('entrar','El enlace del correo ya no es válido o ya se usó. Pida uno nuevo.')}
+    if(h.get('type')==='recovery'){NUBE.recup=d;return pantallaAuth('nueva')}
+    guardarSesion(d);toast('¡Cuenta activada!');return entrarConDatos()}
+  let ses=null;try{ses=JSON.parse(lsGet('pd_sesion')||'null')}catch(e){}
+  if(ses?.refresh_token){NUBE.ses=ses;return entrarConDatos()}
+  pantallaAuth('entrar')}
+
+window.addEventListener('hashchange',()=>{if(NUBE.on&&/access_token=|error_description=/.test(location.hash))iniciar()});
+iniciar();
 </script>
 
 
