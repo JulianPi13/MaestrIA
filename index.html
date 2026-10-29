@@ -17,21 +17,23 @@
   --ok:#2D8A57; --warn:#B9800F; --bad:#C2382E; --info:#3672B8;
   --ok-bg:#E3F3EA; --warn-bg:#FBF0D6; --bad-bg:#FBE4E1; --info-bg:#E2ECF8;
   --f-display:"Bitter", Georgia, serif; --f-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wa:#1E8E4E;
   --f1:#2E9E6A;--f2:#3B7DD8;--f3:#D9822B;--f4:#8E4FC2;--f5:#C2384E;
   --r:10px;
+  --il-pizarra:#2F5A4B;--il-marco:#A8743F;--il-mesa:#B9875A;--il-hoja:#FFFDF6;--il-linea:#C9D6CF;--il-linea-osc:#6B5A48;--il-regla:#F2D27A;--il-piel1:#F1C7A0;--il-piel2:#B9805A;--il-pelo1:#4A3222;--il-pelo2:#231A16;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --paper:#111815; --surface:#18211D; --ink:#E3EBE6; --muted:#9BACA4; --line:#2B3833;
   --board:#16302A; --board2:#0F241F; --chalk:#E3EDE7; --chalk-dim:#8FAA9D;
   --pencil:#EDB847; --pencil-ink:#2A1E03; --rule:#24313D; --margin:#9C4C46;
   --ok:#5CC48A; --warn:#E3B04B; --bad:#EE7468; --info:#78A9E6;
-  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; color-scheme:dark}}
+  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; --il-pizarra:#1F3F35;--il-marco:#8A6038;--il-mesa:#7E5C3E;--il-hoja:#EDE8DA;--il-linea:#A9B5AE;--il-linea-osc:#3E352B;--il-regla:#D9B85E;--il-piel1:#E2B48C;--il-piel2:#A8714D;--il-pelo1:#3A271B;--il-pelo2:#171210; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#111815; --surface:#18211D; --ink:#E3EBE6; --muted:#9BACA4; --line:#2B3833;
   --board:#16302A; --board2:#0F241F; --chalk:#E3EDE7; --chalk-dim:#8FAA9D;
   --pencil:#EDB847; --pencil-ink:#2A1E03; --rule:#24313D; --margin:#9C4C46;
   --ok:#5CC48A; --warn:#E3B04B; --bad:#EE7468; --info:#78A9E6;
-  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; color-scheme:dark}
+  --ok-bg:#16301F; --warn-bg:#33280F; --bad-bg:#3A1A17; --info-bg:#172A40; --f1:#4FC48A;--f2:#6EA6F0;--f3:#F0A050;--f4:#B88AE8;--f5:#EE7088; --il-pizarra:#1F3F35;--il-marco:#8A6038;--il-mesa:#7E5C3E;--il-hoja:#EDE8DA;--il-linea:#A9B5AE;--il-linea-osc:#3E352B;--il-regla:#D9B85E;--il-piel1:#E2B48C;--il-piel2:#A8714D;--il-pelo1:#3A271B;--il-pelo2:#171210; color-scheme:dark}
 [hidden]{display:none!important}
 [hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -235,6 +237,28 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
 .cod-nuevo b.cod{font-size:1.4rem;color:var(--ink)}.cod-nuevo p{margin:0;color:var(--muted);font-size:.88rem}
 .tbl.adm td{vertical-align:middle}.tbl.adm td.acc{white-space:nowrap}.tbl.adm td.acc .btn{margin:2px}.tbl.adm small{color:var(--muted)}
 .chip.on{background:var(--board);color:var(--chalk);border-color:var(--board)}
+.renovar{display:flex;flex-direction:column;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.pasos-pago{margin:0;padding:0;list-style:none;counter-reset:pp;display:flex;flex-direction:column;gap:10px}
+.pasos-pago li{position:relative;padding:3px 0 0 36px;min-height:26px;font-size:.92rem;line-height:1.4;color:var(--muted)}.pasos-pago li b{color:var(--ink)}
+.pasos-pago li::before{counter-increment:pp;content:counter(pp);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--board);color:var(--chalk);display:grid;place-items:center;font-weight:700;font-size:.82rem}
+.wa-num{font-weight:700;color:var(--ink);white-space:nowrap;user-select:all}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:#fff;justify-content:center;text-decoration:none}.btn.wa:hover{filter:brightness(1.06)}
+.renovar-nota{margin:0;font-size:.8rem;color:var(--muted);display:flex;gap:6px;align-items:flex-start}.renovar-nota svg.i{width:14px;height:14px;color:var(--ok);margin-top:2px}
+.sin-codigo{font-size:.9rem}.sin-codigo summary{cursor:pointer;color:var(--info);font-weight:600;text-align:center;list-style:none}.sin-codigo summary::-webkit-details-marker{display:none}.sin-codigo[open] summary{margin-bottom:10px}
+.apariencia{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between}.apariencia h2{margin:0 0 4px}.apariencia p{margin:0;color:var(--muted);font-size:.92rem}.ap-txt{flex:1 1 240px}
+.tema-sel{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:4px;min-width:min(100%,340px)}
+.tema-pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:999px;background:var(--board);box-shadow:0 2px 8px rgba(0,0,0,.18);transition:transform .45s cubic-bezier(.5,1.6,.4,1)}
+.tema-sel[data-v="dark"] .tema-pill{transform:translateX(100%)}.tema-sel[data-v="auto"] .tema-pill{transform:translateX(200%)}
+.tema-sel button{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:none;padding:9px 8px;border-radius:999px;font-weight:600;font-size:.88rem;color:var(--muted);cursor:pointer;transition:color .3s}
+.tema-sel button[aria-checked="true"]{color:var(--chalk)}
+.tema-sel button svg.i{transition:transform .6s cubic-bezier(.5,1.6,.4,1)}
+.tema-sel button[aria-checked="true"][data-v="light"] svg.i{transform:rotate(90deg) scale(1.15)}
+.tema-sel button[aria-checked="true"][data-v="dark"] svg.i{transform:rotate(-25deg) scale(1.15)}
+.tema-sel button[aria-checked="true"][data-v="auto"] svg.i{transform:scale(1.15)}
+.tema-sel button:active svg.i{transform:scale(.8)}
+.tema-anim,.tema-anim *,.tema-anim *::before,.tema-anim *::after{transition:background-color .45s ease,color .45s ease,border-color .45s ease,box-shadow .45s ease!important}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-new(root){z-index:2}
 .auth-nota{margin:0;font-size:.8rem;color:var(--muted);text-align:center}
 .gbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .gedit{display:flex;flex-direction:column;gap:8px}
@@ -312,6 +336,38 @@ ul.pl{margin:0;padding-left:18px} ul.pl li{margin:2px 0}
   h1{font-size:1.35rem}
 }
 @media (max-width:520px){.grid2{grid-template-columns:minmax(0,1fr)}}
+
+/* ---- Ilustraciones, pantallas vacías y animaciones suaves ---- */
+.ilus{display:block;width:100%;height:auto}
+.vacio{display:flex;align-items:center;gap:18px;padding:18px 8px;color:var(--muted)}
+.vacio .ilus{width:132px;flex:none;animation:flota 6s ease-in-out infinite}
+.vacio-txt b{display:block;color:var(--ink);font-family:var(--f-display);font-size:1.05rem;margin-bottom:4px}
+.vacio-txt p{margin:0 0 10px;font-size:.92rem;max-width:46ch}
+.card.vacio-card{padding:8px 18px}
+.vacio.mini{padding:12px 4px;gap:10px;font-size:.92rem}.vacio.mini .i{color:var(--ok);flex:none}
+@media (max-width:560px){.vacio{flex-direction:column;text-align:center}.vacio-txt p{margin-inline:auto}.vacio .ilus{width:116px}}
+.phead-ilus{width:150px;flex:none;margin:-6px 0 -10px auto;opacity:.95}
+@media (max-width:700px){.phead-ilus{display:none}}
+.auth-ilus{max-width:330px;margin:18px 0 6px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25));animation:flota 7s ease-in-out infinite}
+@media (max-width:860px){.auth-ilus{display:none}}
+@keyframes flota{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.main{background-image:radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--line) 70%,transparent) 1px,transparent 0);background-size:22px 22px}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.main.entra .wrap>*{animation:entra .38s cubic-bezier(.2,.7,.3,1) both}
+.main.entra .wrap>*:nth-child(2){animation-delay:.04s}.main.entra .wrap>*:nth-child(3){animation-delay:.08s}.main.entra .wrap>*:nth-child(4){animation-delay:.12s}.main.entra .wrap>*:nth-child(n+5){animation-delay:.16s}
+.card,.stat{transition:box-shadow .2s,transform .2s,border-color .2s}
+.card:hover{box-shadow:0 6px 18px rgba(20,40,30,.07)}
+.stat:hover{transform:translateY(-2px)}
+.btn{transition:transform .12s,background-color .2s,border-color .2s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn.pri:hover{box-shadow:0 4px 12px color-mix(in srgb,var(--pencil) 40%,transparent)}
+.toast{animation:toastIn .3s cubic-bezier(.2,.8,.3,1.2)}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
+.modal{animation:modalIn .22s ease-out}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.cl-ok.on .i{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.4)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+@media print{.phead-ilus,.vacio .ilus{display:none}.main{background:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{
   :root{--paper:#fff;--surface:#fff;--ink:#000;--muted:#333;--line:#999}
@@ -351,10 +407,92 @@ const IC={
  pencil:'<path d="M3 21l3-1 12-12-2-2L4 18l-1 3z"/><path d="M14 6l2-2 4 4-2 2"/>',
  ruler:'<rect x="2" y="8" width="20" height="8" rx="1"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/>',
  down:'<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>', up:'<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>',
-key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+ moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+ monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+ key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
 };
 const ic=(n)=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+/* ---------- Ilustraciones propias (SVG hechos con código, se adaptan al tema claro u oscuro) ---------- */
+const OJOS=(x1,x2,y)=>`<circle cx="${x1}" cy="${y}" r="1.9" fill="#2B2420"/><circle cx="${x2}" cy="${y}" r="1.9" fill="#2B2420"/><path d="M${x1+1} ${y+7}q${(x2-x1)/2-1} 4 ${x2-x1-2} 0" stroke="#2B2420" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+const ILUS={
+  // Dos niños estudiando frente al tablero
+  ninos:`<svg class="ilus" viewBox="0 0 320 214" role="img" aria-label="Niña y niño estudiando frente al tablero">
+    <rect x="38" y="10" width="244" height="98" rx="6" fill="var(--il-pizarra)" stroke="var(--il-marco)" stroke-width="6"/>
+    <text x="62" y="54" font-family="Bitter, Georgia, serif" font-size="25" fill="#EAF2ED" opacity=".92">A b c</text>
+    <text x="178" y="54" font-family="Bitter, Georgia, serif" font-size="22" fill="#EAF2ED" opacity=".92">2 + 3 = 5</text>
+    <path d="M62 76h74M62 90h48M178 76h62" stroke="#EAF2ED" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+    <rect x="226" y="102" width="24" height="5" rx="2" fill="#F4F3EC"/>
+    <path d="M300 24l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="var(--pencil)"/>
+    <path d="M18 66l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z" fill="var(--f2)" opacity=".8"/>
+    <path d="M70 206v-38a28 28 0 0 1 56 0v38z" fill="var(--f1)"/>
+    <circle cx="98" cy="126" r="19" fill="var(--il-piel1)"/>
+    <path d="M79 124a19 19 0 0 1 38-1c-5-7-13-9-19-5-6-5-13-3-19 6z" fill="var(--il-pelo1)"/>
+    ${OJOS(91,105,128)}
+    <path d="M194 206v-38a28 28 0 0 1 56 0v38z" fill="var(--f3)"/>
+    <circle cx="222" cy="126" r="19" fill="var(--il-piel2)"/>
+    <path d="M203 128a19 19 0 0 1 38 0v-4c0-11-8-18-19-18s-19 7-19 18z" fill="var(--il-pelo2)"/>
+    <circle cx="201" cy="137" r="6" fill="var(--il-pelo2)"/><circle cx="243" cy="137" r="6" fill="var(--il-pelo2)"/>
+    <circle cx="201" cy="131" r="2.4" fill="var(--f5)"/><circle cx="243" cy="131" r="2.4" fill="var(--f5)"/>
+    ${OJOS(215,229,129)}
+    <rect x="34" y="172" width="252" height="13" rx="4" fill="var(--il-mesa)"/>
+    <path d="M56 185v25M264 185v25" stroke="var(--il-mesa)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M70 171l28-7 28 7" fill="none" stroke="var(--f2)" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M72 168l26-6 26 6v-15l-26-6-26 6z" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="1.5"/>
+    <path d="M98 162v-15M78 157l14-3M78 162l14-3M104 154l14 3M104 159l14 3" stroke="var(--il-linea)" stroke-width="1.4"/>
+    <rect x="196" y="156" width="48" height="15" rx="2" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="1.5"/>
+    <path d="M202 161h30M202 166h22" stroke="var(--il-linea)" stroke-width="1.4"/>
+    <g transform="rotate(-32 246 150)"><rect x="232" y="147" width="30" height="7" rx="1.5" fill="var(--pencil)"/><path d="M262 147l8 3.5-8 3.5z" fill="#F2D3A0"/><path d="M268 149.6l2 .9-2 .9z" fill="#2B2420"/><rect x="228" y="147" width="5" height="7" rx="1" fill="var(--f5)"/></g>
+    <circle cx="150" cy="166" r="7" fill="var(--f5)"/><path d="M150 159q2-5 6-5" stroke="var(--f1)" stroke-width="2" fill="none"/>
+  </svg>`,
+  // Útiles escolares: libros, vaso con lápices y regla
+  utiles:`<svg class="ilus" viewBox="0 0 220 130" role="img" aria-label="Libros, lápices y regla">
+    <rect x="18" y="104" width="190" height="8" rx="3" fill="var(--il-mesa)" opacity=".9"/>
+    <rect x="26" y="84" width="86" height="20" rx="3" fill="var(--f2)"/><rect x="30" y="88" width="78" height="3" fill="#fff" opacity=".5"/>
+    <rect x="32" y="64" width="78" height="20" rx="3" fill="var(--f1)"/><rect x="36" y="68" width="70" height="3" fill="#fff" opacity=".5"/>
+    <rect x="24" y="46" width="82" height="18" rx="3" fill="var(--f3)"/><rect x="28" y="50" width="74" height="3" fill="#fff" opacity=".5"/>
+    <rect x="128" y="56" width="40" height="48" rx="6" fill="var(--f4)"/><rect x="128" y="56" width="40" height="9" rx="4" fill="#000" opacity=".12"/>
+    <g><rect x="134" y="14" width="7" height="44" rx="1.5" fill="var(--pencil)" transform="rotate(-8 137 58)"/><path d="M134 14l3.5-9 3.5 9z" fill="#F2D3A0" transform="rotate(-8 137 58)"/></g>
+    <g><rect x="146" y="8" width="7" height="50" rx="1.5" fill="var(--f5)"/><path d="M146 8l3.5-9 3.5 9z" fill="#F2D3A0"/></g>
+    <g><rect x="157" y="18" width="7" height="40" rx="1.5" fill="var(--f2)" transform="rotate(10 160 58)"/><path d="M157 18l3.5-9 3.5 9z" fill="#F2D3A0" transform="rotate(10 160 58)"/></g>
+    <rect x="176" y="40" width="14" height="64" rx="2" fill="var(--il-regla)"/>
+    <path d="M176 48h6M176 56h9M176 64h6M176 72h9M176 80h6M176 88h9M176 96h6" stroke="var(--il-linea-osc)" stroke-width="1.4"/>
+    <path d="M202 26l2.5 5.5 6 .8-4.4 4.2 1 6-5.1-2.8-5.1 2.8 1-6-4.4-4.2 6-.8z" fill="var(--pencil)"/>
+  </svg>`,
+  // Cuaderno abierto con lápiz (pantallas vacías)
+  cuaderno:`<svg class="ilus" viewBox="0 0 160 112" role="img" aria-label="Cuaderno abierto y lápiz">
+    <path d="M14 22q33-10 66 4v74q-33-14-66-4z" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="2"/>
+    <path d="M146 22q-33-10-66 4v74q33-14 66-4z" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="2"/>
+    <path d="M24 40q24-6 46 2M24 54q24-6 46 2M24 68q24-6 46 2M90 42q22-8 46-2M90 56q22-8 46-2M90 70q22-8 46-2" stroke="var(--il-linea)" stroke-width="1.5" fill="none"/>
+    <path d="M80 26v74" stroke="var(--margin)" stroke-width="2" opacity=".6"/>
+    <g transform="rotate(38 118 76)"><rect x="96" y="72" width="44" height="8" rx="2" fill="var(--pencil)"/><path d="M140 72l10 4-10 4z" fill="#F2D3A0"/><path d="M147 74.8l3 1.2-3 1.2z" fill="#2B2420"/><rect x="90" y="72" width="7" height="8" rx="1.5" fill="var(--f5)"/></g>
+    <path d="M30 8l2 4.5 5 .6-3.6 3.4.9 4.9-4.3-2.3-4.3 2.3.9-4.9-3.6-3.4 5-.6z" fill="var(--pencil)"/>
+    <circle cx="140" cy="10" r="3" fill="var(--f2)"/><circle cx="12" cy="92" r="2.5" fill="var(--f1)"/>
+  </svg>`,
+  // Hoja de calendario con lápiz
+  calendario:`<svg class="ilus" viewBox="0 0 150 112" role="img" aria-label="Calendario escolar">
+    <rect x="20" y="16" width="96" height="86" rx="8" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="2"/>
+    <path d="M20 24a8 8 0 0 1 8-8h80a8 8 0 0 1 8 8v12H20z" fill="var(--f5)"/>
+    <path d="M42 10v14M94 10v14" stroke="var(--il-linea-osc)" stroke-width="4" stroke-linecap="round"/>
+    ${[0,1,2,3].map(f=>[0,1,2,3,4].map(c=>`<rect x="${30+c*16}" y="${44+f*13}" width="10" height="8" rx="2" fill="${f===1&&c===2?'var(--pencil)':'var(--il-linea)'}" opacity="${f===1&&c===2?1:.7}"/>`).join('')).join('')}
+    <g transform="rotate(-40 118 82)"><rect x="104" y="78" width="36" height="7" rx="1.5" fill="var(--f2)"/><path d="M140 78l8 3.5-8 3.5z" fill="#F2D3A0"/></g>
+  </svg>`,
+  // Escuela rural
+  escuela:`<svg class="ilus" viewBox="0 0 200 130" role="img" aria-label="Escuela rural">
+    <circle cx="168" cy="26" r="13" fill="var(--pencil)" opacity=".9"/>
+    <path d="M0 116q50-14 100-4t100-2v20H0z" fill="var(--f1)" opacity=".35"/>
+    <rect x="52" y="58" width="96" height="56" rx="3" fill="var(--il-hoja)" stroke="var(--il-linea)" stroke-width="2"/>
+    <path d="M44 62l56-34 56 34z" fill="var(--f5)"/>
+    <rect x="90" y="80" width="20" height="34" rx="2" fill="var(--il-mesa)"/>
+    <rect x="62" y="72" width="18" height="16" rx="2" fill="var(--f2)" opacity=".75"/><rect x="120" y="72" width="18" height="16" rx="2" fill="var(--f2)" opacity=".75"/>
+    <path d="M100 28V8" stroke="var(--il-linea-osc)" stroke-width="2.5"/><path d="M100 8h18v5h-18z" fill="#FCD116"/><path d="M100 13h18v3h-18z" fill="#003893"/><path d="M100 16h18v3h-18z" fill="#CE1126"/>
+    <circle cx="26" cy="84" r="16" fill="var(--f1)"/><rect x="24" y="96" width="4" height="18" fill="var(--il-mesa)"/>
+    <circle cx="178" cy="90" r="11" fill="var(--f1)" opacity=".85"/><rect x="176" y="98" width="4" height="16" fill="var(--il-mesa)"/>
+  </svg>`
+};
+const vacio=(titulo,texto,ilus='cuaderno',accion='')=>`<div class="vacio">${ILUS[ilus]}<div class="vacio-txt"><b>${titulo}</b>${texto?`<p>${texto}</p>`:''}${accion}</div></div>`;
+const vacioMini=(texto,icono='check')=>`<div class="vacio mini">${ic(icono)}<span>${texto}</span></div>`;
 
 /* ---------- Utilidades ---------- */
 const $=s=>document.querySelector(s);
@@ -396,6 +534,25 @@ function seed(){
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){storageOK=false}return seed()}
 function save(){try{localStorage.setItem(claveDatos(),JSON.stringify(S))}catch(e){storageOK=false}if(NUBE?.on&&NUBE.ses)programarSubida()}
 let S=load(); save();
+/* ---------- Tema claro / oscuro (se guarda en este equipo y en la cuenta) ---------- */
+const TEMA_HOST=document.documentElement.getAttribute('data-theme');
+const temaGuardado=()=>{try{return localStorage.getItem('md_tema')||'auto'}catch(e){return 'auto'}};
+const temaEfectivo=t=>t==='auto'?(TEMA_HOST||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')):t;
+function aplicarTema(t){const r=document.documentElement;if(t==='auto'){if(TEMA_HOST)r.setAttribute('data-theme',TEMA_HOST);else r.removeAttribute('data-theme')}else r.setAttribute('data-theme',t);
+  const sel=document.querySelector('.tema-sel');if(sel){sel.dataset.v=t;sel.querySelectorAll('[role=radio]').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.v===t)))}}
+function cambiarTema(t,origen){if(t===temaGuardado()&&document.documentElement.dataset.temaListo)return;try{localStorage.setItem('md_tema',t)}catch(e){}
+  if(typeof enSesion==='function'&&enSesion()&&S.config.tema!==t){S.config.tema=t;save()}
+  const antes=temaEfectivo(temaGuardado()),hacer=()=>aplicarTema(t),root=document.documentElement;
+  const quieto=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(origen&&!quieto&&document.startViewTransition&&antes!==temaEfectivo(t)){
+    const r=origen.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2,rad=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+    const vt=document.startViewTransition(hacer);
+    vt.ready.then(()=>root.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${rad}px at ${x}px ${y}px)`]},{duration:600,easing:'cubic-bezier(.45,0,.2,1)',pseudoElement:'::view-transition-new(root)'})).catch(()=>{})}
+  else if(!quieto){root.classList.add('tema-anim');hacer();setTimeout(()=>root.classList.remove('tema-anim'),500)}
+  else hacer();
+  toast(t==='dark'?'Modo oscuro activado':t==='light'?'Modo claro activado':'El tema sigue al de este equipo')}
+aplicarTema(temaGuardado());document.documentElement.dataset.temaListo='1';
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(temaGuardado()==='auto')aplicarTema('auto')});
 
 const G=id=>S.grados.find(x=>x.id===id);
 const M=id=>S.materias.find(x=>x.id===id);
@@ -409,7 +566,7 @@ const avance=list=>list.length?Math.round(list.filter(t=>t.estado==='completado'
 
 /* ---------- Estado de interfaz ---------- */
 let V={name:'panel',grado:null,tab:'temas',f:{materia:'',periodo:'',estado:'',q:''},open:new Set(),cal:{y:new Date().getFullYear(),m:new Date().getMonth(),g:''},pr:{g:'',p:''},gen:null};
-function go(name,extra={}){Object.assign(V,{name},extra);render();window.scrollTo(0,0)}
+function go(name,extra={}){Object.assign(V,{name},extra);render();window.scrollTo(0,0);const m=$('#main');if(m){m.classList.remove('entra');void m.offsetWidth;m.classList.add('entra')}}
 
 /* ---------- Modal y avisos ---------- */
 function toast(t){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2200)}
@@ -502,7 +659,7 @@ function renderSide(){
   <button class="nav" data-act="addGrado" style="opacity:.8">${ic('plus')}Agregar grado</button></nav>`}
 
 /* ---------- Vistas ---------- */
-function head(k,title,sub,tools=''){return `<div class="phead"><div><div class="k">${k}</div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div><div class="tools">${tools}</div></div>`}
+function head(k,title,sub,tools='',ilus=''){return `<div class="phead"><div><div class="k">${k}</div><h1>${title}</h1>${sub?`<p>${sub}</p>`:''}</div>${ilus&&ILUS[ilus]?`<div class="phead-ilus" aria-hidden="true">${ILUS[ilus]}</div>`:''}<div class="tools">${tools}</div></div>`}
 function temaRow(t){const g=G(t.gradoId),m=M(t.materiaId);return `<div class="row"><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${g?.color};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer" data-act="openTema" data-id="${t.id}">${esc(t.titulo)}</button><div class="s">${esc(g?.nombre)} · ${esc(m?.nombre||'')}</div></div><span class="date">${fmt(t.limite)}</span>${stBadge(t)}</div>`}
 const VIEWS={};
 VIEWS.panel=()=>{const dp=NUBE.on&&NUBE.perfil&&!NUBE.perfil.admin&&NUBE.perfil.vigente?diasPlan():null;const avisoPlan=dp!=null&&dp<=7?`<div class="warnbox">${ic('cal')} <span>Su plan vence ${dp<=1?'mañana':'en '+dp+' días'} (el ${esc(fmtL(NUBE.perfil.vence.slice(0,10)).replace(/^\w+, /,''))}). Para no perder el acceso, renuévelo con un código. <button class="btn sm" data-act="renovar">Renovar ahora</button></span></div>`:'';
@@ -511,13 +668,13 @@ VIEWS.panel=()=>{const dp=NUBE.on&&NUBE.perfil&&!NUBE.perfil.admin&&NUBE.perfil.
     ...S.eventos.filter(e=>!e.hecho&&e.fecha>=HOY&&e.fecha<=lim).map(e=>({f:e.fecha,txt:e.tipo+': '+e.titulo,g:e.gradoId,a:`data-act="editEv" data-id="${e.id}"`}))].sort((a,b)=>a.f.localeCompare(b.f));
   const pa=perActual();
   return head(fmtL(HOY),`Panel de ${esc(S.config.docente)}`,pa?`${esc(pa.nombre)} · del ${fmt(pa.inicio)} al ${fmt(pa.fin)}`:'Fuera de los periodos académicos registrados',
-    `<button class="btn pri" data-act="go" data-v="generador">${ic('bulb')} Generar temario</button><button class="btn" data-act="newEv">${ic('plus')} Tarea o evaluación</button>`)+
+    `<button class="btn pri" data-act="go" data-v="generador">${ic('bulb')} Generar temario</button><button class="btn" data-act="newEv">${ic('plus')} Tarea o evaluación</button>`,'utiles')+
   avisoPlan+(storageOK?'':`<div class="warnbox">${ic('x')} Este navegador no permite guardar datos. Use “Configuración → Descargar respaldo” antes de cerrar.</div>`)+
   `<div class="stats"><div class="stat warn"><b>${ec.length}</b><span>Temas en curso</span></div><div class="stat"><b>${pe.length}</b><span>Temas pendientes</span></div><div class="stat bad"><b>${at.length}</b><span>Temas atrasados</span></div><div class="stat ok"><b>${avance(T)}%</b><span>Avance general (${co.length} de ${T.length})</span></div></div>
-  <div class="cols"><section class="card"><h2>${ic('cal')} Próximos 14 días</h2><div class="list">${prox.map(p=>`<div class="row"><span class="date" style="width:52px">${fmt(p.f)}</span><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${G(p.g)?.color||'var(--muted)'};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600" ${p.a}>${esc(p.txt)}</button><div class="s">${esc(G(p.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||'<p class="empty">Nada programado en las próximas dos semanas.</p>'}</div></section>
+  <div class="cols"><section class="card"><h2>${ic('cal')} Próximos 14 días</h2><div class="list">${prox.map(p=>`<div class="row"><span class="date" style="width:52px">${fmt(p.f)}</span><span class="dot" style="width:10px;height:10px;border-radius:3px;background:${G(p.g)?.color||'var(--muted)'};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600" ${p.a}>${esc(p.txt)}</button><div class="s">${esc(G(p.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||vacio('Semana libre','Nada programado en las próximas dos semanas.','calendario')}</div></section>
   <section class="card"><h2>${ic('ruler')} Avance por grado</h2>${S.grados.map(g=>{const l=T.filter(t=>t.gradoId===g.id),p=avance(l);return `<button class="prog" data-act="grado" data-id="${g.id}"><span style="font-weight:600">${esc(g.nombre)}</span><span class="bar"><i style="width:${p}%;background:${g.color}"></i></span><span>${p}%</span></button>`}).join('')||'<p class="empty">Agregue un grado para empezar.</p>'}<p class="s" style="color:var(--muted);font-size:.82rem;margin:8px 0 0">Porcentaje de temas completados sobre los planeados.</p></section></div>
-  <div class="cols"><section class="card"><h2 style="color:var(--bad)">Contenidos atrasados</h2><div class="list">${at.sort((a,b)=>a.limite.localeCompare(b.limite)).map(temaRow).join('')||'<p class="empty">No hay temas atrasados.</p>'}</div></section>
-  <section class="card"><h2>Temas en curso</h2><div class="list">${ec.map(temaRow).join('')||'<p class="empty">No hay temas en curso.</p>'}</div></section></div>`};
+  <div class="cols"><section class="card"><h2 style="color:var(--bad)">Contenidos atrasados</h2><div class="list">${at.sort((a,b)=>a.limite.localeCompare(b.limite)).map(temaRow).join('')||vacioMini('¡Al día! No hay temas atrasados.')}</div></section>
+  <section class="card"><h2>Temas en curso</h2><div class="list">${ec.map(temaRow).join('')||vacioMini('No hay temas en curso.','book')}</div></section></div>`};
 
 function temaCard(t){
   const e=estado(t),open=V.open.has(t.id),hs=t.subtemas.filter(s=>s.hecho).length,p=P(t.periodoId);
@@ -539,14 +696,14 @@ VIEWS.grado=()=>{
       <input id="fQ" type="search" placeholder="Buscar tema…" value="${esc(f.q)}" style="flex:1;min-width:140px"></div>`+
      (matsDe(g.id).filter(m=>!f.materia||m.id===f.materia).map(m=>{const l=L.filter(t=>t.materiaId===m.id),all=T.filter(t=>t.materiaId===m.id);if(!l.length)return '';
        return `<section class="grp"><header><h3>${esc(m.nombre)}</h3><span class="chip">${avance(all)}% completado · ${all.length} temas</span><button class="btn sm ghost" data-act="newTemaM" data-m="${m.id}">${ic('plus')} Tema</button></header>${l.map(temaCard).join('')||'<p class="empty">Sin temas con este filtro.</p>'}</section>`}).join('')||'')+
-     (L.length?'':`<div class="card empty">No hay temas ${T.length?'que coincidan con el filtro':'todavía'}. Use “Nuevo tema” o el generador de temarios para planear el primero.</div>`);
+     (L.length?'':`<div class="card vacio-card">${vacio(T.length?'No hay temas con este filtro':'Aún no hay temas',T.length?'Cambie el filtro para ver otros temas.':'Use “Nuevo tema” o el generador de temarios para planear el primero.',T.length?'cuaderno':'utiles')}</div>`);
   }
   if(V.tab==='eventos'){const E=S.eventos.filter(e=>e.gradoId===g.id||!e.gradoId).sort((a,b)=>a.fecha.localeCompare(b.fecha));
-    body=`<div class="card"><div class="list">${E.map(e=>`<div class="row"><input type="checkbox" data-act="evDone" data-id="${e.id}"${e.hecho?' checked':''} aria-label="Marcar realizada" style="width:18px;height:18px;accent-color:var(--ok)"><span class="date" style="width:52px">${fmt(e.fecha)}</span><div class="grow"><div class="t" style="${e.hecho?'text-decoration:line-through;color:var(--muted)':''}">${esc(e.titulo)}</div><div class="s">${esc(e.tipo)}${e.materiaId?' · '+esc(M(e.materiaId)?.nombre):''}${!e.gradoId?' · Todos los grados':''}${e.notas?' · '+esc(e.notas):''}</div></div>${!e.hecho&&e.fecha<HOY?'<span class="st atrasado">Vencida</span>':''}<button class="ib" data-act="editEv" data-id="${e.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delEv" data-id="${e.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Sin tareas ni evaluaciones registradas.</p>'}</div></div>`}
+    body=`<div class="card"><div class="list">${E.map(e=>`<div class="row"><input type="checkbox" data-act="evDone" data-id="${e.id}"${e.hecho?' checked':''} aria-label="Marcar realizada" style="width:18px;height:18px;accent-color:var(--ok)"><span class="date" style="width:52px">${fmt(e.fecha)}</span><div class="grow"><div class="t" style="${e.hecho?'text-decoration:line-through;color:var(--muted)':''}">${esc(e.titulo)}</div><div class="s">${esc(e.tipo)}${e.materiaId?' · '+esc(M(e.materiaId)?.nombre):''}${!e.gradoId?' · Todos los grados':''}${e.notas?' · '+esc(e.notas):''}</div></div>${!e.hecho&&e.fecha<HOY?'<span class="st atrasado">Vencida</span>':''}<button class="ib" data-act="editEv" data-id="${e.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delEv" data-id="${e.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||vacio('Aún no hay tareas ni evaluaciones','Use “Tarea o evaluación” para registrar la primera.','cuaderno')}</div></div>`}
   if(V.tab==='recursos'){const R=S.recursos.filter(r=>r.gradoId===g.id);
-    body=`<div class="card"><div class="list">${R.map(r=>`<div class="row">${ic('book')}<div class="grow"><div class="t">${esc(r.titulo)}</div><div class="s">${esc(M(r.materiaId)?.nombre||'General')}${r.notas?' · '+esc(r.notas):''}</div>${r.enlace?(/^https?:\/\//.test(r.enlace)?`<a href="${esc(r.enlace)}" target="_blank" rel="noopener" style="font-size:.85rem;overflow-wrap:anywhere">${esc(r.enlace)}</a>`:`<div class="s">${esc(r.enlace)}</div>`):''}</div><button class="ib" data-act="editRec" data-id="${r.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delRec" data-id="${r.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Guarde aquí guías, libros, videos y material del aula.</p>'}</div></div>`}
+    body=`<div class="card"><div class="list">${R.map(r=>`<div class="row">${ic('book')}<div class="grow"><div class="t">${esc(r.titulo)}</div><div class="s">${esc(M(r.materiaId)?.nombre||'General')}${r.notas?' · '+esc(r.notas):''}</div>${r.enlace?(/^https?:\/\//.test(r.enlace)?`<a href="${esc(r.enlace)}" target="_blank" rel="noopener" style="font-size:.85rem;overflow-wrap:anywhere">${esc(r.enlace)}</a>`:`<div class="s">${esc(r.enlace)}</div>`):''}</div><button class="ib" data-act="editRec" data-id="${r.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delRec" data-id="${r.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||vacio('Su biblioteca está vacía','Guarde aquí guías, libros, videos y material del aula.','utiles')}</div></div>`}
   if(V.tab==='obs'){const O=S.observaciones.filter(o=>o.gradoId===g.id).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-    body=`<div class="card"><div class="list">${O.map(o=>`<div class="row" style="align-items:flex-start"><span class="date" style="width:52px">${fmt(o.fecha)}</span><div class="grow">${o.estudiante?`<div class="t">${esc(o.estudiante)}</div>`:''}<div class="note">${esc(o.texto)}</div></div><button class="ib" data-act="editObs" data-id="${o.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delObs" data-id="${o.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||'<p class="empty">Registre aquí observaciones del grupo o de cada estudiante.</p>'}</div></div>`}
+    body=`<div class="card"><div class="list">${O.map(o=>`<div class="row" style="align-items:flex-start"><span class="date" style="width:52px">${fmt(o.fecha)}</span><div class="grow">${o.estudiante?`<div class="t">${esc(o.estudiante)}</div>`:''}<div class="note">${esc(o.texto)}</div></div><button class="ib" data-act="editObs" data-id="${o.id}" aria-label="Editar">${ic('edit')}</button><button class="ib" data-act="delObs" data-id="${o.id}" aria-label="Eliminar">${ic('trash')}</button></div>`).join('')||vacio('Sin observaciones todavía','Registre aquí observaciones del grupo o de cada estudiante.','cuaderno')}</div></div>`}
   const addBtn={temas:`<button class="btn pri" data-act="newTema">${ic('plus')} Nuevo tema</button>`,eventos:`<button class="btn pri" data-act="newEv">${ic('plus')} Nueva tarea o evaluación</button>`,recursos:`<button class="btn pri" data-act="newRec">${ic('plus')} Nuevo recurso</button>`,obs:`<button class="btn pri" data-act="newObs">${ic('plus')} Nueva observación</button>`}[V.tab];
   const at=T.filter(t=>estado(t)==='atrasado').length;
   return head(`<span style="color:${g.color}">■</span> Grado`,esc(g.nombre),`${T.length} temas · ${avance(T)}% completado${at?` · <b style="color:var(--bad)">${at} atrasados</b>`:''}`,
@@ -566,7 +723,7 @@ VIEWS.calendario=()=>{
    `<button class="btn" data-act="calMv" data-v="-1" aria-label="Mes anterior">${ic('left')}</button><button class="btn" data-act="calHoy">Hoy</button><button class="btn" data-act="calMv" data-v="1" aria-label="Mes siguiente">${ic('right')}</button><button class="btn pri" data-act="newEv">${ic('plus')} Evento</button>`)+
   `<div class="filters"><select id="calG" aria-label="Grado">${optG('Todos los grados').map(o=>`<option value="${o.v}"${o.v===g?' selected':''}>${esc(o.t)}</option>`).join('')}</select><span class="filters">${S.grados.map(x=>`<span class="chip"><i style="background:${x.color}"></i>${esc(x.nombre)}</span>`).join('')}</span></div>
   <div class="cal">${['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'].map(d=>`<div class="dh">${d}</div>`).join('')}${cells}</div>
-  <section class="card"><h2>Agenda del mes</h2><div class="list">${mes.map(x=>`<div class="row"><span class="date" style="width:52px">${fmt(x.f)}</span><span style="width:10px;height:10px;border-radius:3px;background:${x.c};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;${x.done?'text-decoration:line-through;color:var(--muted)':''}" ${x.a}>${esc(x.txt)}</button><div class="s">${esc(G(x.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||'<p class="empty">No hay actividades en este mes.</p>'}</div></section>`};
+  <section class="card"><h2>Agenda del mes</h2><div class="list">${mes.map(x=>`<div class="row"><span class="date" style="width:52px">${fmt(x.f)}</span><span style="width:10px;height:10px;border-radius:3px;background:${x.c};flex:none"></span><div class="grow"><button class="t" style="background:none;border:0;padding:0;text-align:left;cursor:pointer;${x.done?'text-decoration:line-through;color:var(--muted)':''}" ${x.a}>${esc(x.txt)}</button><div class="s">${esc(G(x.g)?.nombre||'Todos los grados')}</div></div></div>`).join('')||vacio('Mes sin actividades','No hay clases ni tareas programadas en este mes.','calendario')}</div></section>`};
 
 /* ---------- Generador de temarios ---------- */
 const AREAS=[
@@ -608,7 +765,7 @@ function generar(o){
   return {o,sub:SUB,act,ej:EJ,clases,limite:clases[clases.length-1].fecha}}
 VIEWS.generador=()=>{
   const gid=V.genG||S.grados[0]?.id;const gen=V.gen;
-  if(!S.grados.length)return head('Herramienta','Generador de temarios','')+'<div class="card empty">Primero agregue un grado en Configuración.</div>';
+  if(!S.grados.length)return head('Herramienta','Generador de temarios','')+`<div class="card vacio-card">${vacio('Primero agregue un grado','Vaya a Configuración y cree los grados que atiende.','escuela','<button class="btn pri" data-act="go" data-v="config">Ir a Configuración</button>')}</div>`;
   const form=`<form id="genF" class="card grid2"><h2 class="wide">${ic('bulb')} Datos del tema</h2>
    ${fieldHtml({k:'gradoId',label:'Grado',type:'select',options:optG()},gid)}${fieldHtml({k:'materiaId',label:'Materia',type:'select',options:optM(gid)},gen?.o.materiaId)}
    ${fieldHtml({k:'tema',label:'Tema principal',req:1,wide:1,ph:'Ej.: Los seres vivos y su clasificación'},gen?.o.tema)}
@@ -638,6 +795,9 @@ VIEWS.imprimir=()=>head('Planeación','Imprimir y exportar','Elija qué incluir 
  <div class="card">${planHTML()}</div>`;
 
 VIEWS.config=()=>head('Ajustes','Configuración',NUBE.on?'Su cuenta, grados, periodos y copias de seguridad.':'Grados, periodos y respaldo de la información.')+
+ (()=>{const t=temaGuardado();return `<section class="card apariencia"><div class="ap-txt"><h2>${ic('sun')} Apariencia</h2><p>Elija cómo se ve ${esc(NOMBRE_APP)}. Se guarda en este equipo${enSesion()?' y en su cuenta':''}.</p></div>
+   <div class="tema-sel" role="radiogroup" aria-label="Modo de color" data-v="${t}"><span class="tema-pill" aria-hidden="true"></span>
+   ${[['light','sun','Claro'],['dark','moon','Oscuro'],['auto','monitor','Automático']].map(([v,i,l])=>`<button type="button" role="radio" aria-checked="${t===v}" data-act="tema" data-v="${v}" title="${v==='auto'?'Igual que el modo de este equipo':'Modo '+l.toLowerCase()}">${ic(i)}<span>${l}</span></button>`).join('')}</div></section>`})()+
  (enSesion()?(()=>{const ca=cuentaActual();return `<section class="card cuenta"><h2>${ic('gear')} Mi cuenta</h2><div class="cuenta-datos"><div><span class="s">Usuario</span><b>${esc(ca.usuario)}</b></div><div><span class="s">Correo</span><b>${esc(ca.correo)}</b></div><div><span class="s">Rol</span><b>Profesor</b></div>${NUBE.on&&NUBE.perfil?`<div><span class="s">Plan</span><b>${NUBE.perfil.admin?'Administrador (sin vencimiento)':NUBE.perfil.sinControl?'Sin control de planes':NUBE.perfil.vigente?'Vigente hasta el '+esc(fmtL(NUBE.perfil.vence.slice(0,10)).replace(/^\w+, /,'')):'Vencido'}</b></div>`:''}${NUBE.on?'<div><span class="s">Guías con IA este mes</span><b id="usoIA">…</b></div>':''}<div><span class="s">Guardado</span><b>${NUBE.on?'Automático en la nube':'En este equipo'}</b></div></div><div class="tools">${NUBE.on&&NUBE.perfil&&!NUBE.perfil.admin&&!NUBE.perfil.sinControl?'<button class="btn pri" data-act="renovar">Renovar con código</button>':''}<button class="btn" data-act="cambiarClave">Cambiar contraseña</button><button class="btn danger" data-act="salir">Cerrar sesión</button></div></section>`})():'')+
  `<div class="cols"><section class="card grid2"><h2 class="wide">Datos del docente</h2>${fieldHtml({k:'docente',label:'Nombre del docente'},S.config.docente)}${fieldHtml({k:'institucion',label:'Institución o sede'},S.config.institucion)}<div class="mact wide"><button class="btn pri" data-act="saveCfg">Guardar datos</button></div></section>
  <section class="card"><h2>${NUBE.on?'Copia de seguridad':'Respaldo'}</h2><p style="margin:0 0 12px;color:var(--muted)">${NUBE.on?'Su planeación se guarda sola en su cuenta y la puede abrir desde cualquier equipo. Si quiere, descargue también una copia en este equipo.':'La información se guarda en este navegador. Descargue un respaldo con frecuencia y úselo para pasar los datos a otro equipo o celular.'}</p><div class="tools"><button class="btn pri" data-act="backup">${ic('down')} Descargar respaldo</button><button class="btn" data-act="restore">${ic('up')} Cargar respaldo</button><button class="btn danger" data-act="reset">${ic('trash')} Borrar todo</button></div></section></div>
@@ -696,6 +856,7 @@ const A={
  saveCfg:()=>{S.config.docente=$('#f_docente').value.trim()||'Docente';S.config.institucion=$('#f_institucion').value.trim();save();render();toast('Datos guardados')},
  backup:()=>{download(`respaldo_planeacion_${HOY}.json`,JSON.stringify(S,null,1),'application/json');},
  restore:()=>$('#fileIn').click(),
+ tema:(d,b)=>cambiarTema(d.v,b),
  salir:()=>confirmar('¿Cerrar sesión en este equipo? Su planeación queda guardada en su cuenta.',cerrarSesion),
  cambiarClave:()=>modalCambiarClave(),
  reset:()=>confirmar('¿Borrar toda la información y volver a la configuración inicial? Descargue un respaldo antes si lo necesita.',()=>{S=seed();S.temas=[];S.eventos=[];save();V.name='panel';render();toast('Información reiniciada')})
@@ -1103,9 +1264,25 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)traerCambi
 /* ----- Entrar y salir ----- */
 const tieneDatosPropios=d=>!!d&&((d.temas||[]).some(t=>!/\(ejemplo\)/.test(t.titulo))||(d.recursos||[]).length>0||(d.observaciones||[]).length>0);
 function datosNuevos(nombre){const d=seed();d.config.docente=nombre||'Docente';d.config.institucion='';return d}
-function arrancar(){if(NUBE.on&&NUBE.perfil&&NUBE.perfil.vigente===false)return pantallaAuth('vencido');$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();if(NUBE.on)marcarNube(NUBE.pendiente?'guardando':'ok')}
+function arrancar(){if(NUBE.on&&NUBE.perfil&&NUBE.perfil.vigente===false)return pantallaAuth('vencido');if(S.config?.tema&&S.config.tema!==temaGuardado()){try{localStorage.setItem('md_tema',S.config.tema)}catch(e){}aplicarTema(S.config.tema)}$('#auth')?.remove();document.querySelector('.app').hidden=false;V.name='panel';render();if(NUBE.on)marcarNube(NUBE.pendiente?'guardando':'ok')}
 function primeraVez(nombre){let local=null;try{local=JSON.parse(lsGet(KEY)||'null')}catch(e){}
   if(tieneDatosPropios(local))return pantallaAuth('migrar','',{local,nombre});S=datosNuevos(nombre);save();arrancar()}
+/* ----- Renovación y compra por WhatsApp (el plan solo se activa con un código; ningún pago se aplica solo) ----- */
+const waNumero=()=>String(NUBE.cfg?.whatsapp||'573224396858').replace(/\D/g,'');
+const waVisible=()=>{const n=waNumero().replace(/^57/,'');return n.length===10?`${n.slice(0,3)} ${n.slice(3,6)} ${n.slice(6)}`:n};
+function waLink(tipo){const ca=cuentaActual();
+  const t=tipo==='renovar'?`Hola, quiero renovar mi plan de ${NOMBRE_APP}.${ca?` Mi usuario es ${ca.usuario} y mi correo es ${ca.correo}.`:''} Les envío el comprobante de pago para recibir mi nuevo código de activación.`
+    :`Hola, quiero adquirir un plan de ${NOMBRE_APP} para crear mi cuenta de profesor. Les enviaré el comprobante de pago para recibir mi código de activación.`;
+  return `https://wa.me/${waNumero()}?text=${encodeURIComponent(t)}`}
+const IC_WA='<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.3-3.9A8 8 0 1 1 8 19z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 0 1-2-2l1-1-1-2z"/></svg>';
+function pasosRenovar(tipo='renovar'){return `<div class="renovar">
+  <ol class="pasos-pago">
+    <li><b>Haga el pago de su plan.</b> Si no conoce el valor o los medios de pago, pregúntenos por WhatsApp.</li>
+    <li><b>Envíe el comprobante de pago por WhatsApp</b> al <span class="wa-num">${waVisible()}</span>. Necesitamos el comprobante para generar su código.</li>
+    <li><b>Reciba su código de activación</b> y escríbalo ${tipo==='renovar'?'aquí abajo':'en «Código de activación»'}. ${tipo==='renovar'?'Los días se suman a los que le queden.':'Su cuenta queda activa al instante.'}</li>
+  </ol>
+  <a class="btn wa ancho" href="${waLink(tipo)}" target="_blank" rel="noopener">${IC_WA} ${tipo==='renovar'?'Enviar comprobante por WhatsApp':'Pedir mi código por WhatsApp'}</a>
+  <p class="renovar-nota">${ic('check')} El plan solo se ${tipo==='renovar'?'renueva':'activa'} con un código válido: ningún pago se aplica de forma automática.</p></div>`}
 async function cargarPerfil(){if(!NUBE.on||!NUBE.ses)return null;try{NUBE.perfil=await apiJson('/api/cuenta',{token:await tokenNube()})}catch(e){NUBE.perfil=null}return NUBE.perfil}
 async function canjearCodigo(codigo){const d=await apiJson('/api/cuenta',{method:'POST',token:await tokenNube(),body:{accion:'canjear',codigo}});NUBE.perfil=d;return d}
 const diasPlan=()=>NUBE.perfil?.vence?Math.ceil((new Date(NUBE.perfil.vence)-new Date())/86400000):null;
@@ -1132,7 +1309,7 @@ async function accionEntrar(idTxt,clave){
   const id=await LOCAL.entrar(idTxt,clave),x=cuentasLocales()[id];return {usuario:x.usuario,correo:x.correo,ir:()=>entrarLocal(id)}}
 async function apiJson(ruta,{method='GET',body,token}={}){let r;
   try{r=await fetch(ruta,{method,cache:'no-store',headers:{'content-type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined})}catch(e){throw {code:'red'}}
-  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error',msg:d.detalle||'',status:r.status};return d}
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw {code:d.code||'error',msg:d.detalle||'',status:r.status,expiro:d.expiro};return d}
 async function accionRegistrar({codigo,correo,usuario,llave,clave}){
   if(NUBE.on){await apiJson('/api/registro',{method:'POST',body:{codigo,correo,usuario,llave,clave}});return await accionEntrar(correo,clave)}
   const id=await LOCAL.registrar({correo,usuario,llave,clave});return {ir:()=>entrarLocal(id)}}
@@ -1150,6 +1327,7 @@ const ERR_AUTH={
   codigo_usado:'Ese código ya se usó: cada código sirve una sola vez. Si usted ya creó su cuenta con él, toque «Iniciar sesión». Si no, pida un código nuevo.',
   codigo_anulado:'Ese código fue anulado. Pida un código nuevo a quien le vendió el plan.',
   codigo_en_uso:'Ese código se está usando en este momento en otro registro. Espere 5 minutos y vuelva a intentar.',
+  codigo_expirado:'Ese código ya expiró: tenía un plazo para usarse y ya pasó. Escríbanos por WhatsApp para recibir uno nuevo.',
   sin_secreta:'No se pueden crear cuentas porque falta la clave secreta de Supabase. El administrador debe agregar SUPABASE_SECRET_KEY en Vercel y hacer Redeploy.',
   usuario_invalido:'El usuario debe tener entre 3 y 30 caracteres.',
   plan_vencido:'Su plan venció. Renuévelo con un código en Configuración → Mi cuenta.',
@@ -1179,6 +1357,7 @@ const ERR_AUTH={
   PGRST205:'Faltan las tablas de la aplicación en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.',
   '42P01':'Faltan las tablas de la aplicación en Supabase. El administrador debe ejecutar todo el archivo supabase.sql en Supabase → SQL Editor.'};
 const errAuth=e=>{const msg=String(e?.msg||'');
+  if(e?.code==='codigo_expirado'&&e.expiro)return `Ese código expiró el ${fmtL(String(e.expiro).slice(0,10)).replace(/^\w+, /,'')}: tenía un plazo para usarse y ya pasó. Escríbanos por WhatsApp para recibir uno nuevo.`;
   if(e?.code==='email_address_not_authorized'||/not authorized/i.test(msg))return ERR_AUTH.email_address_not_authorized;
   if(/invalid path|no route matched|requested path is invalid/i.test(msg)||(e?.status===404&&!e?.code?.startsWith?.('PGRST')))return 'La dirección de Supabase está mal puesta en Vercel. El administrador debe poner en SUPABASE_URL solo la Project URL (https://abcdxyz.supabase.co, sin /rest/v1) y hacer Redeploy.';
   if(/invalid api key|no api key|apikey/i.test(msg)||(e?.status===401&&!e?.code))return 'Supabase rechazó la clave pública. El administrador debe revisar SUPABASE_PUBLISHABLE_KEY en Vercel (debe empezar por sb_publishable_ y ser del mismo proyecto) y hacer Redeploy.';
@@ -1213,15 +1392,15 @@ function pantallaAuth(modo,aviso='',extra={}){
       :['Recuperar contraseña','Le enviaremos un correo con un enlace para crear una nueva.',`${campo('aEmail','Correo de su cuenta','email','email','nombre@gmail.com')}<button type="button" data-submit class="btn pri ancho">Enviar enlace</button><p class="auth-alt"><button type="button" class="link" data-auth="entrar">Volver a iniciar sesión</button></p>`],
     nueva:['Nueva contraseña','Escriba la contraseña que usará desde ahora.',`${campoClave('aPass','Nueva contraseña','new-password',true)}<button type="button" data-submit class="btn pri ancho">Guardar contraseña</button>`],
     confirmar:['Revise su correo',`Le enviamos un enlace a <b>${esc(extra.email||'su correo')}</b>. Ábralo para activar la cuenta y entrar. Si no lo ve, busque en la carpeta de spam.`,`<button type="button" class="btn ancho" data-auth="entrar">Ya la activé, iniciar sesión</button>`],
-    vencido:['Su plan venció',`${NUBE.perfil?.vence?'Venció el '+esc(fmtL(NUBE.perfil.vence.slice(0,10)))+'. ':''}Su planeación sigue guardada y no se ha perdido nada. Para seguir usándola, escriba un código de renovación.`,`${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX')}<button type="button" data-submit class="btn pri ancho">Renovar plan</button><button type="button" class="btn ancho" data-auth="copia">${ic('down')} Descargar copia de mi planeación</button><p class="auth-alt"><button type="button" class="link" data-auth="salir">Cerrar sesión</button></p>`],
+    vencido:['Su plan venció',`${NUBE.perfil?.vence?'Venció el '+esc(fmtL(NUBE.perfil.vence.slice(0,10)).replace(/^\w+, /,''))+'. ':''}Su planeación sigue guardada y no se ha perdido nada. Para seguir usándola, renueve su plan así:`,`${pasosRenovar('renovar')}${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX')}<button type="button" data-submit class="btn pri ancho">Renovar plan</button><button type="button" class="btn ancho" data-auth="copia">${ic('down')} Descargar copia de mi planeación</button><p class="auth-alt"><button type="button" class="link" data-auth="salir">Cerrar sesión</button></p>`],
     migrar:['Encontramos datos en este equipo','Hay una planeación guardada en este navegador. ¿Quiere pasarla a su cuenta?',`<button type="button" class="btn pri ancho" data-auth="migrarSi">Sí, pasarla a mi cuenta</button><button type="button" class="btn ancho" data-auth="migrarNo">No, empezar desde cero</button>`]
   }[modo];
   a.innerHTML=`<aside class="auth-izq"><div class="brand"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="stroke:var(--pencil);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${IC.pencil}</svg><div><b>${marca()}</b><small>Para docentes de escuela rural</small></div></div>
-    <div class="auth-msg"><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
+    <div class="auth-msg"><div class="auth-ilus" aria-hidden="true">${ILUS.ninos}</div><h1>Planee sus clases multigrado y prepare guías en minutos.</h1>
     <ul class="auth-lista"><li>${ic('cal')}<span>Cada tema dividido en clases con fecha</span></li><li>${ic('book')}<span>Guías para resolver, listas en PDF y Word</span></li><li>${ic('ruler')}<span>Avance y temas atrasados de cada grado</span></li></ul></div>
     <small class="auth-pie">© ${new Date().getFullYear()} ${esc(NOMBRE_APP)}</small></aside>
   <main class="auth-der"><form class="auth-card" id="authForm" novalidate><h2>${T[0]}</h2><p class="auth-sub">${T[1]}</p>${aviso?`<div class="auth-aviso" role="status">${esc(aviso)}</div>`:''}<div class="auth-err" role="alert" hidden></div>${T[2]}
-    ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}${!local&&NUBE.cfg?.contacto&&/registro|vencido/.test(modo)?`<p class="auth-nota">¿No tiene código? Escríbanos: <b>${esc(NUBE.cfg.contacto)}</b></p>`:''}</form></main>`;
+    ${local&&/entrar|registro/.test(modo)?'<p class="auth-nota">Las cuentas y la planeación se guardan en este equipo.</p>':''}${!local&&modo==='registro'?`<details class="sin-codigo"><summary>¿Todavía no tiene código de activación?</summary>${pasosRenovar('comprar')}</details>`:''}</form></main>`;
   const f=$('#authForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m},val=id=>($('#'+id)?.value||'').trim();
   const ocupado=on=>f.querySelectorAll('button,input').forEach(b=>b.disabled=on);
   const REV={aId:revisarId,aEmail:revisarCorreo,aUser:revisarUsuario,aCodigo:revisarCodigo};
@@ -1230,7 +1409,7 @@ function pantallaAuth(modo,aviso='',extra={}){
   f.addEventListener('focusout',e=>{const id=e.target.id;if(REV[id]&&e.target.value){tocado.add(id);mostrarMsg(id,REV[id](e.target.value))}});
   f.addEventListener('keyup',e=>{if(e.target.type==='password'||e.target.id==='aPass'){const caps=e.getModifierState?.('CapsLock');const m=$('#m_aPass');if(!m)return;if(caps&&!m.dataset.caps){m.dataset.caps=1;if(!$('#f_aPass'))mostrarMsg('aPass',{warn:'Tiene activadas las mayúsculas (Bloq Mayús).'})}else if(!caps&&m.dataset.caps){delete m.dataset.caps;if(!$('#f_aPass'))mostrarMsg('aPass',null)}}});
   // Tocar «Usar…» o «Ver» no le quita el foco al campo, así el mensaje no se redibuja y el toque no se pierde
-  f.addEventListener('mousedown',e=>{if(e.target.closest('[data-sug],[data-ver]'))e.preventDefault()});
+  f.addEventListener('mousedown',e=>{if(e.target.closest('[data-sug],[data-ver],[data-submit],[data-auth]'))e.preventDefault()});
   f.onclick=e=>{const v=e.target.closest('[data-ver]');if(v){const i=$('#'+v.dataset.ver);i.type=i.type==='password'?'text':'password';v.textContent=i.type==='password'?'Ver':'Ocultar';return}
     const sg=e.target.closest('[data-sug]');if(sg){const i=$('#'+sg.dataset.para);i.value=sg.dataset.sug;mostrarMsg(sg.dataset.para,REV[sg.dataset.para](i.value));i.focus();return}
     const us=e.target.closest('[data-usar]');if(us){const r=recordadas().find(x=>x.usuario===us.dataset.usar);$('#aId').value=r.usuario;$('#aPass').value=r.clave||'';mostrarMsg('aId',null);(r.clave?f.querySelector('[data-submit]'):$('#aPass')).focus();return}
@@ -1290,27 +1469,28 @@ const planTxt=d=>(PLANES.find(x=>x[0]===+d)||[0,d+' días'])[1];
 const fechaCorta=iso=>iso?fmtL(iso.slice(0,10)).replace(/^\w+, /,''):'—';
 function copiar(t){const ok=()=>toast('Copiado');try{navigator.clipboard.writeText(t).then(ok,()=>copiarViejo(t))}catch(e){copiarViejo(t)}}
 function copiarViejo(t){const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;left:-9999px';document.body.append(x);x.select();try{document.execCommand('copy');toast('Copiado')}catch(e){toast('No se pudo copiar: seleccione el texto y cópielo a mano')}x.remove()}
-function mensajeWhatsApp(c){const n=c.nota&&/[a-záéíóúñ]/i.test(c.nota)?' '+c.nota:'';return `Hola${n}. Su código de activación de ${NOMBRE_APP} es: ${c.codigo} (plan de ${planTxt(c.plan_dias)}). Entre a ${location.origin}, toque «Crear una cuenta» y escriba el código junto con su correo, un usuario y una contraseña.`}
+function mensajeWhatsApp(c){const n=c.nota&&/[a-záéíóúñ]/i.test(c.nota)?' '+c.nota:'';return `Hola${n}. Su código de activación de ${NOMBRE_APP} es: ${c.codigo} (plan de ${planTxt(c.plan_dias)}${c.expira?`; úselo antes del ${fechaCorta(c.expira)}`:''}). Entre a ${location.origin}, toque «Crear una cuenta» y escriba el código junto con su correo, un usuario y una contraseña.`}
 async function cargarAdmin(){V.admErr='';try{V.adm=await apiJson('/api/admin',{token:await tokenNube()})}catch(e){V.admErr=errAuth(e)}V.admCargando=false;if(V.name==='admin')render()}
 VIEWS.admin=()=>{
   if(!NUBE.on||!NUBE.perfil?.admin){V.name='panel';return VIEWS.panel()}
   if(!V.adm&&!V.admCargando&&!V.admErr){V.admCargando=true;cargarAdmin()}
   const D=V.adm||{codigos:[],profesores:[]},porId=Object.fromEntries((D.profesores||[]).map(p=>[p.id,p]));
   const ahora=Date.now(),est=v=>{if(!v||new Date(v)<=ahora)return ['atrasado','Vencido'];if(new Date(v).getFullYear()>2100)return ['completado','Sin vencimiento'];if(new Date(v)-ahora<7*86400000)return ['encurso','Vence pronto'];return ['completado','Activo']};
-  const filtro=V.admFiltro||'todos',C=(D.codigos||[]).filter(c=>filtro==='todos'||(filtro==='libres'&&!c.usado_en&&!c.anulado)||(filtro==='usados'&&c.usado_en)||(filtro==='anulados'&&c.anulado));
+  const filtro=V.admFiltro||'todos',exp=c=>!c.usado_en&&!c.anulado&&c.expira&&new Date(c.expira)<=ahora,C=(D.codigos||[]).filter(c=>filtro==='todos'||(filtro==='libres'&&!c.usado_en&&!c.anulado&&!exp(c))||(filtro==='expirados'&&exp(c))||(filtro==='usados'&&c.usado_en)||(filtro==='anulados'&&c.anulado));
   return head('Solo administradores','Administración','Cuando un profesor le pague, genere un código y envíeselo por WhatsApp. Cada código sirve una sola vez.',`<button class="btn" data-act="admRecargar">${ic('undo')} Actualizar</button>`)+
   (V.admErr?`<div class="gerr">${esc(V.admErr)}</div>`:'')+
   `<section class="card grid2" id="admForm"><h2 class="wide">${ic('key')} Generar códigos</h2>
     ${fieldHtml({k:'admPlan',label:'Plan',type:'select',options:PLANES.map(([d,t])=>({v:d,t}))},V.admPlan||365)}
     ${fieldHtml({k:'admCant',label:'Cantidad de códigos',type:'number',min:1,max:20},1)}
+    ${fieldHtml({k:'admValidez',label:'Plazo para usar el código',type:'select',options:[{v:7,t:'7 días'},{v:30,t:'30 días'},{v:90,t:'90 días'},{v:0,t:'Sin límite'}],help:'Pasado este plazo, el código ya no sirve aunque no se haya usado.'},V.admValidez??30)}
     ${fieldHtml({k:'admNota',label:'Para quién (opcional)',wide:1,ph:'Ej.: Prof. Ana Gómez, 3001234567',help:'Le ayuda a recordar a quién le vendió cada código.'})}
     <div class="mact wide"><button class="btn pri" data-act="admGen">${ic('plus')} Generar</button></div></section>`+
   (V.admNuevos?.length?`<section class="card nuevos"><h2>${ic('check')} ${V.admNuevos.length===1?'Código generado':'Códigos generados'}</h2>${V.admNuevos.map(c=>`<div class="cod-nuevo"><b class="cod">${esc(c.codigo)}</b><p class="s">${esc(mensajeWhatsApp(c))}</p><div class="tools"><button class="btn sm pri" data-act="admCopiar" data-t="${esc(mensajeWhatsApp(c))}">Copiar mensaje para WhatsApp</button><button class="btn sm" data-act="admCopiar" data-t="${esc(c.codigo)}">Copiar solo el código</button></div></div>`).join('')}</section>`:'')+
-  `<section class="card"><h2>Códigos</h2><div class="filters" style="margin-bottom:10px">${[['todos','Todos'],['libres','Disponibles'],['usados','Usados'],['anulados','Anulados']].map(([k,t])=>`<button class="chip${filtro===k?' on':''}" data-act="admFiltro" data-v="${k}">${t}</button>`).join('')}</div>
-   ${V.admCargando&&!V.adm?'<p class="empty">Cargando…</p>':C.length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Código</th><th>Plan</th><th>Para</th><th>Estado</th><th></th></tr></thead><tbody>${C.map(c=>{const u=c.usado_por&&porId[c.usado_por];return `<tr><td class="cod">${esc(c.codigo)}</td><td>${planTxt(c.plan_dias)}</td><td>${esc(c.nota||'—')}</td><td>${c.anulado?'<span class="st">Anulado</span>':c.usado_en?`<span class="st completado">Usado</span> <small>${fechaCorta(c.usado_en)}${u?' · '+esc(u.usuario_visible||u.usuario):''}</small>`:'<span class="st pendiente">Disponible</span>'}</td><td class="acc">${!c.usado_en&&!c.anulado?`<button class="btn sm" data-act="admCopiar" data-t="${esc(mensajeWhatsApp(c))}">Copiar mensaje</button><button class="btn sm danger" data-act="admAnular" data-c="${esc(c.codigo)}">Anular</button>`:''}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">No hay códigos en esta lista.</p>'}</section>
-  <section class="card"><h2>Profesores</h2>${(D.profesores||[]).length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Usuario</th><th>Correo</th><th>Plan hasta</th><th>Estado</th><th></th></tr></thead><tbody>${D.profesores.map(p=>{const [cl,tx]=est(p.vence);return `<tr><td>${esc(p.usuario_visible||p.usuario)}</td><td>${esc(p.correo)}</td><td>${tx==='Sin vencimiento'?'—':fechaCorta(p.vence)}</td><td><span class="st ${cl}">${tx}</span></td><td class="acc">${tx==='Sin vencimiento'?'':`<button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="30">+1 mes</button><button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="365">+1 año</button><button class="btn sm danger" data-act="admSusp" data-id="${p.id}" data-n="${esc(p.usuario_visible||p.usuario)}">Suspender</button>`}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">Todavía no hay profesores registrados.</p>'}</section>`};
+  `<section class="card"><h2>Códigos</h2><div class="filters" style="margin-bottom:10px">${[['todos','Todos'],['libres','Disponibles'],['usados','Usados'],['expirados','Expirados'],['anulados','Anulados']].map(([k,t])=>`<button class="chip${filtro===k?' on':''}" data-act="admFiltro" data-v="${k}">${t}</button>`).join('')}</div>
+   ${V.admCargando&&!V.adm?'<p class="empty">Cargando…</p>':C.length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Código</th><th>Plan</th><th>Para</th><th>Estado</th><th></th></tr></thead><tbody>${C.map(c=>{const u=c.usado_por&&porId[c.usado_por];return `<tr><td class="cod">${esc(c.codigo)}</td><td>${planTxt(c.plan_dias)}</td><td>${esc(c.nota||'—')}</td><td>${c.anulado?'<span class="st">Anulado</span>':c.usado_en?`<span class="st completado">Usado</span> <small>${fechaCorta(c.usado_en)}${u?' · '+esc(u.usuario_visible||u.usuario):''}</small>`:exp(c)?`<span class="st atrasado">Expirado</span> <small>${fechaCorta(c.expira)}</small>`:`<span class="st pendiente">Disponible</span>${c.expira?` <small>hasta ${fechaCorta(c.expira)}</small>`:''}`}</td><td class="acc">${!c.usado_en&&!c.anulado&&!exp(c)?`<button class="btn sm" data-act="admCopiar" data-t="${esc(mensajeWhatsApp(c))}">Copiar mensaje</button><button class="btn sm danger" data-act="admAnular" data-c="${esc(c.codigo)}">Anular</button>`:''}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="empty">No hay códigos en esta lista.</p>'}</section>
+  <section class="card"><h2>Profesores</h2>${(D.profesores||[]).length?`<div class="scroll"><table class="tbl adm"><thead><tr><th>Usuario</th><th>Correo</th><th>Plan hasta</th><th>Estado</th><th></th></tr></thead><tbody>${D.profesores.map(p=>{const [cl,tx]=est(p.vence);return `<tr><td>${esc(p.usuario_visible||p.usuario)}</td><td>${esc(p.correo)}</td><td>${tx==='Sin vencimiento'?'—':fechaCorta(p.vence)}</td><td><span class="st ${cl}">${tx}</span></td><td class="acc">${tx==='Sin vencimiento'?'':`<button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="30">+1 mes</button><button class="btn sm" data-act="admExt" data-id="${p.id}" data-d="365">+1 año</button><button class="btn sm danger" data-act="admSusp" data-id="${p.id}" data-n="${esc(p.usuario_visible||p.usuario)}">Suspender</button>`}</td></tr>`}).join('')}</tbody></table></div>`:vacio('Todavía no hay profesores','Cuando un profesor cree su cuenta con un código, aparecerá aquí.','escuela')}</section>`};
 function modalRenovar(){
-  openModal('Renovar plan',`<form id="rnForm" class="grid2" novalidate>${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX').replace('class="fld"','class="fld wide"')}<div class="auth-err wide" role="alert" hidden></div><div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Renovar</button></div></form>`,()=>{
+  openModal('Renovar plan',`<form id="rnForm" class="grid2" novalidate><div class="wide">${NUBE.perfil?.vigente&&NUBE.perfil?.vence&&!NUBE.perfil.admin?`<p class="s" style="margin:0 0 10px;color:var(--muted)">Su plan va hasta el ${esc(fechaCorta(NUBE.perfil.vence))}. Para renovarlo:</p>`:''}${pasosRenovar('renovar')}</div>${campo('aCodigo','Código de renovación','text','off','MAES-XXXX-XXXX').replace('class="fld"','class="fld wide"')}<div class="auth-err wide" role="alert" hidden></div><div class="mact wide"><button type="button" class="btn ghost" data-close>Cancelar</button><button type="button" data-submit class="btn pri">${ic('check')} Renovar</button></div></form>`,()=>{
     const f=$('#rnForm'),err=m=>{const e=f.querySelector('.auth-err');e.textContent=m;e.hidden=!m};
     f.addEventListener('input',e=>{if(e.target.id==='aCodigo'){const v=formatoCodigo(e.target.value);if(v!==e.target.value)e.target.value=v}err('')});
     f._go=async()=>{const r=revisarCodigo($('#aCodigo').value);if(r.err){mostrarMsg('aCodigo',r);return}f.querySelectorAll('button,input').forEach(b=>b.disabled=true);
@@ -1320,9 +1500,9 @@ Object.assign(A,{
   admRecargar:()=>{V.adm=null;V.admCargando=false;V.admErr='';render()},
   admFiltro:d=>{V.admFiltro=d.v;render()},
   admCopiar:d=>copiar(d.t),
-  admGen:async()=>{const dias=+$('#f_admPlan').value,cantidad=Math.min(20,Math.max(1,+$('#f_admCant').value||1)),nota=$('#f_admNota').value.trim();V.admPlan=dias;
+  admGen:async()=>{const validez=+$('#f_admValidez').value;V.admValidez=validez;const dias=+$('#f_admPlan').value,cantidad=Math.min(20,Math.max(1,+$('#f_admCant').value||1)),nota=$('#f_admNota').value.trim();V.admPlan=dias;
     const b=$('[data-act="admGen"]');b.disabled=true;b.innerHTML='<span class="spin"></span> Generando…';
-    try{const d=await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'crear',dias,cantidad,nota}});V.admNuevos=d.codigos;toast(cantidad===1?'Código generado':cantidad+' códigos generados');await cargarAdmin()}
+    try{const d=await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'crear',dias,cantidad,nota,validez}});V.admNuevos=d.codigos;toast(cantidad===1?'Código generado':cantidad+' códigos generados');await cargarAdmin()}
     catch(e){toast(errAuth(e));render()}},
   admAnular:d=>confirmar(`¿Anular el código ${d.c}? Ya no servirá para crear cuentas.`,async()=>{try{await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'anular',codigo:d.c}});toast('Código anulado');V.admNuevos=(V.admNuevos||[]).filter(c=>c.codigo!==d.c);await cargarAdmin()}catch(e){toast(errAuth(e))}}),
   admExt:async d=>{try{const r=await apiJson('/api/admin',{method:'POST',token:await tokenNube(),body:{accion:'extender',id:d.id,dias:+d.d}});toast(`Plan extendido hasta el ${fechaCorta(r.vence)}`);await cargarAdmin()}catch(e){toast(errAuth(e))}},

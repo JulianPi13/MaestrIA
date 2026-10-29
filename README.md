@@ -47,7 +47,7 @@ En su proyecto de Vercel: **Settings → Environment Variables**. Agregue:
 | `SUPABASE_SECRET_KEY` | La Secret key |
 | `GEMINI_API_KEY` | Su clave de IA (o `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) |
 | `ADMIN_CORREOS` | **Su correo** (el del administrador). Si son varios, sepárelos con comas |
-| `CONTACTO_VENTAS` | Opcional: a dónde escribir para comprar un código, por ejemplo `WhatsApp 300 123 4567`. Se muestra en el registro |
+| `WHATSAPP_VENTAS` | Opcional: el número de WhatsApp para comprar y renovar planes. Si no la pone, se usa **322 439 6858** |
 | `NOMBRE_APP` | Otro nombre para mostrar (opcional; por defecto MaestrIA) |
 | `IA_LIMITE_MES` | Guías con IA por docente al mes (opcional, 60 por defecto) |
 
@@ -63,12 +63,13 @@ Abra su página, toque **Crear una cuenta**, **deje vacío el código** y regís
 
 ## Cómo vender
 
-1. Cuando un profesor le pague, entre a **Administración**, elija el plan (1 mes, 3 meses, 6 meses o 1 año), escriba para quién es y toque **Generar**.
-2. Toque **Copiar mensaje para WhatsApp** y péguelo en el chat del profesor. El mensaje trae el código y los pasos.
-3. El profesor toca **Crear una cuenta**, escribe el código y sus datos, y entra de una vez. Cada código sirve una sola vez.
-4. **Renovar:** genere otro código y envíelo. El profesor lo escribe en **Configuración → Mi cuenta → Renovar con código**, o en la pantalla que le sale cuando el plan vence. Los días se suman a los que le queden.
-5. Desde **Administración → Profesores** puede dar +1 mes o +1 año sin código, o **suspender** a alguien. Con el plan vencido o suspendido, el profesor puede ver y descargar su planeación, pero no guardar cambios ni generar guías.
-6. Si un código no se usó y ya no debe servir, tóquelo en **Anular**.
+1. El profesor le envía el comprobante de pago por WhatsApp (la app le muestra el botón con el mensaje ya escrito).
+2. Revise que el pago sí llegó. Luego entre a **Administración**, elija el plan (1 mes, 3 meses, 6 meses o 1 año), el **plazo para usar el código** (7, 30 o 90 días, o sin límite), escriba para quién es y toque **Generar**.
+3. Toque **Copiar mensaje para WhatsApp** y péguelo en el chat del profesor. El mensaje trae el código y los pasos.
+4. El profesor toca **Crear una cuenta**, escribe el código y sus datos, y entra de una vez. Cada código sirve **una sola vez**: queda marcado como usado en el mismo instante y la base de datos no deja reutilizarlo, aunque dos personas lo escriban al mismo tiempo.
+5. **Renovar:** genere otro código y envíelo. El profesor lo escribe en **Configuración → Mi cuenta → Renovar con código**, o en la pantalla que le sale cuando el plan vence. Los días se suman a los que le queden. El plan **nunca** se renueva solo: siempre hace falta un código nuevo.
+6. Desde **Administración → Profesores** puede dar +1 mes o +1 año sin código, o **suspender** a alguien. Con el plan vencido o suspendido, el profesor puede ver y descargar su planeación, pero no guardar cambios ni generar guías.
+7. Si un código no se usó y ya no debe servir, tóquelo en **Anular**.
 
 ## Antes de vender (recomendado)
 

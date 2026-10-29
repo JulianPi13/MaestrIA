@@ -155,3 +155,29 @@ create policy "crear su planeacion" on public.planeaciones
 drop policy if exists "editar su planeacion" on public.planeaciones;
 create policy "editar su planeacion" on public.planeaciones
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id and public.plan_vigente());
+
+-- 5. Protección extra de los códigos
+-- Hasta cuándo se puede usar un código (vacío = sin límite) y marca de quién lo tiene apartado
+alter table public.codigos add column if not exists expira timestamptz;
+alter table public.codigos add column if not exists reserva uuid;
+
+-- Un código ya usado nunca vuelve a quedar libre ni pasa a otra cuenta (aunque alguien lo intente desde el servidor)
+create or replace function public.proteger_codigo()
+returns trigger
+language plpgsql
+as $$
+begin
+  if old.usado_en is not null and new.usado_en is null then
+    raise exception 'El código % ya fue usado y no puede volver a quedar libre', old.codigo;
+  end if;
+  if old.usado_en is not null and new.usado_por is not null and new.usado_por is distinct from old.usado_por then
+    raise exception 'El código % ya fue usado por otra cuenta', old.codigo;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists proteger_codigo on public.codigos;
+create trigger proteger_codigo
+  before update on public.codigos
+  for each row execute function public.proteger_codigo();

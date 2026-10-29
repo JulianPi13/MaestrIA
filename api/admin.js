@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const [codigos, profesores] = await Promise.all([
-        sv('/rest/v1/codigos?select=codigo,plan_dias,nota,creado,usado_por,usado_en,anulado&order=creado.desc&limit=300'),
+        sv('/rest/v1/codigos?select=codigo,plan_dias,nota,creado,expira,usado_por,usado_en,anulado&order=creado.desc&limit=300'),
         sv('/rest/v1/perfiles?select=id,usuario,usuario_visible,correo,vence,creado&order=creado.desc&limit=500'),
       ]);
       return res.status(200).json({ codigos, profesores });
@@ -23,7 +23,10 @@ export default async function handler(req, res) {
       const cantidad = Math.min(50, Math.max(1, parseInt(b.cantidad, 10) || 1));
       if (!dias) return res.status(400).json({ code: 'dias' });
       const nota = String(b.nota || '').trim().slice(0, 120) || null;
-      const filas = Array.from({ length: cantidad }, () => ({ codigo: generarCodigo(), plan_dias: dias, nota }));
+      // Plazo para usar el código (0 = sin límite)
+      const validez = Math.min(365, Math.max(0, parseInt(b.validez, 10) || 0));
+      const expira = validez ? new Date(Date.now() + validez * 86400000).toISOString() : null;
+      const filas = Array.from({ length: cantidad }, () => ({ codigo: generarCodigo(), plan_dias: dias, nota, expira }));
       const creados = await sv('/rest/v1/codigos', { method: 'POST', body: filas, prefer: 'return=representation' });
       return res.status(200).json({ codigos: creados });
     }

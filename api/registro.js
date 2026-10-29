@@ -1,6 +1,6 @@
 // Crear cuenta de profesor: solo con un código de activación válido (o si el correo es de un administrador).
 // La cuenta queda activa de una vez, sin correo de confirmación, porque el código ya prueba el pago.
-import { nubeActiva, esAdmin, sv, normalizarCodigo, reservarCodigo, liberarCodigo, marcarUsado, ponerVence, nuevoVence, leerBody, ERRORES_CODIGO } from './_supabase.js';
+import { nubeActiva, esAdmin, sv, normalizarCodigo, reservarCodigo, liberarCodigo, marcarUsado, borrarUsuario, ponerVence, nuevoVence, leerBody, ERRORES_CODIGO } from './_supabase.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -16,13 +16,13 @@ export default async function handler(req, res) {
   if (clave.length < 8) return res.status(400).json({ code: 'weak_password' });
 
   const admin = esAdmin(correo);
-  let codigo = null, reservado = false;
+  let codigo = null, reserva = null, uid = null;
   try {
     let dias = 36500; // administradores: sin vencimiento práctico
     if (!admin) {
       codigo = normalizarCodigo(b.codigo);
       if (!codigo) return res.status(400).json({ code: b.codigo ? 'codigo_formato' : 'codigo_vacio' });
-      const plan = await reservarCodigo(codigo); reservado = true; dias = plan.plan_dias;
+      const plan = await reservarCodigo(codigo); reserva = plan.reserva; dias = plan.plan_dias;
     }
     const libre = await sv('/rest/v1/rpc/usuario_disponible', { method: 'POST', body: { p_usuario: llave } });
     if (libre === false) { const e = new Error('usuario'); e.code = 'usuario_existe'; throw e; }
@@ -34,15 +34,17 @@ export default async function handler(req, res) {
       else if (/password/i.test(e.message)) e.code = 'weak_password';
       throw e;
     }
-    const uid = u?.id || u?.user?.id;
+    uid = u?.id || u?.user?.id;
+    // El código queda usado apenas existe la cuenta; si eso fallara, la cuenta se borra para no dejarla sin plan
+    if (codigo) await marcarUsado(codigo, reserva, uid);
     const vence = nuevoVence(null, dias);
-    await ponerVence(uid, vence);
-    if (codigo) await marcarUsado(codigo, uid);
+    try { await ponerVence(uid, vence); } catch (e) { await ponerVence(uid, vence); }
     return res.status(200).json({ ok: true, vence, dias });
   } catch (e) {
-    if (reservado) await liberarCodigo(codigo);
+    if (reserva && uid && e.code === 'codigo_usado') await borrarUsuario(uid);
+    if (reserva) await liberarCodigo(codigo, reserva);
     const code = e.code && (ERRORES_CODIGO.has(e.code) || ['usuario_existe', 'user_already_exists', 'weak_password', 'sin_secreta'].includes(e.code)) ? e.code : 'error';
     if (code === 'error') console.error('Error en registro', e);
-    return res.status(code === 'error' ? 502 : 400).json({ code, ...(code === 'error' ? { detalle: String(e.message || '').slice(0, 160) } : {}) });
+    return res.status(code === 'error' ? 502 : 400).json({ code, ...(e.expiro ? { expiro: e.expiro } : {}), ...(code === 'error' ? { detalle: String(e.message || '').slice(0, 160) } : {}) });
   }
 }

@@ -11,5 +11,7 @@ export default function handler(req, res) {
     supabaseAnonKey: nube ? clavePublica() : null,
     limiteIA: limiteMensual(),
     contacto: process.env.CONTACTO_VENTAS || null,
+    // Número de WhatsApp para renovar o comprar planes (con indicativo de Colombia)
+    whatsapp: (() => { const n = String(process.env.WHATSAPP_VENTAS || '3224396858').replace(/\D/g, ''); return n.length === 10 ? '57' + n : n; })(),
   });
 }

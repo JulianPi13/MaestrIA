@@ -58,7 +58,7 @@ export async function sumarUso(uid) {
 }
 
 // ---------- Planes, códigos y administración ----------
-import { randomInt } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 
 // Correos con permiso de administrador (variable ADMIN_CORREOS en Vercel, separados por coma)
 export const esAdmin = email => (process.env.ADMIN_CORREOS || '').split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(Boolean).includes(String(email || '').trim().toLowerCase());
@@ -84,15 +84,28 @@ export async function perfilDe(uid) { const d = await sv(`/rest/v1/perfiles?sele
 export const vigente = p => Boolean(p?.vence) && new Date(p.vence) > new Date();
 export const nuevoVence = (actual, dias) => { const desde = actual && new Date(actual) > new Date() ? new Date(actual) : new Date(); return new Date(desde.getTime() + dias * 86400000).toISOString(); };
 
-// Aparta un código por 5 minutos para que dos personas no lo usen a la vez; si no se puede, dice por qué
+// Uso del código en dos pasos, cada uno es una sola operación en la base de datos (no puede quedar a medias):
+// 1) apartarlo con una marca única, solo si está libre, sin anular, sin expirar y nadie más lo tiene apartado;
+// 2) marcarlo como usado de inmediato, solo si sigue apartado con esa misma marca.
+// Si dos personas escriben el mismo código al mismo tiempo, la base de datos deja pasar solo a una.
 export async function reservarCodigo(codigo) {
-  const c = encodeURIComponent(codigo), hace = new Date(Date.now() - 5 * 60000).toISOString();
-  const d = await sv(`/rest/v1/codigos?codigo=eq.${c}&usado_en=is.null&anulado=eq.false&or=${encodeURIComponent(`(reservado_en.is.null,reservado_en.lt.${hace})`)}`, { method: 'PATCH', body: { reservado_en: new Date().toISOString() }, prefer: 'return=representation' });
-  if (d?.length) return d[0];
-  const x = (await sv(`/rest/v1/codigos?select=codigo,usado_en,anulado&codigo=eq.${c}`))?.[0];
-  const e = new Error('codigo'); e.code = !x ? 'codigo_no_existe' : x.anulado ? 'codigo_anulado' : x.usado_en ? 'codigo_usado' : 'codigo_en_uso'; throw e;
+  const c = encodeURIComponent(codigo), ahora = new Date().toISOString(), hace = new Date(Date.now() - 5 * 60000).toISOString();
+  const reserva = randomUUID();
+  const cond = encodeURIComponent(`(or(expira.is.null,expira.gt.${ahora}),or(reservado_en.is.null,reservado_en.lt.${hace}))`);
+  const d = await sv(`/rest/v1/codigos?codigo=eq.${c}&usado_en=is.null&anulado=eq.false&and=${cond}`, { method: 'PATCH', body: { reservado_en: ahora, reserva }, prefer: 'return=representation' });
+  if (d?.length) return { ...d[0], reserva };
+  const x = (await sv(`/rest/v1/codigos?select=codigo,usado_en,anulado,expira&codigo=eq.${c}`))?.[0];
+  const e = new Error('codigo');
+  e.code = !x ? 'codigo_no_existe' : x.anulado ? 'codigo_anulado' : x.usado_en ? 'codigo_usado' : (x.expira && new Date(x.expira) <= new Date()) ? 'codigo_expirado' : 'codigo_en_uso';
+  if (x?.expira) e.expiro = x.expira;
+  throw e;
 }
-export const liberarCodigo = codigo => sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}&usado_en=is.null`, { method: 'PATCH', body: { reservado_en: null }, prefer: 'return=minimal' }).catch(() => {});
-export const marcarUsado = (codigo, uid) => sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}`, { method: 'PATCH', body: { usado_por: uid, usado_en: new Date().toISOString() }, prefer: 'return=minimal' });
+export async function marcarUsado(codigo, reserva, uid) {
+  const d = await sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}&reserva=eq.${reserva}&usado_en=is.null`, { method: 'PATCH', body: { usado_por: uid, usado_en: new Date().toISOString() }, prefer: 'return=representation' });
+  if (!d?.length) { const e = new Error('codigo'); e.code = 'codigo_usado'; throw e; }
+  return d[0];
+}
+export const liberarCodigo = (codigo, reserva) => sv(`/rest/v1/codigos?codigo=eq.${encodeURIComponent(codigo)}&reserva=eq.${reserva}&usado_en=is.null`, { method: 'PATCH', body: { reservado_en: null, reserva: null }, prefer: 'return=minimal' }).catch(() => {});
+export const borrarUsuario = uid => sv(`/auth/v1/admin/users/${encodeURIComponent(uid)}`, { method: 'DELETE' }).catch(e => console.error('No se pudo borrar la cuenta a medio crear', e));
 export const ponerVence = (uid, vence) => sv(`/rest/v1/perfiles?id=eq.${encodeURIComponent(uid)}`, { method: 'PATCH', body: { vence }, prefer: 'return=minimal' });
-export const ERRORES_CODIGO = new Set(['codigo_no_existe', 'codigo_anulado', 'codigo_usado', 'codigo_en_uso']);
+export const ERRORES_CODIGO = new Set(['codigo_no_existe', 'codigo_anulado', 'codigo_usado', 'codigo_en_uso', 'codigo_expirado']);
